@@ -1,8 +1,8 @@
 ---
 title: Courses
 description: Courses in programming, architecture, and everything related to the development and delivery of software products
-published: true
-date: 2025-06-01T18:34:46.660Z
+published: false
+date: 2025-06-01T18:37:49.045Z
 tags: programming, .net, c#, f#, asp.net core, scrum, kanban, learn to code, coding tutorials, programming courses, software development, c programming, c++ programming, web development, software architecture, software design, design patterns, scalable systems, microservices, software project management, agile development, agile methodologies, software delivery, programming blog, tech blog, learn software development, developer journey, coding resources, tech tutorials, open source, coding tips
 editor: markdown
 dateCreated: 2025-06-01T18:32:58.531Z
