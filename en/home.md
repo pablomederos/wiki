@@ -2,7 +2,7 @@
 title: .NET
 description: General documentation related to .NET, C#, F#, C++ and the entire related ecosystem
 published: true
-date: 2025-06-01T18:07:15.667Z
+date: 2025-06-01T18:42:06.635Z
 tags: .net, dotnet, asp.net, asp net, csharp, c#, f#, fsharp, performance, high level, high performance, functional programming
 editor: markdown
 dateCreated: 2024-10-15T14:37:06.626Z
