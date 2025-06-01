@@ -2,7 +2,7 @@
 title: .NET
 description: Documentación general sobre C#, C++, Javascript, .NET y todo el ecosistema relacionado
 published: true
-date: 2025-06-01T18:04:26.893Z
+date: 2025-06-01T18:04:31.422Z
 tags: dotnet, asp.net, asp net, csharp, c#, f#, fsharp, performance, alto nivel, rendimiento
 editor: markdown
 dateCreated: 2024-10-15T16:09:27.357Z
