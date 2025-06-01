@@ -1,8 +1,8 @@
 ---
 title: C/C++
 description: Articles related to two of the most iconic and powerful programming languages
-published: true
-date: 2025-06-01T17:57:26.866Z
+published: false
+date: 2025-06-01T18:37:21.362Z
 tags: clang, c++, programming, low level, low-level, cpp, embedded, software, engineering
 editor: markdown
 dateCreated: 2025-06-01T17:52:10.981Z
