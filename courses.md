@@ -1,8 +1,8 @@
 ---
 title: Cursos
 description: Cursos de programación, arquitectura y todo lo relacionado con el desarrollo y entrega de productos de sofware
-published: true
-date: 2025-06-01T18:34:06.662Z
+published: false
+date: 2025-06-01T18:36:32.531Z
 tags: c++, .net, c#, f#, cursos, progamación, cursos de programación, aprendizaje online, aprendizaje, cursos gratis, aprender a programar, tutoriales de programación, c, lenguaje c, lenguaje c++, desarrollo web, asp.net core, arquitectura de software, diseño de software, patrones de diseño, sistemas escalables, microservicios, gestión de proyectos software, desarrollo ágil, metodologías ágiles, scrum, kanban, entrega de software, blog de programación, desarrollo de software, aprender software, guía de programación, experiencia de desarrollador, tutoriales tech, recursos de programación, código abierto, tips de programación
 editor: markdown
 dateCreated: 2025-06-01T18:26:45.890Z
