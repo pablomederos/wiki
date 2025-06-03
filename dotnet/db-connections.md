@@ -2,7 +2,7 @@
 title: Guía de Cadenas de Conexión
 description: Ejemplos de cómo establecer una conexión con una base de datos y las diferentes herramientas para hacerlo
 published: true
-date: 2025-06-03T21:47:30.321Z
+date: 2025-06-03T21:55:42.758Z
 tags: cadenas de conexión .net, ado.net, conectar base de datos c#, sql server .net, postgresql .net, mysql .net, seguridad cadenas conexión, sqlclient connection string, oledbconnection .net, odbcconnection .net, npgsql connection string, mysql.data connection string, connectionstringbuilder c#, autenticación windows sql server, azure ad connection string, cifrado conexión base de datos, mejores prácticas conexión .net, conectar access c#, conectar excel c#, odbc driver sql server, psqlodbc, mysql connector odbc
 editor: markdown
 dateCreated: 2025-06-03T14:56:40.794Z
@@ -74,6 +74,20 @@ public class ConnectionStringBuilderExample
 }
 ```
 
+### Parámetros Comunes en Cadenas de Conexión
+
+
+| Palabra Clave | Propósito | Proveedores Comunes |
+| :--- | :--- | :--- |
+|Data Source/Server| Especifica la dirección del servidor o la ruta del archivo de la base de datos. | Todos |
+|Initial Catalog/Database| Designa el nombre de la base de datos a la que se establecerá la conexión. | Todos |
+|User ID/UID| Proporciona el identificador de usuario para la autenticación. | Todos |
+|Password/PWD| Suministra la contraseña asociada al identificador de usuario. | Todos |
+|Integrated Security/Trusted_Connection| Habilita la autenticación de Windows para la conexión. | SqlClient, OleDb, Odbc |
+|Provider| Define el proveedor OLE DB específico a utilizar. | OleDb |
+|Driver| Especifica el controlador ODBC requerido para la conexión. | Odbc |
+|Encrypt/SslMode| Controla el comportamiento del cifrado para la comunicación de la conexión. | SqlClient, Npgsql, MySQL |
+
 ### Connection Pooling: Optimización del Rendimiento
 El Connection Pooling (agrupación de conexiones) es una técnica de optimización crítica en ADO.NET que mejora significativamente el rendimiento y la escalabilidad de las aplicaciones al reducir la sobrecarga asociada con la apertura y el cierre de conexiones a la base de datos. En lugar de crear una nueva conexión física cada vez que una aplicación solicita una, el pool de conexiones mantiene un conjunto de conexiones abiertas y reutilizables. Cuando una aplicación "abre" una conexión, en realidad obtiene una conexión disponible del pool; cuando la "cierra", la conexión se devuelve al pool para su reutilización futura en lugar de ser cerrada físicamente.
 
@@ -136,22 +150,7 @@ public class ConnectionPoolingExample
 |Load Balance Timeout| Tiempo (en segundos) que una conexión puede permanecer inactiva en el pool antes de ser eliminada. | SqlClient |
 |Connection Lifetime| Tiempo (en segundos) máximo que una conexión puede permanecer activa en el pool antes de ser eliminada. | SqlClient |
 
-<br/>
-<br/>
-
-### Parámetros Comunes en Cadenas de Conexión
-
-
-| Palabra Clave | Propósito | Proveedores Comunes |
-| :--- | :--- | :--- |
-|Data Source/Server| Especifica la dirección del servidor o la ruta del archivo de la base de datos. | Todos |
-|Initial Catalog/Database| Designa el nombre de la base de datos a la que se establecerá la conexión. | Todos |
-|User ID/UID| Proporciona el identificador de usuario para la autenticación. | Todos |
-|Password/PWD| Suministra la contraseña asociada al identificador de usuario. | Todos |
-|Integrated Security/Trusted_Connection| Habilita la autenticación de Windows para la conexión. | SqlClient, OleDb, Odbc |
-|Provider| Define el proveedor OLE DB específico a utilizar. | OleDb |
-|Driver| Especifica el controlador ODBC requerido para la conexión. | Odbc |
-|Encrypt/SslMode| Controla el comportamiento del cifrado para la comunicación de la conexión. | SqlClient, Npgsql, MySQL |
+---
 
 ### 1. SqlClient: El Estándar para SQL Server
 El proveedor `Microsoft.Data.SqlClient` representa la opción optimizada y preferida para establecer conexiones entre aplicaciones .NET y **Microsoft SQL Server**, así como Azure SQL Database. Este proveedor garantiza un rendimiento superior y acceso integral a las funcionalidades específicas de SQL Server.
