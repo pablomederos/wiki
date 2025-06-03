@@ -2,7 +2,7 @@
 title: Connection Strings Guide
 description: Examples of how to establish a connection to a database and the different tools to do so
 published: true
-date: 2025-06-03T21:51:49.106Z
+date: 2025-06-03T21:53:28.728Z
 tags: .net connection strings, ado.net connection strings, .net database security, sql server connection .net, connectionstringbuilder, ado.net guide, .net database connection, c# connection string, oledbconnection, odbcconnection, npgsql connection, mysql.data connection, sql server windows authentication, sql server authentication, .net connection encryption, azure active directory authentication .net, access connection .net, excel connection .net, postgresql connection .net, mysql connection .net, .net security best practices, connection string injection, .net secret manager, azure key vault connection strings, principle of least privilege database
 editor: markdown
 dateCreated: 2025-06-03T16:02:28.206Z
@@ -78,6 +78,20 @@ public class ConnectionStringBuilderExample
 }
 ```
 
+
+### Common Connection String Parameters
+
+| Keyword | Purpose | Common Providers |
+| :--- | :--- | :--- |
+|Data Source/Server| Specifies the server address or database file path. | All |
+|Initial Catalog/Database| Designates the name of the database to connect to. | All |
+|User ID/UID| Provides the user ID for authentication. | All |
+|Password/PWD| Supplies the password associated with the user ID. | All |
+|Integrated Security/Trusted_Connection| Enables Windows authentication for the connection. | SqlClient, OleDb, Odbc |
+|Provider| Defines the specific OLE DB provider to use. | OleDb |
+|Driver| Specifies the required ODBC driver for the connection. | Odbc |
+|Encrypt/SslMode| Controls encryption behavior for connection communication. | SqlClient, Npgsql, MySQL |
+
 ### Connection Pooling: Performance Optimization
 Connection Pooling is a critical optimization technique in ADO.NET that significantly improves application performance and scalability by reducing the overhead associated with opening and closing database connections. Instead of creating a new physical connection every time an application requests one, the connection pool maintains a set of open, reusable connections. When an application "opens" a connection, it actually obtains an available connection from the pool; when it "closes" the connection, the connection is returned to the pool for future reuse instead of being physically closed.
 
@@ -139,22 +153,6 @@ public class ConnectionPoolingExample
 |Max Pool Size| Maximum number of connections that can be maintained in the pool. | SqlClient, Npgsql, MySql.Data |
 |Load Balance Timeout| Time (in seconds) a connection can remain idle in the pool before being removed. | SqlClient |
 |Connection Lifetime| Maximum time (in seconds) a connection can remain active in the pool before being removed. | SqlClient |
-
-<br/>
-<br/>
-
-### Common Connection String Parameters
-
-| Keyword | Purpose | Common Providers |
-| :--- | :--- | :--- |
-|Data Source/Server| Specifies the server address or database file path. | All |
-|Initial Catalog/Database| Designates the name of the database to connect to. | All |
-|User ID/UID| Provides the user ID for authentication. | All |
-|Password/PWD| Supplies the password associated with the user ID. | All |
-|Integrated Security/Trusted_Connection| Enables Windows authentication for the connection. | SqlClient, OleDb, Odbc |
-|Provider| Defines the specific OLE DB provider to use. | OleDb |
-|Driver| Specifies the required ODBC driver for the connection. | Odbc |
-|Encrypt/SslMode| Controls encryption behavior for connection communication. | SqlClient, Npgsql, MySQL |
 
 ---
 
