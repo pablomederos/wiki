@@ -2,7 +2,7 @@
 title: Guía de Cadenas de Conexión
 description: Ejemplos de cómo establecer una conexión con una base de datos y las diferentes herramientas para hacerlo
 published: true
-date: 2025-06-03T16:05:00.987Z
+date: 2025-06-03T21:47:30.321Z
 tags: cadenas de conexión .net, ado.net, conectar base de datos c#, sql server .net, postgresql .net, mysql .net, seguridad cadenas conexión, sqlclient connection string, oledbconnection .net, odbcconnection .net, npgsql connection string, mysql.data connection string, connectionstringbuilder c#, autenticación windows sql server, azure ad connection string, cifrado conexión base de datos, mejores prácticas conexión .net, conectar access c#, conectar excel c#, odbc driver sql server, psqlodbc, mysql connector odbc
 editor: markdown
 dateCreated: 2025-06-03T14:56:40.794Z
@@ -73,6 +73,71 @@ public class ConnectionStringBuilderExample
     }
 }
 ```
+
+### Connection Pooling: Optimización del Rendimiento
+El Connection Pooling (agrupación de conexiones) es una técnica de optimización crítica en ADO.NET que mejora significativamente el rendimiento y la escalabilidad de las aplicaciones al reducir la sobrecarga asociada con la apertura y el cierre de conexiones a la base de datos. En lugar de crear una nueva conexión física cada vez que una aplicación solicita una, el pool de conexiones mantiene un conjunto de conexiones abiertas y reutilizables. Cuando una aplicación "abre" una conexión, en realidad obtiene una conexión disponible del pool; cuando la "cierra", la conexión se devuelve al pool para su reutilización futura en lugar de ser cerrada físicamente.
+
+La mayoría de los proveedores de datos de .NET, comoSqlClient, tienen el pooling de conexiones habilitado por defecto, lo que subraya su importancia. Sin embargo, es posible ajustar su comportamiento a través de propiedades en la cadena de conexión para afinar el rendimiento según las necesidades específicas de la aplicación.
+
+#### Ejemplo de utilización de Connection Pooling:
+
+Aunque el pooling está habilitado por defecto, puedes especificar sus propiedades para un control más granular. El siguiente ejemplo muestra una cadena de conexión con propiedades de pooling explícitas.
+
+```csharp
+
+using Microsoft.Data.SqlClient;
+using System;
+
+public class ConnectionPoolingExample
+{
+    /// <summary>
+    /// Demuestra el uso de Connection Pooling con propiedades explícitas.
+    /// </summary>
+    public static void DemonstratePooling()
+    {
+        // La mayoría de estas propiedades tienen valores por defecto razonables.
+        // Se muestran aquí para fines ilustrativos.
+        string connectionString = "Server=localhost;Database=MiBaseDeDatos;Integrated Security=True;" +
+                                  "Pooling=True;Min Pool Size=5;Max Pool Size=20;Connect Timeout=30;";
+
+        Console.WriteLine($"Cadena de conexión con pooling: {connectionString}");
+
+        try
+        {
+            // Abrir y cerrar conexiones múltiples veces para observar el efecto del pooling.
+            // Las conexiones físicas se reutilizarán.
+            for (int i = 0; i < 3; i++)
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    Console.WriteLine($"Conexión {i + 1} abierta. Estado: {connection.State}");
+                    // Realizar operaciones con la base de datos
+                } // La conexión se devuelve al pool aquí, no se cierra físicamente.
+                Console.WriteLine($"Conexión {i + 1} cerrada (devuelta al pool).");
+            }
+            Console.WriteLine("Demostración de Connection Pooling completada.");
+        }
+        catch (SqlException ex)
+        {
+            Console.WriteLine($"Error durante la demostración de pooling: {ex.Message}");
+        }
+    }
+}
+```
+
+### Propiedades de Connection Pooling y Timeout
+| Palabra Clave | Propósito | Proveedores Comunes |
+| :--- | :--- | :--- |
+|Connect Timeout/Timeout| Tiempo (en segundos) que el sistema espera para establecer una conexión antes de terminar el intento. | Todos |
+|Pooling| Indica si la conexión debe ser agrupada (pooled). Por defecto esTruepara la mayoría de los proveedores. | SqlClient, Npgsql, MySql.Data |
+|Min Pool Size| Número mínimo de conexiones que se mantendrán en el pool. | SqlClient, Npgsql, MySql.Data |
+|Max Pool Size| Número máximo de conexiones que se pueden mantener en el pool. | SqlClient, Npgsql, MySql.Data |
+|Load Balance Timeout| Tiempo (en segundos) que una conexión puede permanecer inactiva en el pool antes de ser eliminada. | SqlClient |
+|Connection Lifetime| Tiempo (en segundos) máximo que una conexión puede permanecer activa en el pool antes de ser eliminada. | SqlClient |
+
+<br/>
+<br/>
 
 ### Parámetros Comunes en Cadenas de Conexión
 
