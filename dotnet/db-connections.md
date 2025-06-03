@@ -2,7 +2,7 @@
 title: Guía de Cadenas de Conexión
 description: Ejemplos de cómo establecer una conexión con una base de datos y las diferentes herramientas para hacerlo
 published: false
-date: 2025-06-03T14:56:40.794Z
+date: 2025-06-03T15:29:18.393Z
 tags: cadenas de conexión .net, ado.net, conectar base de datos c#, sql server .net, postgresql .net, mysql .net, seguridad cadenas conexión, sqlclient connection string, oledbconnection .net, odbcconnection .net, npgsql connection string, mysql.data connection string, connectionstringbuilder c#, autenticación windows sql server, azure ad connection string, cifrado conexión base de datos, mejores prácticas conexión .net, conectar access c#, conectar excel c#, odbc driver sql server, psqlodbc, mysql connector odbc
 editor: markdown
 dateCreated: 2025-06-03T14:56:40.794Z
@@ -26,7 +26,7 @@ Un aspecto crítico en la construcción de cadenas de conexión es la salvaguard
 
 La solución que se considera óptima y segura en el entorno .NET implica la utilización de las clases `ConnectionStringBuilder` (por ejemplo, `SqlConnectionStringBuilder`, `NpgsqlConnectionStringBuilder`, `MySqlConnectionStringBuilder`). Estas clases procesan los parámetros como propiedades, lo que facilita la sanitización de las entradas y previene las vulnerabilidades de inyección. Constituyen el enfoque moderno y robusto para la construcción dinámica de cadenas de conexión en aplicaciones .NET.
 
-**Ejemplo de utilización de `SqlConnectionStringBuilder`:
+**Ejemplo de utilización de `SqlConnectionStringBuilder`:**
 
 ```csharp
 using Microsoft.Data.SqlClient;
