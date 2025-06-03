@@ -1,8 +1,8 @@
 ---
 title: Connection Strings Guide
 description: Examples of how to establish a connection to a database and the different tools to do so
-published: false
-date: 2025-06-03T16:03:13.680Z
+published: true
+date: 2025-06-03T16:04:29.411Z
 tags: .net connection strings, ado.net connection strings, .net database security, sql server connection .net, connectionstringbuilder, ado.net guide, .net database connection, c# connection string, oledbconnection, odbcconnection, npgsql connection, mysql.data connection, sql server windows authentication, sql server authentication, .net connection encryption, azure active directory authentication .net, access connection .net, excel connection .net, postgresql connection .net, mysql connection .net, .net security best practices, connection string injection, .net secret manager, azure key vault connection strings, principle of least privilege database
 editor: markdown
 dateCreated: 2025-06-03T16:02:28.206Z
