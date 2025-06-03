@@ -1,8 +1,8 @@
 ---
 title: Guía de Cadenas de Conexión
 description: Ejemplos de cómo establecer una conexión con una base de datos y las diferentes herramientas para hacerlo
-published: false
-date: 2025-06-03T15:49:58.310Z
+published: true
+date: 2025-06-03T16:05:00.987Z
 tags: cadenas de conexión .net, ado.net, conectar base de datos c#, sql server .net, postgresql .net, mysql .net, seguridad cadenas conexión, sqlclient connection string, oledbconnection .net, odbcconnection .net, npgsql connection string, mysql.data connection string, connectionstringbuilder c#, autenticación windows sql server, azure ad connection string, cifrado conexión base de datos, mejores prácticas conexión .net, conectar access c#, conectar excel c#, odbc driver sql server, psqlodbc, mysql connector odbc
 editor: markdown
 dateCreated: 2025-06-03T14:56:40.794Z
