@@ -2,7 +2,7 @@
 title: Árboles de Sintaxis en C# con Roslyn
 description: Guía de creación estructuración de código fuente a partir de árboles de sintaxis
 published: false
-date: 2025-06-06T17:11:11.692Z
+date: 2025-06-06T17:42:09.585Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-06T16:32:26.317Z
@@ -132,21 +132,31 @@ Esta lista separada se pasa a `SyntaxFactory.ArgumentList()`: `SyntaxFactory.Arg
 Una `InvocationExpressionSyntax` es una expresión. Para que constituya una sentencia completa en un bloque de método (por ejemplo, una llamada a un método void o cuando no se usa su valor de retorno), debe envolverse en una `ExpressionStatementSyntax` y terminarse con un punto y coma: `SyntaxFactory.ExpressionStatement(invocationExpression).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))`.
 
 ### C. Declaraciones de Retorno (ReturnStatementSyntax)
-Las sentencias return se generan usando SyntaxFactory.ReturnStatement(). Este método tiene sobrecargas para manejar retornos con valor y retornos de métodos void.
-Retorno de un valor: Para return result;, donde result es una variable: SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName("result")).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)). Para retornar un literal, como return 0;: SyntaxFactory.ReturnStatement(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0))).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)).
-Retorno para método void: Para return;: SyntaxFactory.ReturnStatement().WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)). La sobrecarga SyntaxFactory.ReturnStatement() sin argumentos crea la base para un return;. Es crucial añadir el SemicolonToken si la sobrecarga utilizada no lo incluye implícitamente.
-La ReturnStatementSyntax tiene una propiedad Expression que puede ser null para retornos void. Las sobrecargas de `SyntaxFactory`reflejan esto, permitiendo omitir la expresión o pasarla explícitamente.
-IV. Ensamblaje de una Unidad de Compilación Completa (CompilationUnitSyntax)
-Un CompilationUnitSyntax es el nodo raíz de cualquier árbol de sintaxis que represente un archivo de código C# completo. Contiene elementos como directivas using, declaraciones de espacio de nombres y declaraciones de tipo (clases, structs, etc.).
-A. Incorporación de Directivas using (UsingDirectiveSyntax)
-Las directivas using se crean con SyntaxFactory.UsingDirective(), que toma un NameSyntax representando el espacio de nombres a importar. Para using System;: NameSyntax systemName = SyntaxFactory.ParseName("System"); UsingDirectiveSyntax usingSystem = SyntaxFactory.UsingDirective(systemName).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
-El método SyntaxFactory.ParseName() es particularmente útil aquí, ya que puede analizar una cadena como "System.Collections.Generic" y construir la estructura QualifiedNameSyntax anidada apropiada. Estas directivas using se añaden luego a la CompilationUnitSyntax usando su método AddUsings().
-B. Declaración de Espacios de Nombres (NamespaceDeclarationSyntax)
-Los espacios de nombres organizan el código y se crean con SyntaxFactory.NamespaceDeclaration(), que también toma un NameSyntax para el nombre del espacio de nombres. Para namespace MyGeneratedCode {... }: NameSyntax namespaceIdentifier = SyntaxFactory.ParseName("MyGeneratedCode"); NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(namespaceIdentifier);
-Al igual que una clase, un NamespaceDeclarationSyntax actúa como un contenedor para sus miembros (clases, structs, otros namespaces, etc.), los cuales se añaden usando el método AddMembers().
-C. Anidando Clases, Métodos y Declaraciones para Formar un Archivo .cs Completo.
-El proceso de crear un archivo .cs completo implica construir el árbol de sintaxis de manera jerárquica, comenzando desde los elementos más internos (como literales y identificadores) y ensamblándolos progresivamente hasta formar la CompilationUnitSyntax raíz.
+  
+Las sentencias `return` se generan usando `SyntaxFactory.ReturnStatement()`. Este método tiene sobrecargas para manejar retornos con valor y retornos de métodos void.
+  
+- **Retorno de un valor:** Para `return result;`, donde `result` es una variable: `SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName("result")).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))`. 
+  Para retornar un literal, como `return 0;`: `SyntaxFactory.ReturnStatement(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0))).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))`.
+- **Retorno para método void:** Para `return;`: `SyntaxFactory.ReturnStatement().WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))`. La sobrecarga `SyntaxFactory.ReturnStatement()` sin argumentos crea la base para un `return;`. Es crucial añadir el `SemicolonToken` si la sobrecarga utilizada no lo incluye implícitamente.
+La `ReturnStatementSyntax` tiene una propiedad `Expression` que puede ser `null` para retornos `void`. Las sobrecargas de `SyntaxFactory`reflejan esto, permitiendo omitir la expresión o pasarla explícitamente.
+
+## IV. Ensamblaje de una Unidad de Compilación Completa (CompilationUnitSyntax)
+Un `CompilationUnitSyntax` es el nodo raíz de cualquier árbol de sintaxis que represente un archivo de código C# completo. Contiene elementos como directivas using, declaraciones de espacio de nombres y declaraciones de tipo (`class`, `struct`, etc.).
+
+ ### A. Incorporación de Directivas using (UsingDirectiveSyntax)
+
+Las directivas using se crean con `SyntaxFactory.UsingDirective()`, que toma un `NameSyntax` representando el espacio de nombres a importar. Para `using System;`: `NameSyntax systemName = SyntaxFactory.ParseName("System"); UsingDirectiveSyntax usingSystem = SyntaxFactory.UsingDirective(systemName).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));`
+El método `SyntaxFactory.ParseName()` es particularmente útil aquí, ya que puede analizar una cadena como "System.Collections.Generic" y construir la estructura `QualifiedNameSyntax` anidada apropiada. Estas directivas `using` se añaden luego a la `CompilationUnitSyntax` usando su método `AddUsings()`.
+
+ ### B. Declaración de Espacios de Nombres (NamespaceDeclarationSyntax)
+
+  Los espacios de nombres organizan el código y se crean con `SyntaxFactory.NamespaceDeclaration()`, que también toma un `NameSyntax` para el nombre del espacio de nombres. Para namespace `MyGeneratedCode {... }`: `NameSyntax namespaceIdentifier = SyntaxFactory.ParseName("MyGeneratedCode"); NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(namespaceIdentifier);`
+Al igual que una clase, un `NamespaceDeclarationSyntax` actúa como un contenedor para sus miembros (clases, structs, otros namespaces, etc.), los cuales se añaden usando el método `AddMembers()`.
+
+ ### C. Anidando Clases, Métodos y Declaraciones para Formar un Archivo .cs Completo.
+El proceso de crear un archivo .cs completo implica construir el árbol de sintaxis de manera jerárquica, comenzando desde los elementos más internos (como literales y identificadores) y ensamblándolos progresivamente hasta formar la `CompilationUnitSyntax` raíz.
 El siguiente ejemplo integral demuestra la creación de un archivo C# con la siguiente estructura:
+```csharp
 using System;
 
 namespace MyGeneratedCode
@@ -161,59 +171,98 @@ namespace MyGeneratedCode
         }
     }
 }
+```
 
+#### Construcción paso a paso:
 
-Construcción paso a paso:
-Directiva using:
-UsingDirectiveSyntax usingSystem = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System"))
-   .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+  **Directiva using:**
+ ```csharp
+UsingDirectiveSyntax usingSystem = SyntaxFactory
+    .UsingDirective(SyntaxFactory.ParseName("System"))
+    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+```
 
+**Sentencias para el cuerpo del método MyMethod:**
 
-Sentencias para el cuerpo del método MyMethod:
 int x = 10;
-LocalDeclarationStatementSyntax localVarDecl = SyntaxFactory.LocalDeclarationStatement(
-    SyntaxFactory.VariableDeclaration(
-        SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword)),
-        SyntaxFactory.SingletonSeparatedList(
-            SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("x"))
-               .WithInitializer(SyntaxFactory.EqualsValueClause(
-                    SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(10))))
-        )
-    )
-).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+  
+```csharp
+  
+LocalDeclarationStatementSyntax localVarDecl = SyntaxFactory
+	.LocalDeclarationStatement(
+		SyntaxFactory.VariableDeclaration(
+  		SyntaxFactory.PredefinedType(
+  			SyntaxFactory.Token(SyntaxKind.IntKeyword)
+  		),
+      SyntaxFactory.SingletonSeparatedList(
+				SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("x")
+			)
+  		.WithInitializer(SyntaxFactory.EqualsValueClause(
+				SyntaxFactory.LiteralExpression(
+					SyntaxKind.NumericLiteralExpression, 
+  				SyntaxFactory.Literal(10)
+  			)
+  		))
+    ))
+  ).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
 
+```
 
 System.Console.WriteLine(x);
-ExpressionStatementSyntax methodCall = SyntaxFactory.ExpressionStatement(
-    SyntaxFactory.InvocationExpression(
-        SyntaxFactory.MemberAccessExpression(
-            SyntaxKind.SimpleMemberAccessExpression,
-            SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"), SyntaxFactory.IdentifierName("Console")),
-            SyntaxFactory.IdentifierName("WriteLine")
-        ),
-        SyntaxFactory.ArgumentList(SyntaxFactory.SingletonSeparatedList(
-            SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x"))
-        ))
-    )
-).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
 
+```csharp
+
+  ExpressionStatementSyntax methodCall = SyntaxFactory
+  .ExpressionStatement(
+    SyntaxFactory.InvocationExpression(
+      SyntaxFactory.MemberAccessExpression(
+        SyntaxKind.SimpleMemberAccessExpression,
+  			SyntaxFactory.QualifiedName(
+  				SyntaxFactory.IdentifierName("System"),
+  				SyntaxFactory.IdentifierName("Console")
+  			),
+  			SyntaxFactory.IdentifierName("WriteLine")
+      ),
+			SyntaxFactory.ArgumentList(
+				SyntaxFactory.SingletonSeparatedList(
+  				SyntaxFactory.Argument(SyntaxFactory.IdentifierName("x")
+  			)
+  		)
+  	)
+  )
+).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+```
 
 return;
-ReturnStatementSyntax returnStatement = SyntaxFactory.ReturnStatement()
+  
+```csharp
+
+  ReturnStatementSyntax returnStatement = SyntaxFactory.ReturnStatement()
    .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
 
+```
 
-Cuerpo del Método MyMethod:
-BlockSyntax methodBody = SyntaxFactory.Block(localVarDecl, methodCall, returnStatement);
+**Cuerpo del Método MyMethod:**
+
+```csharp
+BlockSyntax methodBody = SyntaxFactory
+  .Block(localVarDecl, methodCall, returnStatement);
+```
 
 
-Declaración del Método MyMethod:
-MethodDeclarationSyntax methodDeclaration = SyntaxFactory.MethodDeclaration(
-        SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.VoidKeyword)),
-        SyntaxFactory.Identifier("MyMethod"))
-   .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-   .WithBody(methodBody);
+**Declaración del Método MyMethod:**
+```csharp
+MethodDeclarationSyntax methodDeclaration = SyntaxFactory
+  .MethodDeclaration(
+  	SyntaxFactory.PredefinedType(
+			SyntaxFactory.Token(SyntaxKind.VoidKeyword)
+  	),
+  	SyntaxFactory.Identifier("MyMethod")
+  )
+  .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+  .WithBody(methodBody);
 
+  ```
 
 Declaración de la Clase MyClass:
 ClassDeclarationSyntax classDeclaration = SyntaxFactory.ClassDeclaration("MyClass")
