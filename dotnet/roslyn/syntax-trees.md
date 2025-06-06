@@ -2,7 +2,7 @@
 title: Árboles de Sintaxis en C# con Roslyn
 description: Guía de creación estructuración de código fuente a partir de árboles de sintaxis
 published: false
-date: 2025-06-06T16:32:26.317Z
+date: 2025-06-06T17:11:11.692Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-06T16:32:26.317Z
@@ -118,18 +118,20 @@ Para declarar `string message = "Hello";`, el proceso es análogo, utilizando `S
 La declaración de una variable local es un excelente ejemplo de la construcción jerárquica en Roslyn. Se construye desde adentro hacia afuera o en partes, ensamblando nodos más pequeños en estructuras más grandes. El Visualizador de Sintaxis o herramientas como RoslynQuoter son invaluables para deconstruir ejemplos existentes y entender esta jerarquía.
 
 ### B. Invocación de Otros Métodos (InvocationExpressionSyntax)
-Las llamadas a métodos se representan mediante InvocationExpressionSyntax. Esto se aplica tanto a métodos de instancia (objeto.Metodo()) como a métodos estáticos (Clase.Metodo()).
-Expresión de Acceso a Miembro (MemberAccessExpressionSyntax):
-Para una llamada de instancia como myObject.Process(count), la parte myObject.Process es un MemberAccessExpressionSyntax. Se crea con: SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.IdentifierName("myObject"), SyntaxFactory.IdentifierName("Process")).
-Para una llamada estática como System.Console.WriteLine(message), la parte System.Console.WriteLine también es un MemberAccessExpressionSyntax. System.Console en sí mismo puede ser un QualifiedNameSyntax: SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"), SyntaxFactory.IdentifierName("Console")), SyntaxFactory.IdentifierName("WriteLine")).
-Lista de Argumentos (ArgumentListSyntax):
-Cada argumento se envuelve en un ArgumentSyntax. Por ejemplo, para el argumento count: SyntaxFactory.Argument(SyntaxFactory.IdentifierName("count")).
-Si el argumento es un literal, como "Hello": SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Hello"))).
-Los ArgumentSyntax se agrupan en una SeparatedSyntaxList<ArgumentSyntax> (para manejar las comas si hay múltiples argumentos). Para un solo argumento: SyntaxFactory.SingletonSeparatedList(argumentSyntax).
-Esta lista separada se pasa a SyntaxFactory.ArgumentList(): SyntaxFactory.ArgumentList(separatedArgumentList).
-Expresión de Invocación (InvocationExpressionSyntax): Combina la expresión de acceso a miembro y la lista de argumentos: SyntaxFactory.InvocationExpression(memberAccessExpression, argumentListSyntax).
-Una InvocationExpressionSyntax es una expresión. Para que constituya una sentencia completa en un bloque de método (por ejemplo, una llamada a un método void o cuando no se usa su valor de retorno), debe envolverse en una ExpressionStatementSyntax y terminarse con un punto y coma: SyntaxFactory.ExpressionStatement(invocationExpression).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)).
-C. Declaraciones de Retorno (ReturnStatementSyntax)
+  
+Las llamadas a métodos se representan mediante InvocationExpressionSyntax. Esto se aplica tanto a métodos de instancia (`objeto.Metodo()`) como a métodos estáticos (`Clase.Metodo()`).
+- **Expresión de Acceso a Miembro (MemberAccessExpressionSyntax):**
+Para una llamada de instancia como `myObject.Process(count)`, la parte `myObject.Process` es un `MemberAccessExpressionSyntax`. Se crea con: `SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.IdentifierName("myObject"), SyntaxFactory.IdentifierName("Process"))`.
+Para una llamada estática como `System.Console.WriteLine(message)`, la parte `System.Console.WriteLine` también es un `MemberAccessExpressionSyntax`. `System.Console` en sí mismo puede ser un `QualifiedNameSyntax`: `SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"), SyntaxFactory.IdentifierName("Console")), SyntaxFactory.IdentifierName("WriteLine"))`.
+- **Lista de Argumentos (ArgumentListSyntax):**
+Cada argumento se envuelve en un `ArgumentSyntax`. Por ejemplo, para el argumento count: `SyntaxFactory.Argument(SyntaxFactory.IdentifierName("count"))`.
+Si el argumento es un literal, como "Hello": `SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Hello")))`.
+Los ArgumentSyntax se agrupan en una `SeparatedSyntaxList<ArgumentSyntax>` (para manejar las comas si hay múltiples argumentos). Para un solo argumento: `SyntaxFactory.SingletonSeparatedList(argumentSyntax)`.
+Esta lista separada se pasa a `SyntaxFactory.ArgumentList()`: `SyntaxFactory.ArgumentList(separatedArgumentList)`.
+- **Expresión de Invocación (InvocationExpressionSyntax):** Combina la expresión de acceso a miembro y la lista de argumentos: `SyntaxFactory.InvocationExpression(memberAccessExpression, argumentListSyntax)`.
+Una `InvocationExpressionSyntax` es una expresión. Para que constituya una sentencia completa en un bloque de método (por ejemplo, una llamada a un método void o cuando no se usa su valor de retorno), debe envolverse en una `ExpressionStatementSyntax` y terminarse con un punto y coma: `SyntaxFactory.ExpressionStatement(invocationExpression).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))`.
+
+### C. Declaraciones de Retorno (ReturnStatementSyntax)
 Las sentencias return se generan usando SyntaxFactory.ReturnStatement(). Este método tiene sobrecargas para manejar retornos con valor y retornos de métodos void.
 Retorno de un valor: Para return result;, donde result es una variable: SyntaxFactory.ReturnStatement(SyntaxFactory.IdentifierName("result")).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)). Para retornar un literal, como return 0;: SyntaxFactory.ReturnStatement(SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(0))).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)).
 Retorno para método void: Para return;: SyntaxFactory.ReturnStatement().WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken)). La sobrecarga SyntaxFactory.ReturnStatement() sin argumentos crea la base para un return;. Es crucial añadir el SemicolonToken si la sobrecarga utilizada no lo incluye implícitamente.
