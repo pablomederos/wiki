@@ -2,7 +2,7 @@
 title: Árboles de Sintaxis en C# con Roslyn
 description: Guía de creación estructuración de código fuente a partir de árboles de sintaxis
 published: false
-date: 2025-06-06T19:32:06.306Z
+date: 2025-06-06T20:15:44.073Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-06T16:32:26.317Z
@@ -68,8 +68,8 @@ Estas tablas proporcionan un punto de partida para comprender cómo las construc
 La generación de código C# implica el ensamblaje de varios tipos de declaraciones y estructuras. `SyntaxFactory` proporciona los bloques de construcción para cada uno de estos.
 
 ### A. Creación de Clases (ClassDeclarationSyntax)
-Una declaración de clase es un componente fundamental en C#. Para generar una, se utiliza el método **SyntaxFactory.ClassDeclaration()**. Este método tiene varias sobrecargas; la más simple podría tomar solo el nombre de la clase, mientras que otras más completas permiten especificar atributos, modificadores, tipos base, restricciones de tipo genérico y miembros.
-Para crear una clase básica como **public class MyClass { }**, se siguen estos pasos :
+Una declaración de clase es un componente fundamental en C#. Para generar una, se utiliza el método `SyntaxFactory.ClassDeclaration()`. Este método tiene varias sobrecargas; la más simple podría tomar solo el nombre de la clase, mientras que otras más completas permiten especificar atributos, modificadores, tipos base, restricciones de tipo genérico y miembros.
+Para crear una clase básica como `public class MyClass { }`, se siguen estos pasos :
 - **Identificador de Clase:** Crear un `SyntaxToken` para el nombre de la clase usando SyntaxFactory.Identifier("MyClass").
 - **Modificadores:** Crear un `SyntaxToken` para la palabra clave `public` usando SyntaxFactory.Token(SyntaxKind.PublicKeyword). Este token se envuelve en una SyntaxTokenList usando SyntaxFactory.TokenList(publicModifier).
 - **Miembros:** Para una clase vacía, se crea una lista vacía de miembros: `SyntaxFactory.List<MemberDeclarationSyntax>()`.
@@ -79,23 +79,23 @@ La creación de una clase, por lo tanto, implica ensamblar múltiples piezas: el
 
 ### B. Definición de Métodos (MethodDeclarationSyntax)
 
-Los métodos encapsulan la lógica ejecutable dentro de las clases. **SyntaxFactory.MethodDeclaration()** es el punto de partida para su creación. Este método requiere especificar el tipo de retorno, el nombre del método y, opcionalmente, modificadores de acceso, una lista de parámetros y un cuerpo de método.
-Para generar un método como public **void MyMethod(int param1, string param2) { }:
-- **Modificadores:** Similar a las clases, se crea una SyntaxTokenList para modificadores como public (por ejemplo, **SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword))**).
-- **Tipo de Retorno:** Para tipos predefinidos como void o int, se utiliza SyntaxFactory.PredefinedType() con el token de palabra clave apropiado (por ejemplo, SyntaxFactory.Token(SyntaxKind.VoidKeyword)). Para otros tipos, se puede usar SyntaxFactory.ParseTypeName("TypeName").
-- **Nombre del Método:** Se crea un `SyntaxToken` identificador con **SyntaxFactory.Identifier("MyMethod")**.
+Los métodos encapsulan la lógica ejecutable dentro de las clases. `SyntaxFactory.MethodDeclaration()` es el punto de partida para su creación. Este método requiere especificar el tipo de retorno, el nombre del método y, opcionalmente, modificadores de acceso, una lista de parámetros y un cuerpo de método.
+Para generar un método como public `void MyMethod(int param1, string param2) { }`:
+- **Modificadores:** Similar a las clases, se crea una SyntaxTokenList para modificadores como public (por ejemplo, `SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword))`).
+- **Tipo de Retorno:** Para tipos predefinidos como `void` o `int`, se utiliza `SyntaxFactory.PredefinedType()` con el token de palabra clave apropiado (por ejemplo, `SyntaxFactory.Token(SyntaxKind.VoidKeyword)`). Para otros tipos, se puede usar `SyntaxFactory.ParseTypeName("TypeName")`.
+- **Nombre del Método:** Se crea un `SyntaxToken` identificador con `SyntaxFactory.Identifier("MyMethod")`.
 - **Lista de Parámetros (ParameterListSyntax):** Este es un componente más complejo.
-Para cada parámetro, se crea un ParameterSyntax usando **SyntaxFactory.Parameter()** con un identificador para el nombre del parámetro (por ejemplo, **SyntaxFactory.Identifier("param1")**) y se le asigna un tipo usando el método `WithType()` (por ejemplo, **.WithType(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword)))**).
-Los nodos ParameterSyntax individuales se ensamblan en una **SeparatedSyntaxList<ParameterSyntax>**. Esta lista maneja las comas entre parámetros. Por ejemplo: **SyntaxFactory.SeparatedList<ParameterSyntax>(new SyntaxNodeOrToken{param1Syntax, SyntaxFactory.Token(SyntaxKind.CommaToken), param2Syntax})**.
-  Finalmente, esta lista separada se envuelve en un `ParameterListSyntax` usando **SyntaxFactory.ParameterList(separatedParameters)**.
-- **Cuerpo del Método:** Para un método con un cuerpo vacío, se crea un BlockSyntax usando SyntaxFactory.Block().
-Declaración del Método: Se invoca SyntaxFactory.MethodDeclaration() con todos estos componentes.
+Para cada parámetro, se crea un `ParameterSyntax` usando `SyntaxFactory.Parameter()` con un identificador para el nombre del parámetro (por ejemplo, `SyntaxFactory.Identifier("param1")`) y se le asigna un tipo usando el método `WithType()` (por ejemplo, `.WithType(SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword)))`).
+Los nodos ParameterSyntax individuales se ensamblan en una `SeparatedSyntaxList<ParameterSyntax>`. Esta lista maneja las comas entre parámetros. Por ejemplo: `SyntaxFactory.SeparatedList<ParameterSyntax>(new SyntaxNodeOrToken{param1Syntax, SyntaxFactory.Token(SyntaxKind.CommaToken), param2Syntax})`.
+  Finalmente, esta lista separada se envuelve en un `ParameterListSyntax` usando `SyntaxFactory.ParameterList(separatedParameters)`.
+- **Cuerpo del Método:** Para un método con un cuerpo vacío, se crea un `BlockSyntax` usando `SyntaxFactory.Block()`.
+Declaración del Método: Se invoca `SyntaxFactory.MethodDeclaration()` con todos estos componentes.
 
 La creación de `MethodDeclarationSyntax` refleja fielmente la estructura gramatical de una declaración de método en C#. La gestión de parámetros subraya cómo la inmutabilidad guía el diseño de la API: no se "añade" un parámetro a una lista existente; en su lugar, se crea una nueva lista de parámetros y, consecuentemente, un nuevo nodo de declaración de método con esta nueva lista.
   
 ### C. Elaboración de Bloques de Código (BlockSyntax) para Cuerpos de Métodos
 
-Un BlockSyntax representa un bloque de código delimitado por llaves (`{... }`), como el cuerpo de un método o una sentencia if. Se crea usando **SyntaxFactory.Block()**. Este método puede aceptar una `SyntaxList<StatementSyntax>` (una lista de sentencias) o un array de StatementSyntax como argumento, o puede llamarse sin argumentos para crear un bloque vacío.
+Un BlockSyntax representa un bloque de código delimitado por llaves (`{... }`), como el cuerpo de un método o una sentencia if. Se crea usando `SyntaxFactory.Block()`. Este método puede aceptar una `SyntaxList<StatementSyntax>` (una lista de sentencias) o un array de `StatementSyntax` como argumento, o puede llamarse sin argumentos para crear un bloque vacío.
 Un `BlockSyntax` es fundamentalmente un contenedor para una secuencia de sentencias. Su propiedad principal es Statements, que es una `SyntaxList<StatementSyntax>`. Si se tiene un `BlockSyntax` existente (por ejemplo, del `MethodDeclarationSyntax.Body`), se pueden "añadir" sentencias usando el método `AddStatements()`. Debido a la inmutabilidad, este método devuelve un nuevo `BlockSyntax` con las sentencias añadidas. Este nuevo bloque luego reemplazaría al antiguo en el nodo padre (por ejemplo, `methodDeclaration.WithBody(newBlock)`).
   
 Para el propósito de esta nota, inicialmente se creará un `BlockSyntax` vacío, que luego se poblará con sentencias: `BlockSyntax methodBody = SyntaxFactory.Block();`
@@ -103,29 +103,45 @@ Este bloque estará listo para que se le añadan las sentencias que definen el c
 
 ## III. Generación de Contenido Dentro de Bloques de Método
 
-  Una vez que se tiene un BlockSyntax (generalmente como el cuerpo de un método), se puede poblar con varias sentencias que definen la lógica del programa.
+  Una vez que se tiene un `BlockSyntax` (generalmente como el cuerpo de un método), se puede poblar con varias sentencias que definen la lógica del programa.
 
 ### A. Declaración y Asignación de Variables Locales (`LocalDeclarationStatementSyntax`)
 La declaración de variables locales es una operación común. Para generar una sentencia como `int count = 10;`, se construye un `LocalDeclarationStatementSyntax`. Este proceso es jerárquico e implica la creación de varios nodos anidados:
-- **Expresión Literal del Valor:** Para el valor `10`, se crea un `LiteralExpressionSyntax` de tipo numérico: `SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(10))`. La función `SyntaxFactory.Literal()` tiene sobrecargas para diversos tipos de datos, incluyendo enteros, cadenas, booleanos, etc..
+- **Expresión Literal del Valor:** Para el valor `10`, se crea un `LiteralExpressionSyntax` de tipo numérico: 
+`SyntaxFactory.LiteralExpression(SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal(10))`
+La función `SyntaxFactory.Literal()` tiene sobrecargas para diversos tipos de datos, incluyendo enteros, cadenas, booleanos, etc..
 - **Cláusula de Inicialización (EqualsValueClauseSyntax):** Esto representa la parte `= 10`: `SyntaxFactory.EqualsValueClause(literalExpression)` (**Nota**: `SyntaxFactory.EqualsValueClause` toma directamente la expresión; el token `=` es implícito o se añade mediante una sobrecarga que toma `SyntaxToken` equalsToken). Una forma más explícita es: `SyntaxFactory.EqualsValueClause(SyntaxFactory.Token(SyntaxKind.EqualsToken), literalExpression)`
 - `Declarador de Variable (VariableDeclaratorSyntax):` Define el nombre de la variable y su inicializador: `SyntaxFactory.VariableDeclarator(SyntaxFactory.Identifier("count")).WithInitializer(initializerClause)`
-- **Declaración de Variable (VariableDeclarationSyntax):** Especifica el tipo de la variable y contiene uno o más declaradores:
-Tipo: `SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))` para `int`.
-- **Declaradores:** Se utiliza `SyntaxFactory.SingletonSeparatedList(variableDeclarator)` para un solo declarador. `SyntaxFactory.VariableDeclaration(typeSyntax).AddVariables(variableDeclarator)`
+- **Declaración de Variable (VariableDeclarationSyntax):** Especifica el tipo de la variable y contiene uno o más declaradores. Como `SyntaxFactory.PredefinedType(SyntaxFactory.Token(SyntaxKind.IntKeyword))` para `int`.
+- **Declaradores:** Se utiliza `SyntaxFactory.SingletonSeparatedList(variableDeclarator)` para un solo declarador. Para más de un declarador se podría usar `SyntaxFactory.VariableDeclaration(typeSyntax).AddVariables(variableDeclarator)`.
 - **Sentencia de Declaración Local (LocalDeclarationStatementSyntax):** Es la sentencia completa, incluyendo el punto y coma final: `SyntaxFactory.LocalDeclarationStatement(variableDeclaration).WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken))`
 Para declarar `string message = "Hello";`, el proceso es análogo, utilizando `SyntaxKind.StringKeyword` para el tipo y `SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Hello"))` para el valor.
+
 La declaración de una variable local es un excelente ejemplo de la construcción jerárquica en Roslyn. Se construye desde adentro hacia afuera o en partes, ensamblando nodos más pequeños en estructuras más grandes. El Visualizador de Sintaxis o herramientas como RoslynQuoter son invaluables para deconstruir ejemplos existentes y entender esta jerarquía.
+
+<br>
+<br>
 
 ### B. Invocación de Otros Métodos (InvocationExpressionSyntax)
   
 Las llamadas a métodos se representan mediante InvocationExpressionSyntax. Esto se aplica tanto a métodos de instancia (`objeto.Metodo()`) como a métodos estáticos (`Clase.Metodo()`).
 - **Expresión de Acceso a Miembro (MemberAccessExpressionSyntax):**
-Para una llamada de instancia como `myObject.Process(count)`, la parte `myObject.Process` es un `MemberAccessExpressionSyntax`. Se crea con: `SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.IdentifierName("myObject"), SyntaxFactory.IdentifierName("Process"))`.
-Para una llamada estática como `System.Console.WriteLine(message)`, la parte `System.Console.WriteLine` también es un `MemberAccessExpressionSyntax`. `System.Console` en sí mismo puede ser un `QualifiedNameSyntax`: `SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"), SyntaxFactory.IdentifierName("Console")), SyntaxFactory.IdentifierName("WriteLine"))`.
+Para una llamada de instancia como `myObject.Process(count)`, la parte `myObject.Process` es un `MemberAccessExpressionSyntax`. Se crea con: `SyntaxFactory.MemberAccessExpression(
+	SyntaxKind.SimpleMemberAccessExpression,
+  SyntaxFactory.IdentifierName("myObject"),
+  SyntaxFactory.IdentifierName("Process")
+  )`.
+Para una llamada estática como `System.Console.WriteLine(message)`, la parte `System.Console.WriteLine` también es un `MemberAccessExpressionSyntax`. `System.Console` en sí mismo puede ser un `QualifiedNameSyntax`: `SyntaxFactory.MemberAccessExpression(
+	SyntaxKind.SimpleMemberAccessExpression,
+  SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
+  SyntaxFactory.IdentifierName("Console")),
+  SyntaxFactory.IdentifierName("WriteLine")
+  )`.
 - **Lista de Argumentos (ArgumentListSyntax):**
 Cada argumento se envuelve en un `ArgumentSyntax`. Por ejemplo, para el argumento count: `SyntaxFactory.Argument(SyntaxFactory.IdentifierName("count"))`.
-Si el argumento es un literal, como "Hello": `SyntaxFactory.Argument(SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Hello")))`.
+Si el argumento es un literal, como "Hello": `SyntaxFactory.Argument(
+SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal("Hello"))
+)`.
 Los ArgumentSyntax se agrupan en una `SeparatedSyntaxList<ArgumentSyntax>` (para manejar las comas si hay múltiples argumentos). Para un solo argumento: `SyntaxFactory.SingletonSeparatedList(argumentSyntax)`.
 Esta lista separada se pasa a `SyntaxFactory.ArgumentList()`: `SyntaxFactory.ArgumentList(separatedArgumentList)`.
 - **Expresión de Invocación (InvocationExpressionSyntax):** Combina la expresión de acceso a miembro y la lista de argumentos: `SyntaxFactory.InvocationExpression(memberAccessExpression, argumentListSyntax)`.
@@ -154,7 +170,7 @@ El método `SyntaxFactory.ParseName()` es particularmente útil aquí, ya que pu
 Al igual que una clase, un `NamespaceDeclarationSyntax` actúa como un contenedor para sus miembros (clases, structs, otros namespaces, etc.), los cuales se añaden usando el método `AddMembers()`.
 
  ### C. Anidando Clases, Métodos y Declaraciones para Formar un Archivo .cs Completo.
-El proceso de crear un archivo .cs completo implica construir el árbol de sintaxis de manera jerárquica, comenzando desde los elementos más internos (como literales y identificadores) y ensamblándolos progresivamente hasta formar la `CompilationUnitSyntax` raíz.
+El proceso de crear un archivo `.cs` completo implica construir el árbol de sintaxis de manera jerárquica, comenzando desde los elementos más internos (como literales y identificadores) y ensamblándolos progresivamente hasta formar la `CompilationUnitSyntax` raíz.
 El siguiente ejemplo integral demuestra la creación de un archivo C# con la siguiente estructura:
 ```csharp
 using System;
