@@ -2,7 +2,7 @@
 title: Árboles de Sintaxis en C# con Roslyn
 description: Guía de creación estructuración de código fuente a partir de árboles de sintaxis
 published: false
-date: 2025-06-06T17:42:09.585Z
+date: 2025-06-06T18:19:15.525Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-06T16:32:26.317Z
@@ -264,28 +264,40 @@ MethodDeclarationSyntax methodDeclaration = SyntaxFactory
 
   ```
 
-Declaración de la Clase MyClass:
-ClassDeclarationSyntax classDeclaration = SyntaxFactory.ClassDeclaration("MyClass")
-   .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
-   .AddMembers(methodDeclaration);
+**Declaración de la Clase MyClass:**
 
+```csharp
+ClassDeclarationSyntax classDeclaration = SyntaxFactory
+  .ClassDeclaration("MyClass")
+  .AddModifiers(SyntaxFactory.Token(SyntaxKind.PublicKeyword))
+  .AddMembers(methodDeclaration);
+```
 
-Declaración del Espacio de Nombres MyGeneratedCode:
-NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory.NamespaceDeclaration(SyntaxFactory.ParseName("MyGeneratedCode"))
-   .AddMembers(classDeclaration);
+**Declaración del Espacio de Nombres MyGeneratedCode:**
 
+```csharp
+NamespaceDeclarationSyntax namespaceDeclaration = SyntaxFactory
+  .NamespaceDeclaration(SyntaxFactory.ParseName("MyGeneratedCode"))
+  .AddMembers(classDeclaration);
+```
 
-Unidad de Compilación (CompilationUnitSyntax):
+**Unidad de Compilación (CompilationUnitSyntax):**
+
+```csharp
+  
 CompilationUnitSyntax compilationUnit = SyntaxFactory.CompilationUnit()
    .AddUsings(usingSystem)
    .AddMembers(namespaceDeclaration);
 
+```
 
 Este proceso de anidamiento ilustra la metáfora del "árbol": se comienza con las "hojas" (tokens, identificadores) y se ensamblan en "ramas" (expresiones, sentencias) hasta formar el "tronco" (CompilationUnitSyntax). Esta estructura jerárquica es la esencia de cómo Roslyn representa el código.
-V. Generación del Código Fuente Final
+
+## V. Generación del Código Fuente Final
 Una vez que se ha construido el CompilationUnitSyntax, el siguiente paso es convertir este árbol de sintaxis en una cadena de texto que represente el código C# fuente.
-A. Conversión del SyntaxTree a una Cadena de Texto (ToFullString())
-Cualquier SyntaxNode, incluyendo el nodo raíz CompilationUnitSyntax de un árbol, puede ser convertido a su representación de cadena de texto mediante el método ToFullString(). Este método es fundamental para obtener la salida del código generado. Por ejemplo: string generatedCode = compilationUnit.ToFullString();.
+
+ ### A. Conversión del SyntaxTree a una Cadena de Texto (`ToFullString()`)
+Cualquier SyntaxNode, incluyendo el nodo raíz CompilationUnitSyntax de un árbol, puede ser convertido a su representación de cadena de texto mediante el método `ToFullString()`. Este método es fundamental para obtener la salida del código generado. Por ejemplo: `string generatedCode = compilationUnit.ToFullString();`.
 El método ToFullString() respeta el principio de "fidelidad total", lo que significa que incluye toda la trivia (espacios en blanco, saltos de línea, comentarios) presente en el árbol de sintaxis. Si el árbol se generó programáticamente utilizando `SyntaxFactory`sin añadir explícitamente nodos de trivia para el formato, el resultado de ToFullString() será sintácticamente correcto, pero podría no estar bien formateado para la lectura humana, apareciendo como una larga línea de código o con un espaciado mínimo.
 B. Importancia de NormalizeWhitespace() para la Legibilidad
 Para abordar el problema del formato, Roslyn proporciona el método SyntaxNode.NormalizeWhitespace(). Este método reconstruye el árbol (o un subárbol a partir de un nodo dado) con trivia de espacio en blanco normalizada, aplicando sangría y espaciado estándar de C#. El uso típico es: string formattedCode = compilationUnit.NormalizeWhitespace().ToFullString();
