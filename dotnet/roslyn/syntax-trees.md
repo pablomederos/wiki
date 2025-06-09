@@ -2,15 +2,13 @@
 title: Árboles de Sintaxis en C# con Roslyn
 description: Guía de creación estructuración de código fuente a partir de árboles de sintaxis
 published: true
-date: 2025-06-09T13:44:50.194Z
+date: 2025-06-09T13:48:31.539Z
 tags: .net, c#, roslyn, análisis de código, generación de código, metaprogramación, syntaxfactory, árbol de sintaxis, syntaxnode, syntaxtoken, syntaxtrivia, compilationunitsyntax, classdeclarationsyntax, methoddeclarationsyntax, localdeclarationstatementsyntax, invocationexpressionsyntax, namespacedeclarationsyntax, api de compilador roslyn, refactorización de código
 editor: markdown
 dateCreated: 2025-06-06T16:32:26.317Z
 ---
 
 # Creación y Manipulación de Árboles de Sintaxis en C# con Roslyn SyntaxFactory
-
-Este documento técnico proporciona una guía exhaustiva sobre la creación programática de árboles de sintaxis de C# utilizando la API del compilador Roslyn, con un enfoque central en la clase `Microsoft.CodeAnalysis.CSharp.SyntaxFactory`. Se detallarán los procesos para construir elementos fundamentales del lenguaje C#, tales como clases, métodos y bloques de código, incluyendo ejemplos específicos de asignación de variables, invocación de métodos y declaraciones de retorno.
 
 I. [Introducción a los Árboles de Sintaxis de Roslyn y SyntaxFactory](#intro)
   - A. [Principios Fundamentales de los Árboles de Sintaxis de Roslyn](#principles)
@@ -42,6 +40,9 @@ V. [Generación del Código Fuente Final](#generation)
 
 VI. [Compilación del Árbol de Sintaxis (Breve Mención Opcional)](#tree-compilation)
 VII. [Conclusión y Consideraciones Avanzadas](#conclusion)
+
+
+Este documento técnico proporciona una guía exhaustiva sobre la creación programática de árboles de sintaxis de C# utilizando la API del compilador Roslyn, con un enfoque central en la clase `Microsoft.CodeAnalysis.CSharp.SyntaxFactory`. Se detallarán los procesos para construir elementos fundamentales del lenguaje C#, tales como clases, métodos y bloques de código, incluyendo ejemplos específicos de asignación de variables, invocación de métodos y declaraciones de retorno.
 
 <div id="intro"/>
 
