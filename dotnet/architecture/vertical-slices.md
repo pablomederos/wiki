@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de corte vertical en .NET
 published: false
-date: 2025-06-10T20:57:34.537Z
+date: 2025-06-10T21:43:17.607Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -67,7 +67,7 @@ La VSA se sustenta en varios principios clave que guían su implementación y bu
 
 El objetivo primordial de VSA es maximizar la cohesión dentro de cada slice (todos los elementos del slice están fuertemente relacionados) y minimizar el acoplamiento entre slices diferentes (los slices son lo más independientes posible).
 
-La popularización de VSA en .NET podría atribuirse en gran medida a Jimmy Bogard (creador de AutoMapper, MediatR y Respawn). Su argumento es que las arquitecturas en capas tradicionales pueden ser demasiado genéricas y no óptimas para la mayoría de las solicitudes individuales de un sistema. Puedes leer más acerca de este tema en este enlace: [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/).
+La popularización de VSA en .NET podría atribuirse quizá, aunque no exclusivamente, a Jimmy Bogard (creador de AutoMapper, MediatR y Respawn). Su argumento es que las arquitecturas en capas tradicionales pueden ser demasiado genéricas y no óptimas para la mayoría de las solicitudes individuales de un sistema. Puedes leer más acerca de este tema en este enlace: [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/).
   
 
 <div id="vsa-en-el-ecosistema-net-mecanismos-del-framework"\>
@@ -116,6 +116,7 @@ Una estructura típica:
   - `SharedKernel.csproj`: Código compartido (utilidades, interfaces transversales, DTOs comunes si son estrictamente necesarios y bien definidos).
 
 La comunicación inter-contexto, si es necesaria, debe ser explícita, usualmente a través de interfaces definidas en un proyecto compartido o expuestas por el API pública de cada módulo de contexto. El desafío principal es cómo el `MainApiProject` descubre y registra los endpoints definidos en los proyectos de contexto.
+Personalmente prefiero usar y abusar de métodos de extensión que luego pueda agregar casi de forma transparente a mi `MainApiProject`.
 
 <div id="consideraciones-clave-para-la-separacion-de-proyectos"\>
 
@@ -124,16 +125,16 @@ La comunicación inter-contexto, si es necesaria, debe ser explícita, usualment
   - **Gestión de Dependencias:** El proyecto API principal referencia los proyectos de contexto.
   - **Descubrimiento de Features/Endpoints:**
       - **Por qué:** Los endpoints (Controladores MVC o Minimal APIs) definidos en los proyectos de contexto deben ser accesibles a través de HTTP. El proyecto principal necesita saber de ellos.
-      - **Cómo:** Se explorarán `ApplicationParts` para MVC y técnicas de reflexión para Minimal APIs.
+      - **Cómo:** Se explorarán `ApplicationParts` para MVC y Minimal APIs quizá con técnicas de reflexión, generadores de código, o simples métodos de extensión.
   - **Compartición de Código:**
       - **Por qué:** Evitar duplicación excesiva de código verdaderamente común.
       - **Cómo:** Usar un `SharedKernel` con precaución para no crear un "god object". Compartir solo lo que es estable y genuinamente reutilizable.
   - **Intereses Transversales (Cross-Cutting Concerns):**
       - **Por qué:** Funcionalidades como logging, autorización, validación deben aplicarse consistentemente.
-      - **Cómo:** Utilizar middleware de ASP.NET Core, filtros de acción/endpoint, o decoradores implementados manualmente sobre los manejadores de características. Estos mecanismos son parte del framework .NET.
+      - **Cómo:** Utilizar middleware de ASP.NET Core, filtros de acción/endpoint, o decoradores implementados manualmente sobre los manejadores de características. Estos mecanismos son parte del marco .NET.
   - **Configuración y Arranque:**
       - **Por qué:** Los servicios y endpoints de cada contexto deben ser registrados en la aplicación principal.
-      - **Cómo:** En `Program.cs`, se configura el registro de servicios y el mapeo de endpoints provenientes de los proyectos de contexto.
+      - **Cómo:** En `Program.cs`, se configura el registro de servicios y el mapeo de endpoints provenientes de los proyectos de contexto, ya sea directamente (poco recomendable) o usando métodos de extensión.
 
 <div id="estrategias-de-exposicion-de-endpoints"\>
 
@@ -157,20 +158,40 @@ Cuando los slices residen en proyectos separados, el proyecto API principal nece
 
 **Desventajas y Limitaciones:**
 
-  - **Acoplado a MVC Tradicional:** No aplica a Minimal APIs.
-  - **Overhead de MVC:** Implica el framework MVC completo.
+  - **Acoplado a MVC Tradicional:** No aplica a Minimal APIs (Aunque podría no ser un requisito).
+  - **Overhead de MVC:** Implica el framework MVC completo. Es decir, cuando se elige usar un Controlador MVC para un endpoint, no solo se ejecuta el método de acción, sino que además se activa toda la maquinaria y el ciclo de vida que el framework de ASP.NET Core MVC utiliza para procesar una solicitud.
 
 **Ejemplo de Código Minimalista (Ilustrativo):**
-
+  
 ```csharp
-// En MainApiProject/Program.cs
-var builder = WebApplication.CreateBuilder(args);
+  WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IServiceCollection services = builder.Services;
 
-// Si ContextA.Features.dll contiene controladores MVC y es una referencia de proyecto,
-// ASP.NET Core MVC usualmente los descubre automáticamente.
-// Para control explícito o carga desde rutas no referenciadas directamente (plugins):
-builder.Services.AddControllers()
-  .ConfigureApplicationPartManager(apm =>
+services
+    .AddControllers()
+    .AddApplicationPart(
+        typeof(ContextA.Features.Controllers.FeatureAController).Assembly
+    );
+
+WebApplication app = builder.Build();
+
+app.MapControllers();
+
+app.Run();
+```
+
+
+o más configurable:
+  
+  
+```csharp
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IServiceCollection services = builder.Services;
+
+services.AddControllers()
+    .ConfigureApplicationPartManager(apm =>
     {
         // Ejemplo de cómo se podría añadir un ensamblado cargado dinámicamente:
         // var pluginAssembly = Assembly.LoadFrom("ruta/a/ContextA.Features.dll");
@@ -183,14 +204,58 @@ builder.Services.AddControllers()
         // {
         //     apm.ApplicationParts.Remove(assemblyToExclude);
         // }
+        apm
+            .ApplicationParts
+            .Add(
+                new AssemblyPart(
+                    typeof(ContextA.Features.Controllers.FeatureAController).Assembly
+                )
+            );
     });
 
-var app = builder.Build();
-app.MapControllers(); // Mapea los controladores descubiertos
+WebApplication app = builder.Build();
+
+app.MapControllers();
+
 app.Run();
 ```
 
-Este ejemplo se basa en los conceptos descritos en. El `ApplicationPartManager` permite añadir `AssemblyPart` para ensamblados que no son referencias directas, lo cual es clave para un sistema de plugins o para cargar módulos de características de forma más dinámica.
+O mediante métodos de extensión:
+  
+```csharp
+/// FeatureAExtensions.cs
+using Microsoft.Extensions.DependencyInjection;
+
+namespace ContextA.Features.Extensions;
+
+public static class FeatureAExtensions
+{
+    public static IMvcBuilder AddFeatureA(this IMvcBuilder builder)
+    {
+        builder
+            .AddApplicationPart(
+                Assembly.GetExecutingAssembly()
+            );
+
+        return builder;
+    }
+}
+  
+/// Program.cs
+using ContextA.Features.Extensions;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IServiceCollection services = builder.Services;
+
+services
+    .AddControllers()
+    .AddFeatureA();
+
+... // Lo que sigue
+```
+  
+
+Este ejemplo se basa en los conceptos descritos anteriormente. El `ApplicationPartManager` permite añadir `AssemblyPart` para ensamblados que no son referencias directas, lo cual es clave para un sistema de plugins o para cargar módulos de características de forma más dinámica.
 
 <div id="aprovechamiento-de-minimal-apis"\>
 
