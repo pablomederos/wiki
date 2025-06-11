@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de corte vertical en .NET
 published: false
-date: 2025-06-11T14:05:33.105Z
+date: 2025-06-11T14:20:17.209Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -495,11 +495,11 @@ Este enfoque es más directo y también más todoterreno, ya que no usa Reflexi�
 
 ### ApplicationParts vs. Minimal APIs para Slices en Proyectos Separados
 
-| Característica/Aspecto | ApplicationParts (con Controladores MVC) | Minimal APIs (con descubrimiento personalizado vía reflexión/source generators) | Por qué y Cómo Impacta en VSA con Proyectos Separados |
-| :--- | :--- | :--- | :--- |
-| **Mecanismo de Descubrimiento** | **Cómo:** Integrado (`ApplicationPartManager` escanea por tipos ControllerBase`). \<br> **Por qué:** MVC tiene un modelo rico de características que necesitan ser descubiertas. | **Cómo:** Implementación manual (reflexión sobre interfaces/atributos o source generators) \<br> **Por qué:** Minimal APIs es "mínimo", no incluye descubrimiento complejo de ensamblados externos por defecto. | `ApplicationParts` es "listo para usar" para controladores. Minimal APIs requiere un esfuerzo de infraestructura para el descubrimiento, pero ofrece más control. |
+| Característica/Aspecto | ApplicationParts (con Controladores MVC) | Minimal APIs (con descubrimiento personalizado vía reflexión/source generators/métodos de extensión) | Por qué y Cómo Impacta en VSA con Proyectos Separados |
+| -- | -- | -- | -- |
+| **Mecanismo de Descubrimiento** | **Cómo:** Integrado (`ApplicationPartManager` escanea por tipos ControllerBase`). **Por qué:** MVC tiene un modelo rico de características que necesitan ser descubiertas. | **Cómo:** Implementación manual (reflexión sobre interfaces/atributos o source generators) **Por qué:** Minimal APIs es "mínimo", no incluye descubrimiento complejo de ensamblados externos por defecto. | `ApplicationParts` es "listo para usar" para controladores. Minimal APIs requiere un esfuerzo de infraestructura para el descubrimiento, pero ofrece más control. |
 | **Tipo de Endpoint Soportado** | Controladores MVC. | Endpoints `MapGet`, `MapPost`, etc. | La elección del tipo de endpoint en el slice dicta la estrategia de descubrimiento. |
- **Complejidad de Configuración Inicial (Descubrimiento)** | **Cómo:** Baja si son referencias de proyecto. \<br> **Por qué:** El sistema de build y MVC lo manejan. | **Cómo:** Moderada (reflexión) a potencialmente más alta source generators). \<br> **Por qué:** Se construye la lógica de descubrimiento. | Minimal APIs requiere más código de infraestructura inicial para el descubrimiento. |
+ **Complejidad de Configuración Inicial (Descubrimiento)** | **Cómo:** Baja si son referencias de proyecto. **Por qué:** El sistema de build y MVC lo manejan. | **Cómo:** Moderada (reflexión) a potencialmente más alta source generators). **Por qué:** Se construye la lógica de descubrimiento. | Minimal APIs requiere más código de infraestructura inicial para el descubrimiento. |
 | **Rendimiento Percibido del Endpoint** | **Por qué:** Pipeline MVC completo puede tener más sobrecarga. | **Por qué:** Diseño más ligero puede llevar a mejor rendimiento. | Para alta sensibilidad al rendimiento, Minimal APIs puede ser preferible. |
 | **Flexibilidad** | **Cómo:** Menos flexible (deben ser clases Controlador). | **Cómo:** Muy flexible (delegados, métodos en clases, etc.). | Minimal APIs ofrece más libertad, alineándose con la idea de VSA de adaptar la implementación a la necesidad del slice. |
 | **Alineación Filosófica con VSA** | Moderada. | Alta (endpoints pequeños, cohesivos). | Minimal APIs encaja más naturalmente con el espíritu de VSA. |
