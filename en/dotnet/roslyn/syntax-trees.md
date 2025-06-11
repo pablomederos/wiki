@@ -2,7 +2,7 @@
 title: Syntax Trees in C# with Roslyn
 description: Guide to creating and structuring source code from syntax trees
 published: true
-date: 2025-06-09T13:42:53.222Z
+date: 2025-06-11T18:13:29.873Z
 tags: .net, c#, roslyn, syntax tree, code generation, metaprogramming, syntaxfactory, syntaxnode, syntaxtoken, syntaxtrivia, compilationunitsyntax, classdeclarationsyntax, methoddeclarationsyntax, localdeclarationstatementsyntax, invocationexpressionsyntax, namespacedeclarationsyntax, roslyn compiler, api code analysis, code refactoring
 editor: markdown
 dateCreated: 2025-06-06T20:29:35.549Z
@@ -434,3 +434,5 @@ Some other sources to delve deeper into the topic:
 16\. SyntaxFactory.UsingDirective Method (Microsoft.CodeAnalysis.CSharp), [https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.syntaxfactory.usingdirective?view=roslyn-dotnet-4.13.0](https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.syntaxfactory.usingdirective?view=roslyn-dotnet-4.13.0) 
 17\. .NET Core, Roslyn and Code Generation · Code it Yourself - Carlos Mendible, [https://carlos.mendible.com/2017/01/29/net-core-roslyn-and-code-generation/](https://carlos.mendible.com/2017/01/29/net-core-roslyn-and-code-generation/)
 18\. Compiling C\# Code with Roslyn ..., [https://josephwoodward.co.uk/2016/12/in-memory-c-sharp-compilation-using-roslyn](https://josephwoodward.co.uk/2016/12/in-memory-c-sharp-compilation-using-roslyn)
+  
+> Note: The vocabulary and grammar in this text have been enhanced by AI to improve readability and overall structure. Gabriel Mederos.-
