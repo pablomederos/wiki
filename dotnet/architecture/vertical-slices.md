@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de corte vertical en .NET
 published: false
-date: 2025-06-11T14:29:43.253Z
+date: 2025-06-11T14:45:07.281Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -27,9 +27,9 @@ III. [Estrategias de Exposición de Endpoints para Slices Verticales en Proyecto
   
 IV. [Ventajas y Desventajas Generales de la Arquitectura Vertical Slice](#analisis-profundo)
 - A. [Ventajas Detalladas (El Porqué de sus Beneficios)](#ventajas-detalladas)
-- B. [Desventajas y Desafíos Comunes (El Porqué de las Dificultades y Cómo Afrontarlas)](#desventajas-y-desafios-comunes)
+- B. [Desventajas y Desafíos Comunes](#desventajas-y-desafios-comunes)
   
-V. [Mención Resumida de Otras Posibles Alternativas de Implementación en VSA (Enfoques dentro de .NET)](#mencion-resumida-de-otras-posibles-alternativas)
+V. [Otras Posibles Alternativas de Implementación en VSA](#mencion-resumida-de-otras-posibles-alternativas)
 - A. [Organización Interna de los Slices](#organizacion-interna-de-los-slices)
 - B. [Comunicación Directa entre Slices (sin mediador explícito)](#comunicacion-directa-entre-slices)
 - C. [Uso de Source Generators para Registro/Optimización](#uso-de-source-generators-para-registrooptimizacion)
@@ -504,7 +504,7 @@ Este enfoque es más directo y también más todoterreno, ya que no usa Reflexi�
 | **Flexibilidad** | Menos flexible (deben ser clases Controlador). | Muy flexible (delegados, métodos en clases, etc.). | Minimal APIs ofrece más libertad, alineándose con la idea de VSA de adaptar la implementación a la necesidad del slice. |
 | **Alineación Filosófica con VSA** | Moderada. | Alta (endpoints pequeños, cohesivos). | Minimal APIs encaja más naturalmente con el espíritu de VSA. |
 
-**Discusión de Trade-offs (Por qué elegir uno u otro):**
+**Por qué elegir uno u otro:**
 
   - **Controladores MVC con `ApplicationParts`:**
 
@@ -549,7 +549,7 @@ La decisión se basa en el porqué de las necesidades del proyecto (legado, rend
 
 <div id="desventajas-y-desafios-comunes"\>
 
-### Desventajas y Desafíos Comunes (El Porqué de las Dificultades y Cómo Afrontarlas)
+### Desventajas y Desafíos Comunes
 
   - **Potencial Duplicación de Código:**
       - **Por qué:** La independencia de los slices puede llevar a repetir lógica o DTOs.
@@ -569,7 +569,7 @@ La decisión se basa en el porqué de las necesidades del proyecto (legado, rend
 
 <div id="mencion-resumida-de-otras-posibles-alternativas"\>
 
-## V. Mención Resumida de Otras Posibles Alternativas de Implementación en VSA (Enfoques dentro de .NET)
+## V. Otras Posibles Alternativas de Implementación en VSA
 
 Existen variaciones en cómo se implementan los detalles dentro de VSA, utilizando capacidades de .NET:
 
@@ -586,19 +586,19 @@ Existen variaciones en cómo se implementan los detalles dentro de VSA, utilizan
 
 <div id="comunicacion-directa-entre-slices"\>
 
-### Comunicación Directa entre Slices (sin mediador explícito)
+### Comunicación Directa entre Slices (sin mediador explícito como MediaTr o RouteDispatcher, etc.)
 
   - **Por qué:** Para interacciones síncronas simples dentro del mismo proceso, un mediador puede ser una sobrecarga innecesaria.
   - **Cómo:** Una característica invoca funcionalidad de otra a través de una interfaz bien definida (expuesta por el slice invocado y registrada en DI). Esto utiliza la inyección de dependencias de .NET.
 
 <div id="uso-de-source-generators-para-registrooptimizacion"\>
 
-### Uso de Source Generators para Registro/Optimización
+### Uso de Source Generators o métodos de extensión para Registro/Optimización
 
   - **Por qué:** Para reducir código repetitivo (boilerplate) en el registro de servicios o endpoints, y para mejorar el rendimiento en el arranque y la compatibilidad AOT al evitar la reflexión en tiempo de ejecución.
   - **Cómo:** Los Source Generators de .NET analizan el código en tiempo de compilación y pueden generar automáticamente el código necesario para, por ejemplo, registrar todos los manejadores de características o los endpoints de Minimal APIs.
 
-Estas alternativas se centran en cómo estructurar el código o cómo realizar ciertas tareas (como el registro) utilizando funcionalidades intrínsecas de .NET, sin depender de bibliotecas externas.
+Estas alternativas se centran en cómo estructurar el código o cómo realizar ciertas tareas (como el registro) utilizando funcionalidades intrínsecas de .NET, sin depender de bibliotecas externas. De hecho, usar generadores de código o reflexión podría ser mucho código extra si no se usará frecuentemente, y quizá, lol métodos de extensión que mencioné antes, sean una solución más polivalente.
 
 <div id="conclusion-y-recomendaciones-estrategicas"\>
 
@@ -608,25 +608,23 @@ La Arquitectura de Vertical Slice en .NET, implementada mediante proyectos separ
 
 **Resumen de Hallazgos Clave (Porqués y Cómos):**
 
-  - VSA organiza el código por funcionalidad vertical (**por qué:** mejorar cohesión y mantenibilidad; **cómo:** agrupando todo lo de una feature).
-  - La separación en proyectos por contexto (**por qué:** aislamiento y organización; **cómo:** bibliotecas de clases por contexto) se alinea con Monolitos Modulares.
+  - VSA organiza el código por funcionalidad vertical (mejorar cohesión y mantenibilidad, agrupando todo lo de una feature).
+  - La separación en proyectos por contexto (aislamiento y organización; bibliotecas de clases por contexto) se alinea con Monolitos Modulares.
   - La exposición de endpoints desde proyectos separados se logra con:
-      - **Controladores MVC:** `ApplicationParts` (**por qué:** mecanismo nativo de MVC; **cómo:** `ApplicationPartManager` descubre controladores).
-      - **Minimal APIs:** Descubrimiento personalizado (**por qué:** no hay mecanismo nativo para ensamblados externos; **cómo:** reflexión sobre interfaces/atributos o Source Generators).
-  - VSA tiene ventajas en mantenibilidad y flexibilidad (**por qué:** localización del cambio, adaptación por slice) pero requiere disciplina (**por qué:** riesgo de inconsistencia, duplicación).
+      - **Controladores MVC:** `ApplicationParts` (mecanismo nativo de MVC; `ApplicationPartManager` descubre controladores).
+      - **Minimal APIs:** Descubrimiento personalizado (no hay mecanismo nativo para ensamblados externos; métodos de extensión, reflexión sobre interfaces/atributos o Source Generators).
+  - VSA tiene ventajas en mantenibilidad y flexibilidad (localización del cambio, adaptación por slice) pero requiere disciplina (riesgo de inconsistencia, duplicación).
 
 **Recomendaciones Estratégicas (Decisiones Pragmáticas):**
 
   - **Elección del Mecanismo de Exposición de Endpoints (El "Cómo" basado en el "Porqué"):**
-      - Si sus slices usan Controladores MVC (**por qué:** legado, complejidad MVC necesaria), use `ApplicationParts` (**cómo:** configuración en `Program.cs`).
-      - Si sus slices usan Minimal APIs (**por qué:** ligereza, nuevos desarrollos), implemente un descubrimiento personalizado con reflexión o Source Generators (**cómo:** definir convenciones y escanear/generar código de registro).
+      - Si sus slices usan Controladores MVC (legado, complejidad MVC necesaria), use `ApplicationParts` (configuración en `Program.cs`).
+      - Si sus slices usan Minimal APIs (ligereza, nuevos desarrollos), implemente un descubrimiento personalizado con reflexión o Source Generators (definir convenciones y escanear/generar código de registro).
   - **Evaluar la Madurez y Disciplina del Equipo (El "Porqué" de la necesidad de habilidad):** VSA otorga flexibilidad; sin una base sólida en diseño y refactoring, puede llevar a inconsistencias. El cómo se gestiona esta libertad es crucial.
   - **Diseño del `SharedKernel` y Estrategias para Intereses Transversales (El "Cómo" de la compartición y la consistencia):**
-      - **Por qué:** Evitar duplicación excesiva y aplicar políticas globales.
-      - **Cómo:** `SharedKernel` para código verdaderamente común y estable. Middleware, filtros y decoradores de .NET para intereses transversales.
+      - Evitar duplicación excesiva y aplicar políticas globales, mediante un "`SharedKernel`" para código verdaderamente común y estable. Middleware, filtros y decoradores de .NET para intereses transversales.
   - **Considerar VSA como un Habilitador de Monolitos Modulares (El "Porqué" de esta estructura):**
-      - **Por qué:** Ofrece un buen equilibrio entre simplicidad de monolito y modularidad, sin la complejidad inicial de microservicios.
-      - **Cómo:** Estructurando la solución con proyectos de contexto independientes.
+      - Ofrece un buen equilibrio entre simplicidad de monolito y modularidad, sin la complejidad inicial de microservicios, estructurando la solución con proyectos de contexto independientes.
 
 **Consideraciones Finales:**
 La Arquitectura de Vertical Slice, cuando se aborda con un entendimiento claro de sus principios y se utilizan las capacidades del framework .NET de manera pragmática, permite construir sistemas robustos y evolutivos. La elección entre `ApplicationParts` para controladores MVC y un descubrimiento personalizado para Minimal APIs es una decisión técnica fundamental, guiada por el porqué de las necesidades de cada slice y el cómo se integran estos en la aplicación principal.
