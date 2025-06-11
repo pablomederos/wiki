@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de corte vertical en .NET
 published: false
-date: 2025-06-10T21:43:17.607Z
+date: 2025-06-11T14:05:33.105Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -23,6 +23,7 @@ III. [Estrategias de Exposición de Endpoints para Slices Verticales en Proyecto
 - A. [Uso de ApplicationParts de ASP.NET Core (para Controladores MVC)](#uso-de-applicationparts-de-aspnet-core)
 - B. [Aprovechamiento de Minimal APIs (con Descubrimiento Personalizado)](#aprovechamiento-de-minimal-apis)
 - C. [ApplicationParts vs. Minimal APIs para Slices en Proyectos Separados](#analisis-comparativo)
+  - C.1 [Ejemplo más directo usando solo métodos de extensión y Minimal APIs](#extension-methods)
   
 IV. [Ventajas y Desventajas Generales de la Arquitectura Vertical Slice](#analisis-profundo)
 - A. [Ventajas Detalladas (El Porqué de sus Beneficios)](#ventajas-detalladas)
@@ -164,6 +165,25 @@ Cuando los slices residen en proyectos separados, el proyecto API principal nece
 **Ejemplo de Código Minimalista (Ilustrativo):**
   
 ```csharp
+//FeatureAController.cs en un proyecto a parte
+using Microsoft.AspNetCore.Mvc;
+
+namespace ContextA.Features.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class FeatureAController: ControllerBase
+{
+    public IActionResult Index()
+    {
+        return Ok("Hola mundo desde FeatureA!");
+    }
+}
+```
+
+**Program.cs**:
+  
+```csharp
   WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 IServiceCollection services = builder.Services;
 
@@ -223,7 +243,10 @@ app.Run();
 O mediante métodos de extensión:
   
 ```csharp
-/// FeatureAExtensions.cs
+// FeatureAExtensions.cs
+// Suelo colocar uno en cada proyecto para que cada funcionalidad
+// sea responsable de registrarse a sí misma
+  
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ContextA.Features.Extensions;
@@ -232,6 +255,7 @@ public static class FeatureAExtensions
 {
     public static IMvcBuilder AddFeatureA(this IMvcBuilder builder)
     {
+  			// Descubriá todos los controladores que contiene
         builder
             .AddApplicationPart(
                 Assembly.GetExecutingAssembly()
@@ -241,17 +265,27 @@ public static class FeatureAExtensions
     }
 }
   
-/// Program.cs
+// Program.cs
 using ContextA.Features.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 IServiceCollection services = builder.Services;
 
+// Requerido para FeatureA
 services
     .AddControllers()
     .AddFeatureA();
 
-... // Lo que sigue
+// Opcional para FeatureA
+services
+    .AddFeatureAServices();
+
+WebApplication app = builder.Build();
+
+app.MapControllers();
+
+app.Run();
+
 ```
   
 
@@ -261,9 +295,9 @@ Este ejemplo se basa en los conceptos descritos anteriormente. El `ApplicationPa
 
 ### Aprovechamiento de Minimal APIs (con Descubrimiento Personalizado)
 
-**Por qué Minimal APIs:** Ofrecen una sintaxis concisa para definir endpoints HTTP, alineándose con la idea de VSA de reducir el boilerplate y mantener la lógica del endpoint cohesiva.
+**Por qué Minimal APIs:** Ofrecen una sintaxis concisa para definir endpoints HTTP, alineándose con la idea de VSA de reducir el boilerplate y mantener la lógica del endpoint cohesiva. Aunque no estoy completamente de acuerdo con lo primero, sí creo que esto último es un beneficio indiscutible.
 
-**Por qué se necesita descubrimiento personalizado:** ASP.NET Core no tiene un mecanismo automático como `ApplicationParts` para descubrir Minimal APIs definidas en ensamblados externos.
+**Por qué se necesita descubrimiento personalizado:** ASP.NET Core no tiene un mecanismo automático como `ApplicationParts` para descubrir Minimal APIs definidas en ensamblados externos. Aunque podemos valernos de métodos de extensión, u otros mecanismos antes mencionados. Qué tan elaborado, dependerá de las necesidades de cada proyecto.
 
 **Cómo implementar el descubrimiento personalizado:**
 
@@ -274,7 +308,7 @@ Este ejemplo se basa en los conceptos descritos anteriormente. El `ApplicationPa
 
   - **Source Generators (Generadores de Código Fuente):**
 
-      - **Cómo:** En lugar de reflexión en tiempo de ejecución, un generador de código fuente puede analizar los proyectos de contexto en tiempo de compilación, identificar los endpoints (basado en atributos o convenciones) y generar el código de registro directamente en el proyecto principal.
+      - **Cómo:** En lugar de reflexión en tiempo de ejecución, un generador de código fuente puede analizar los proyectos de contexto en tiempo de compilación, identificar los endpoints (basado en atributos o convenciones) y generar el código de registro directamente en el proyecto principal. Por ejemplo, creando métodos de extensión a la medida.
       - **Por qué:** Mejora el rendimiento en el arranque al evitar la reflexión y puede ser más compatible con escenarios de compilación AOT (Ahead-Of-Time).
 
 **Ventajas para VSA con Proyectos Separados (usando Minimal APIs):**
@@ -285,7 +319,7 @@ Este ejemplo se basa en los conceptos descritos anteriormente. El `ApplicationPa
 
 **Desventajas y Limitaciones:**
 
-  - **Esfuerzo de Implementación para Descubrimiento:** Requiere código adicional (reflexión o source generator) para el descubrimiento.
+  - **Esfuerzo de Implementación para Descubrimiento:** Requiere código adicional (reflexión, source generators, o al menos métodos de extensión considerando la mantenibilidad) para el descubrimiento.
   - **Madurez para Características Avanzadas:** Algunas funcionalidades complejas de MVC pueden requerir más trabajo para replicar en Minimal APIs, aunque esto está mejorando continuamente.
 
 **Ejemplo de Código Minimalista (Descubrimiento de Minimal APIs por Reflexión):**
@@ -296,12 +330,11 @@ En `SharedKernel.csproj` (o similar):
 // SharedKernel/Api/IEndpointDefinition.cs
 using Microsoft.AspNetCore.Routing;
 
-namespace SharedKernel.Api
+namespace SharedKernel.Api;
+  
+public interface IEndpointDefinition
 {
-    public interface IEndpointDefinition
-    {
-        void MapEndpoints(IEndpointRouteBuilder app);
-    }
+  void MapEndpoints(IEndpointRouteBuilder app);
 }
 
 // SharedKernel/Api/EndpointRegistrationExtensions.cs
@@ -310,70 +343,58 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
 namespace SharedKernel.Api
-{
-    public static class EndpointRegistrationExtensions
-    {
-        public static IServiceCollection AddEndpointDefinitionsFromAssemblies(
-            this IServiceCollection services, params Assembly[] assembliesToScan)
-        {
-            var endpointDefinitions = new List<IEndpointDefinition>();
-            foreach (var assembly in assembliesToScan)
-            {
-                endpointDefinitions.AddRange(
-                    assembly.ExportedTypes
-                       .Where(t => typeof(IEndpointDefinition).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract)
-                       .Select(Activator.CreateInstance).Cast<IEndpointDefinition>()
-                );
-            }
-            foreach (var endpointDef in endpointDefinitions)
-            {
-                // Podría registrarse el propio IEndpointDefinition si fuera necesario
-                // para ser resuelto luego, o simplemente mantener la lista para MapAllEndpoints.
-                // Aquí lo añadimos como singleton para demostrar.
-                services.AddSingleton(endpointDef.GetType(), endpointDef);
-            }
-            // O registrar la colección para ser resuelta
-            // services.AddSingleton(endpointDefinitions as IReadOnlyCollection<IEndpointDefinition>);
-            return services;
-        }
 
-        public static IApplicationBuilder MapAllEndpoints(
-            this WebApplication app)
+public static class EndpointRegistrationExtensions
+{
+
+    public static WebApplication MapAllEndpoints(
+        this WebApplication app, params Assembly[] assembliesToScan)
+    {
+        
+        var endpointDefinitions = new List<IEndpointDefinition>();
+        foreach (Assembly assembly in assembliesToScan)
+            endpointDefinitions
+                .AddRange(
+                    assembly
+                        .ExportedTypes
+                        .Where(t => typeof(IEndpointDefinition)
+                                        .IsAssignableFrom(t) 
+                                    && t is { 
+                                        IsInterface: false, 
+                                        IsAbstract: false 
+                                    }
+                        )
+                        .Select(Activator.CreateInstance)
+                        .Cast<IEndpointDefinition>()
+                );
+        
+        foreach (IEndpointDefinition definition in endpointDefinitions)
         {
-            // Si se registraron individualmente:
-            var definitions = app.Services.GetServices<IEndpointDefinition>();
-            foreach (var definition in definitions)
-            {
-                definition.MapEndpoints(app);
-            }
-            return app;
+            definition.MapEndpoints(app);
         }
+        return app;
     }
 }
 ```
 
-En `ContextA.Features.csproj`:
+En `ContextB.Features.csproj`:
 
 ```csharp
-// ContextA.Features/Products/ProductEndpoints.cs
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
-using SharedKernel.Api;
+// ContextB.Features/FeatureB.cs
+  
+namespace ContextB.Features.Api;
 
-namespace ContextA.Features.Products
+public sealed class FeatureB : IEndpointDefinition
 {
-    public class ProductEndpoints : IEndpointDefinition
+    // Solo se requiere el constructor por defecto
+    
+    public void MapEndpoints(
+        IEndpointRouteBuilder app
+    )
     {
-        public void MapEndpoints(IEndpointRouteBuilder app)
-        {
-            app.MapGet("/api/contextA/products/{id}", async (int id) =>
-            {
-                // Lógica para obtener producto del Contexto A
-                await Task.Delay(10); // Simulación
-                return Results.Ok(new { ProductId = id, Name = "Product from Context A" });
-            }).WithTags("ContextA.Products");
-        }
+        app.MapGet("/FeatureB", 
+            (SomeService  someService) => someService.GetHi()
+        );
     }
 }
 ```
@@ -382,37 +403,93 @@ En `MainApiProject/Program.cs`:
 
 ```csharp
 // MainApiProject/Program.cs
+  
+using ContextB.Features.Extensions;
 using SharedKernel.Api;
-using System.Reflection;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IServiceCollection services = builder.Services;
 
-// Cargar ensamblados de contexto. Si son referencias de proyecto,
-// typeof(ContextA.Features.Products.ProductEndpoints).Assembly es una forma de obtenerlos.
-// Si se cargan dinámicamente, se usaría Assembly.LoadFrom o similar.
-builder.Services.AddEndpointDefinitionsFromAssemblies(
-    typeof(ContextA.Features.Products.ProductEndpoints).Assembly
-    // , typeof(ContextB.Features.AnotherEndpoints).Assembly // si existiera ContextB
+
+// Opcional si hay que registrar servicios
+services
+    .AddFeatureBServices();
+
+WebApplication app = builder.Build();
+
+app.MapAllEndpoints(
+    typeof(ContextB.Features.Api.FeatureB).Assembly
 );
 
-// Otros servicios...
-builder.Services.AddEndpointsApiExplorer(); // Para Swagger/OpenAPI
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-app.MapAllEndpoints(); // Llama al método de extensión para registrar todos los endpoints
 app.Run();
 ```
 
 Este ejemplo ilustra el cómo (reflexión para encontrar implementaciones de `IEndpointDefinition`) y el porqué (necesidad de un mecanismo de registro explícito para Minimal APIs en ensamblados separados).
+ 
+  
+<div id="extension-methods"\>
+  
+#### Ejemplo más directo usando solo métodos de extensión y Minimal APIs
+  
+En `ContextC.Features.csproj`:
+  
+```csharp
+// FeatureC.cs
+using ContextC.Features.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
+
+namespace ContextC.Features.Api;
+
+public static class FeatureC
+{   
+    public static void MapFeatureCEndpoints(
+        this IEndpointRouteBuilder app
+    )
+    {
+        app
+            .AddGet()
+            //.AddPost();
+            //.AddPut();
+            //.AddPatch();
+            //.AddDelete();
+            ;
+    }
+
+    // Cada método HTTP podría tener su propia clase para mayor control
+    private static IEndpointRouteBuilder AddGet(this IEndpointRouteBuilder app)
+    {
+        app.MapGet("/FeatureC", 
+            (SomeService  someService) => someService.GetHi()
+        );
+        
+        return app;
+    }
+}
+```
+
+En `MainApiProject/Program.cs`:
+
+```csharp
+using ContextC.Features.Api;
+using ContextC.Features.Extensions;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IServiceCollection services = builder.Services;
+
+// Opcional
+services
+    .AddFeatureCServices();
+
+WebApplication app = builder.Build();
+
+app.MapFeatureCEndpoints();
+
+app.Run();
+```
+  
+Este enfoque es más directo y también más todoterreno, ya que no usa Reflexión y no depende de un proyecto externo para el descubrimiento de los endpoints. El rendimiento podría ser apenas ligeramente mayor durante arranque de la aplicación, pero no habría diferencias durante la ejecución regular del proceso. También se evita la sobreingeniería en la mayoría de los casos.
+  
 
 <div id="analisis-comparativo"\>
 
@@ -420,7 +497,7 @@ Este ejemplo ilustra el cómo (reflexión para encontrar implementaciones de `IE
 
 | Característica/Aspecto | ApplicationParts (con Controladores MVC) | Minimal APIs (con descubrimiento personalizado vía reflexión/source generators) | Por qué y Cómo Impacta en VSA con Proyectos Separados |
 | :--- | :--- | :--- | :--- |
-| **Mecanismo de Descubrimiento** | **Cómo:** Integrado (`ApplicationPartManager` escanea por tipos ControllerBase`). \<br> **Por qué:** MVC tiene un modelo rico de características que necesitan ser descubiertas. | **Cómo:** Implementación manual (reflexión sobre interfaces/atributos o source generators).<sup\>20</sup> \<br> **Por qué:** Minimal APIs es "mínimo", no incluye descubrimiento complejo de ensamblados externos por defecto. | `ApplicationParts` es "listo para usar" para controladores. Minimal APIs requiere un esfuerzo de infraestructura para el descubrimiento, pero ofrece más control. |
+| **Mecanismo de Descubrimiento** | **Cómo:** Integrado (`ApplicationPartManager` escanea por tipos ControllerBase`). \<br> **Por qué:** MVC tiene un modelo rico de características que necesitan ser descubiertas. | **Cómo:** Implementación manual (reflexión sobre interfaces/atributos o source generators) \<br> **Por qué:** Minimal APIs es "mínimo", no incluye descubrimiento complejo de ensamblados externos por defecto. | `ApplicationParts` es "listo para usar" para controladores. Minimal APIs requiere un esfuerzo de infraestructura para el descubrimiento, pero ofrece más control. |
 | **Tipo de Endpoint Soportado** | Controladores MVC. | Endpoints `MapGet`, `MapPost`, etc. | La elección del tipo de endpoint en el slice dicta la estrategia de descubrimiento. |
  **Complejidad de Configuración Inicial (Descubrimiento)** | **Cómo:** Baja si son referencias de proyecto. \<br> **Por qué:** El sistema de build y MVC lo manejan. | **Cómo:** Moderada (reflexión) a potencialmente más alta source generators). \<br> **Por qué:** Se construye la lógica de descubrimiento. | Minimal APIs requiere más código de infraestructura inicial para el descubrimiento. |
 | **Rendimiento Percibido del Endpoint** | **Por qué:** Pipeline MVC completo puede tener más sobrecarga. | **Por qué:** Diseño más ligero puede llevar a mejor rendimiento. | Para alta sensibilidad al rendimiento, Minimal APIs puede ser preferible. |
@@ -454,19 +531,19 @@ La decisión se basa en el porqué de las necesidades del proyecto (legado, rend
 
 ### Ventajas Detalladas (El Porqué de sus Beneficios)
 
-  - **Alta Cohesión y Bajo Acoplamiento <sup\>1</sup>:**
+  - **Alta Cohesión y Bajo Acoplamiento:**
       - **Por qué:** Agrupar todo el código de una característica reduce las dependencias entre características no relacionadas.
       - **Cómo:** Cambios en un slice tienen menos probabilidad de impactar otros slices.
-  - **Mantenibilidad y Testeabilidad Mejoradas <sup\>1</sup>:**
+  - **Mantenibilidad y Testeabilidad Mejoradas:**
       - **Por qué:** Código localizado es más fácil de entender y modificar.
       - **Cómo:** Pruebas enfocadas en el comportamiento del slice de forma aislada.
-  - **Escalabilidad del Desarrollo y Productividad del Equipo <sup\>1</sup>:**
+  - **Escalabilidad del Desarrollo y Productividad del Equipo:**
       - **Por qué:** Menos conflictos entre desarrolladores trabajando en features distintas.
       - **Cómo:** Nuevos miembros pueden enfocarse en un slice sin entender todo el sistema.
-  - **Flexibilidad en la Implementación por Slice <sup\>1</sup>:**
+  - **Flexibilidad en la Implementación por Slice:**
       - **Por qué:** No todas las características tienen la misma complejidad o requisitos técnicos.
       - **Cómo:** Cada slice puede, teóricamente, usar las herramientas o patrones óptimos para su necesidad específica (ej. EF Core para un slice, Dapper para otro). Se debe balancear con la consistencia.
-  - **Eliminación Limpia de Características <sup\>8</sup>:**
+  - **Eliminación Limpia de Características:**
       - **Por qué:** Si una característica se vuelve obsoleta.
       - **Cómo:** Borrar la carpeta/proyecto del slice es más seguro debido al bajo acoplamiento.
 
@@ -474,19 +551,19 @@ La decisión se basa en el porqué de las necesidades del proyecto (legado, rend
 
 ### Desventajas y Desafíos Comunes (El Porqué de las Dificultades y Cómo Afrontarlas)
 
-  - **Potencial Duplicación de Código <sup\>1</sup>:**
+  - **Potencial Duplicación de Código:**
       - **Por qué:** La independencia de los slices puede llevar a repetir lógica o DTOs.
       - **Cómo mitigar:** Extraer funcionalidades verdaderamente comunes a un `SharedKernel` o utilidades compartidas. Distinguir duplicación "mala" de la "aceptable" que preserva autonomía.
-  - **Gestión de Intereses Transversales <sup\>1</sup>:**
+  - **Gestión de Intereses Transversales:**
       - **Por qué:** Logging, autorización, validación, etc., deben aplicarse consistentemente.
       - **Cómo gestionar:** Usar middleware de ASP.NET Core, filtros de acción/endpoint, o el patrón Decorator implementado manualmente sobre los manejadores de características. Estos son mecanismos del framework .NET.
-  - **Mantenimiento de la Consistencia entre Slices <sup\>1</sup>:**
+  - **Mantenimiento de la Consistencia entre Slices:**
       - **Por qué:** Demasiada flexibilidad en la implementación por slice puede llevar a un código base inconsistente.
       - **Cómo gestionar:** Guías arquitectónicas claras, revisiones de código y disciplina de equipo para mantener un nivel de consistencia razonable.
-  - **Curva de Aprendizaje Inicial y Disciplina Requerida <sup\>1</sup>:**
+  - **Curva de Aprendizaje Inicial y Disciplina Requerida:**
       - **Por qué:** VSA no es inherentemente "más fácil" si no se entienden los principios de acoplamiento, cohesión y refactoring.
       - **Cómo gestionar:** Fomentar la comprensión profunda de estos principios y la habilidad para refactorizar.
-  - **Gran Número de Clases/Archivos <sup\>1</sup>:**
+  - **Gran Número de Clases/Archivos:**
       - **Por qué:** La granularidad fina puede llevar a muchos archivos pequeños.
       - **Cómo gestionar:** Buena estructura de carpetas y convenciones de nombrado.
 
