@@ -2,7 +2,7 @@
 title: Vertical Slices in .NET
 description: Software Architecture in Dotnet: A pragmatic introduction to Vertical Slices
 published: true
-date: 2025-06-11T17:57:51.601Z
+date: 2025-06-11T18:16:07.746Z
 tags: .net, c#, asp.net core, software architecture, software design, vertical slice architecture, minimal apis, applicationparts, mvc controllers, modular monolith, .net architecture, project structure, endpoint discovery, low coupling high cohesion, code maintainability, .net 8
 editor: markdown
 dateCreated: 2025-06-11T17:56:17.634Z
@@ -624,3 +624,5 @@ Vertical Slice Architecture in .NET, implemented through projects separated by c
 Vertical Slice Architecture, when approached with a clear understanding of its principles and using the capabilities of the .NET framework pragmatically, allows for the construction of robust and evolutionary systems. The choice between `ApplicationParts` for MVC controllers and custom discovery for Minimal APIs is a fundamental technical decision, guided by the why of each slice's needs and the how they are integrated into the main application.
 
 Everything mentioned above was condensed (reasonably) on Github [Vertical Slices in .NET - Github](https://github.com/pablomederos/vetical-slices-dotnet)
+  
+> Note: The vocabulary and grammar in this text have been enhanced by AI to improve readability and overall structure. Gabriel Mederos.-
