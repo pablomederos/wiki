@@ -2,7 +2,7 @@
 title: Árboles de Sintaxis en C# con Roslyn
 description: Guía de creación estructuración de código fuente a partir de árboles de sintaxis
 published: true
-date: 2025-06-11T18:13:04.652Z
+date: 2025-06-12T12:25:23.321Z
 tags: .net, c#, roslyn, análisis de código, generación de código, metaprogramación, syntaxfactory, árbol de sintaxis, syntaxnode, syntaxtoken, syntaxtrivia, compilationunitsyntax, classdeclarationsyntax, methoddeclarationsyntax, localdeclarationstatementsyntax, invocationexpressionsyntax, namespacedeclarationsyntax, api de compilador roslyn, refactorización de código
 editor: markdown
 dateCreated: 2025-06-06T16:32:26.317Z
@@ -436,5 +436,3 @@ Algunas otras fuentes para profundizar en el tema:
 17. SyntaxFactory.UsingDirective Method (Microsoft.CodeAnalysis.CSharp), https://learn.microsoft.com/en-us/dotnet/api/microsoft.codeanalysis.csharp.syntaxfactory.usingdirective?view=roslyn-dotnet-4.13.0 
 18. .NET Core, Roslyn and Code Generation · Code it Yourself - Carlos Mendible, https://carlos.mendible.com/2017/01/29/net-core-roslyn-and-code-generation/
 19. Compiling C# Code with Roslyn ..., https://josephwoodward.co.uk/2016/12/in-memory-c-sharp-compilation-using-roslyn
-
-> Nota: El léxico en este texto, así como su gramática fue "enriquecido" por IA para mejorar la legibilidad, y estructura general. Gabriel Mederos.-
