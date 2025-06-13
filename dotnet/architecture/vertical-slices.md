@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-06-12T12:24:30.346Z
+date: 2025-06-13T19:55:25.775Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -44,6 +44,10 @@ VI. [Conclusión y Recomendaciones Estratégicas: Un Enfoque Pragmático con .NE
 ## I. Introducción a la Arquitectura de Vertical Slice en .NET
 
 La Arquitectura de Vertical Slice (VSA) ha ganado una tracción considerable en la comunidad de desarrollo de .NET como una alternativa a los enfoques arquitectónicos en capas más tradicionales. Su filosofía central se basa en organizar la lógica de la aplicación en torno a funcionalidades o características de negocio, denominadas "slices" (rebanadas), en lugar de agrupar el código por afinidad técnica en capas horizontales como presentación, lógica de negocio y acceso a datos. Cada slice vertical encapsula, idealmente, todos los aspectos necesarios para implementar una característica específica, desde la interfaz de usuario (si aplica) hasta la persistencia de datos, atravesando todas las preocupaciones técnicas relevantes para esa funcionalidad particular.
+  
+<p align="center">
+  <img src="/vsa.drawio.png" width=400 />
+</p>
 
 <div id="principios-fundamentales-de-vsa-el-porque-y-el-como"\>
 
