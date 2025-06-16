@@ -1,8 +1,8 @@
 ---
-title: Welcome!
+title: Welcome to La Cueva Dev Wiki!
 description: This space born from a passion for software development and to share what I've learned
 published: true
-date: 2025-06-09T16:26:07.101Z
+date: 2025-06-16T14:08:59.890Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-01T18:50:39.100Z
