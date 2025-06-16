@@ -1,8 +1,8 @@
 ---
-title: Bienvenidos/as
+title: Bienvenid@s a La Cueva Dev wiki
 description: Un espacio que nace de la pasión por el desarrollo de software y de compartir lo aprendido
 published: true
-date: 2025-06-09T16:25:33.961Z
+date: 2025-06-16T14:08:34.807Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-01T18:47:41.119Z
