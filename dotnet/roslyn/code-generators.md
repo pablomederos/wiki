@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T15:14:34.916Z
+date: 2025-06-17T15:30:27.162Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -37,7 +37,7 @@ Antes de entrar en detalles de código e implementación, un poco de contexto:
 3. **Modelos de despliegue modernos**
   Quizá una de las ventajas más importantes (al menos para este servidor), es la compatibilidad con tecnologías de optimización modernas como pueden ser la compilación **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)), o el **Trimming** ([Recorte de ensamblados](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). Estas tecnologías son más compatibles con entornos en la nube, móviles, o casos de uso de alto rendimiento y bajo consumo de recursos. En estos casos donde la compatibilidad con reflexión es inexistente, o el rendimiento es primordial, la generación de código permite obtener todo el código necesario durante la compilación, pasando de una simple optimización a un pilar arquitectónico de la estrategia de **.NET** para el futuro.
   
-## 1.2 Casos de uso en el ecosistema .NET
+### 1.2 Casos de uso en el ecosistema .NET
 
 Los generadores de código no son un fenómeno aislado, de nicho, sin que actualmente están profundamente integrados en la plataforma **.NET**.
 
@@ -54,3 +54,16 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
   
 3. **Inyección de dependencias**
   Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [_algunos más activos que otros_]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
+  
+### 1.3 Consideraciones de portabilidad
+
+Al desarrollar un generador de código, se requiere tener en cuenta el entorno en el que se ejecutará.
+
+1. **Framework de destino (Target Framework)**
+  Es importante que el proyecto generador tenga como framework de destino `netstandard2.0` para maximizar la compatibilidad con diferentes versiones de **Visual Studio**, **MSBuild**, el **SDK de .NET** e incluso algunos otros IDEs.
+  
+2. **IDE vs. Compilación en Línea de Comandos**
+  El pipeline incremental, así como el sistema de caché (que se tratará más adelante en este artículo), están diseñados principalmente para maximizar la experiencia en un IDE (**Visual Studio**, **Rider**, etc.), ofreciendo una retroalimentación inmediata al desarrollador. En caso de usarse la línea de comandos, este proceso de compilación no será automático y probablemente requiera el desarrollo de un script que mejore esta experiencia. Editores como **Visual Studio Code** y derivados podrían ya contar con soporte integrado mediante las extensiones oficiales de **.NET** y **C#** ([C# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) u otras).
+  
+3. **Entornos multiplataforma**
+  El desarrollo en **Unity** u otras plataformas podría requerir configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual.
