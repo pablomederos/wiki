@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T15:30:27.162Z
+date: 2025-06-17T16:22:49.817Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -23,7 +23,7 @@ Antes de entrar en detalles de código e implementación, un poco de contexto:
 
 </br>
 
-### 1.1 Ventajas fundamentales de la generación  de código en tiempo de compilación
+### Ventajas fundamentales de la generación  de código en tiempo de compilación
 
 </br>
 
@@ -67,3 +67,15 @@ Al desarrollar un generador de código, se requiere tener en cuenta el entorno e
   
 3. **Entornos multiplataforma**
   El desarrollo en **Unity** u otras plataformas podría requerir configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual.
+  
+###  Evolución de `ISourceGenerator` hacia `IIncrementalGenerator`
+
+En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en absoluto. `IIncrementalGenerator` es la única opción, ya que la anterior se considera obsoleta.
+
+1. **Comparación "arquitectónica": Imperativo vs Declarativo**
+  La diferencia entre ambas interfaces representa un cambio significativo en el modelo de programación:
+  - `ISourceGenerator`: Expone dos métodos: `Initialize` y `Execute`, combinado con una implementación de `ISyntaxReceiver` o `ISyntaxContextReceiver`. El `ISyntaxReceiver` realiza un recorrido por todos los árboles de sintaxis de una compilación de forma imperativa, recopilando datos de los nodos, posteriormente invoca al método `Execute`, el cual recibe la compilación completa y el receptor poblado para realizar la generación. Como se mencionó, se trata de un modelo imperativo, y además basado en eventos.
+  - `IIncrementalGenerator`: Solo contiene el método `Initialize`, dentro del cual el desarrollador escribe de forma declarativa el flujo de transformaciones de datos, en una sitaxis similar a LINQ. Este flujo describe como se trasladan los datos desde la entrada (código fuente u otros archivos adicionales) hasta el código generado.
+  
+2. **Rendimiento inferior de `ISourceGenerator`**
+  En pocas palabras, el método `Execute` de `ISourceGenerator` se activa con cada pulsación o cambio en el proyecto, obligando a la reevaluación de la lógica, lo que resulta en un rendimiento catastrófico del IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar una técnica de **Memoization** sobre los resultados de cada etapa, lo que aumenta la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos. Además, `IIncrementalGenerator` separa la etapa inicial de comprobación sintáctica, de la más costosa que es la transformación, siendo esta una etapa que implica análisis semántico. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
