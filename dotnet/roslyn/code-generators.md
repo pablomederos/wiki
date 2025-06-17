@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T13:05:21.122Z
+date: 2025-06-17T13:11:43.993Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -37,3 +37,7 @@ La idea central de este artículo, es entender qué es un generadore de código 
   
 ## 1.2 Casos de uso en el ecosistema .NET
 
+Los generadores de código no son un fenómeno aislado, de nicho, sin que actualmente están profundamente integrados en la plataforma **.NET**.
+
+1. **Serializador `System.Text.Json`**
+ 
