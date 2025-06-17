@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T14:30:32.535Z
+date: 2025-06-17T14:54:18.446Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -48,4 +48,7 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
   > Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
   
 2. **ASP.NET Core y Native AOT**
-  ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`
+  ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, de que se tratarán más adelante en este artículo. Pero básicamente, **intercepta** las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
+  
+3. **Inyección de dependencias**
+  Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [_algunos más activos que otros_]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la posibilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
