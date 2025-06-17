@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T13:03:13.400Z
+date: 2025-06-17T13:05:21.122Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -34,3 +34,6 @@ La idea central de este artículo, es entender qué es un generadore de código 
   
 3. **Modelos de despliegue modernos**
   Quizá una de las ventajas más importantes (al menos para este servidor), es la compatibilidad con tecnologías de optimización modernas como pueden ser la compilación **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)), o el **Trimming** ([Recorte de ensamblados](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). Estas tecnologías son más compatibles con entornos en la nube, móviles, o casos de uso de alto rendimiento y bajo consumo de recursos. En estos casos donde la compatibilidad con reflexión es inexistente, o el rendimiento es primordial, la generación de código permite obtener todo el código necesario durante la compilación, pasando de una simple optimización a un pilar arquitectónico de la estrategia de **.NET** para el futuro.
+  
+## 1.2 Casos de uso en el ecosistema .NET
+
