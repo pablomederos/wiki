@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T13:11:43.993Z
+date: 2025-06-17T14:30:32.535Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -40,4 +40,12 @@ La idea central de este artículo, es entender qué es un generadore de código 
 Los generadores de código no son un fenómeno aislado, de nicho, sin que actualmente están profundamente integrados en la plataforma **.NET**.
 
 1. **Serializador `System.Text.Json`**
- 
+  El serializador **JSON** integrado en .NET es un claro ejemplo de caso de uso. Mediante el uso del atributo `JsonSerializableAttribute` aplicado a una clase parcial que extienda de `JsonSerializerContext`, es posible activar un generador de código que analiza los tipos y produce lógica de serialización y deserialización muy optimizada en tiempo de compilación. Esto tiene como resultado una [mejora del rendimiento de hasta un 40%](https://okyrylchuk.dev/blog/intro-to-serialization-with-source-generation-in-system-text-json/) en el arranque gracias a evitar el uso de la reflexión.
+
+**El generador utiliza dos modos de operación:**
+  - **Modo basado en metadatos**: Recolecta de antemano los metadatos necesarios de los tipos, para acelerar la serialización y deserialización.
+  - **Modo de optimización de serialización**: Genera el código utilizando `Utf8JsonWriter` directamente, ofreciendo el máximo rendimiento posible de serialización. Este modo es más restrictivo y no soporta todas las opciones de personalización.
+  > Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
+  
+2. **ASP.NET Core y Native AOT**
+  ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`
