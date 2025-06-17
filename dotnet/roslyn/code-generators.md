@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T16:22:49.817Z
+date: 2025-06-17T16:33:31.553Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -15,8 +15,6 @@ La metaprogramación es la capacidad de un programa de tratar a otros programas 
 Con la llegada de la plataforma de compilación llamada `Roslyn`, se pasó de una "caja negra" a una plataforma abierta con apis para el análisis y la generación de código. Esto llevó, entre otras cosas, al surgimiento de los **Source Generators**. Se trata de un componente que analiza el código en tiempo de compilación y produce archivos fuente adicionales, que se compilan con el resto del código.
 
 La idea central de este artículo, es entender qué es un generadore de código incremental, cómo este mejora el rendimiento de la aplicación y mejora la relación entre el desarrollador y el código, así como también, presentar al ahora estándar de metaprogramación en tiempo de compilación de C#, para el desarrollo de bibliotecas modernas y de alto rendimiento.
-
-Antes de entrar en detalles de código e implementación, un poco de contexto:
 
 
 ## Generación incremental: Fundamento y aplicación
@@ -79,3 +77,14 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
   
 2. **Rendimiento inferior de `ISourceGenerator`**
   En pocas palabras, el método `Execute` de `ISourceGenerator` se activa con cada pulsación o cambio en el proyecto, obligando a la reevaluación de la lógica, lo que resulta en un rendimiento catastrófico del IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar una técnica de **Memoization** sobre los resultados de cada etapa, lo que aumenta la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos. Además, `IIncrementalGenerator` separa la etapa inicial de comprobación sintáctica, de la más costosa que es la transformación, siendo esta una etapa que implica análisis semántico. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
+  
+### Implementación práctica
+
+En esta sección se demuestra la implementación de un generador de código enfocado en registrar repositorios en un contenedor de inyección de dependencias.
+
+1. **Escenario y configuración**
+  - **Objetivo**: Crear un generador que encuentre todas las clases concretas en un ensamblado que implementen la interfaz marcadora `IRepository`. El generador creará un método de extensión para `IServiceCollection` que registrará cada una de estas clases en el contenedor de DI con un ciclo de vida **Scoped**.
+  - **Configuración**: En el proyecto que se consuma el generador, se definirá una interfaz marcadora `public interface IRepository()`. El generador buscará las clases que implementen esta interfaz.
+
+2. **Construcción del Pipeline del Generador**
+  
