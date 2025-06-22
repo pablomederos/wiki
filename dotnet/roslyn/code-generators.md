@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-17T16:33:31.553Z
+date: 2025-06-22T20:36:52.103Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -87,4 +87,6 @@ En esta sección se demuestra la implementación de un generador de código enfo
   - **Configuración**: En el proyecto que se consuma el generador, se definirá una interfaz marcadora `public interface IRepository()`. El generador buscará las clases que implementen esta interfaz.
 
 2. **Construcción del Pipeline del Generador**
+
+> El siguiente código usará algunas pocas líneas para ejemplificar únicamente, pero la implementación completa se puede encontrar [en este repositorio](https://github.com/pablomederos/SourceGeneratorsExample).
   
