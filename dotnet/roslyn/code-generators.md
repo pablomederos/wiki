@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-23T22:35:21.317Z
+date: 2025-06-23T22:58:55.977Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -333,3 +333,190 @@ private static void GenerateServicesRegistration(
     );
 }
 ```
+
+
+
+### Testeando el generador de código
+
+Un generador de código es una pieza de software que debe ser tan robusta y fiable como cualquier otra. Esta sección detalla cómo construir un conjunto de pruebas completo para el generador de registro de repositorios.
+A los efectos de esta documentación se usarán dos enfoques: **Snapshot Testing** y las típicas **Aserciones**.
+
+1. **Snapshot Testing con** [`Verify`](https://github.com/VerifyTests/Verify)
+Las pruebas de tipo **Snapshot Testing** son una técnica ideal para los generadores de código. En lugar de escribir aserciones manuales sobre el texto generado, el `framework Verify` captura la salida completa del generador (tanto el código generado como los diagnósticos) y la guarda en un archivo `.verified.cs`. En ejecuciones posteriores, la nueva salida se compara con este archivo "aprobado". Si hay alguna diferencia, la prueba falla, lo que permite detectar regresiones de manera muy eficaz.
+
+- **Ejemplo**:
+
+  Para inizializar el soporte de Verify se requiere un `ModuleInitializer`
+  
+```csharp
+using System.Runtime.CompilerServices;
+using VerifyTests;
+
+public static class ModuleInitializer
+{
+    [ModuleInitializer]
+    public static void Init() => VerifySourceGenerators.Initialize();
+}
+```
+  Una prueba típica se vería así _(Ejemplo con XUnit)_:
+  
+```csharp
+public class RepositoryRegistrationGeneratorTests
+{
+    private readonly VerifySettings _verifySettings = new ();
+
+    public RepositoryRegistrationGeneratorTests()
+    {
+        _verifySettings.UseDirectory("TestsResults");
+    }
+    
+    [Fact]
+    public Task GeneratesRepositoryRegistration_WhenRepositoryExists()
+    {
+        // 1. Arrange: Definir el código fuente de entrada
+        const string source = $$"""
+                                using {{RepositoryMarker.MarkerNamespace}};
+                                namespace MyApplication.Data
+                                {
+                                    public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+                                    public class ProductRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+                                    public abstract class BaseRepository : {{RepositoryMarker.MarkerInterfaceName}} { } // No debe ser registrado
+                                    public class NotARepository { } // No debe ser registrado
+                                }
+                                """;
+
+        // 2. Act: Ejecutar el generador
+        var compilation = CSharpCompilation.Create(
+            "MyTestAssembly",
+            [ CSharpSyntaxTree.ParseText(source) ],
+            [ MetadataReference.CreateFromFile(typeof(object).Assembly.Location) ]
+        );
+
+        GeneratorDriver driver = CSharpGeneratorDriver
+            .Create(new RepositoryRegistrationGenerator())
+            .RunGenerators(compilation);
+
+        // 3. Assert: Verificar la salida con Verify
+        // Esta prueba debe generar los registros para 
+        // UserRepository y ProductRepository en la extensión
+        return Verifier
+            .Verify(
+                driver.GetRunResult().Results.Single(),
+                _verifySettings
+            );
+    }
+}
+```
+
+La primera vez que se ejecute esta prueba, fallará y creará dos archivos: \*.received.cs (la salida real) y \*.verified.cs (el archivo de instantánea, inicialmente una copia del recibido). El desarrollador debe revisar el archivo _.verified._ para asegurarse de que es correcto y luego aceptarlo.
+
+2. **Probando la Incrementalidad con aserciones**
+
+> Si bien este código usa las típicas aserciones incluídas en el framework de testing, en el repositorio se agregó código de ejemplo para el uso de `Verify` como se hizo anteriormente.
+
+Esta es la prueba más crítica para un generador incremental. Demuestra que la caché está funcionando correctamente y que el generador no está realizando trabajo innecesario.
+Los pasos para probar la incrementalidad son básicamente los siguientes:
+
+- **Marcar los Pasos del Pipeline**: En el código del generador, se añade `.WithTrackingName("StepName")` a las etapas clave del pipeline que se quieren monitorizar.
+
+- **Configurar el GeneratorDriver**: En la prueba, se crea el `GeneratorDriver` con la opción `trackIncrementalGeneratorSteps: true`.
+
+- **Realizar Múltiples Ejecuciones**:
+  - **Ejecución 1**: Se ejecuta el generador sobre una compilación inicial.
+  - **Ejecución 2**: Se crea una nueva compilación añadiendo un cambio trivial a la primera (por ejemplo, un comentario) y se vuelve a ejecutar el generador.
+  
+- **Aserción sobre el Motivo de la Ejecución**: Se obtiene el resultado de la segunda ejecución y se comprueba el motivo (**Reason**) por el que se ejecutaron los pasos. Si la caché funcionó, el motivo debería ser `IncrementalStepRunReason.Cached` o `IncrementalStepRunReason.Unchanged`.
+
+```csharp
+public class RepositoryRegistrationGeneratorTests
+{   
+    [Fact]
+    public void IncrementalGenerator_CachesOutputs()
+    {
+        // 1. Arrange: Definir el código fuente de entrada
+        const string initialSource = $$"""
+                                       using {{RepositoryMarker.MarkerNamespace}};
+                                       namespace MyApplication.Data
+                                       {
+                                           public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+                                       }
+                                       """;
+        SyntaxTree initialSyntaxTree = CSharpSyntaxTree.ParseText(initialSource, path: "TestFile.cs");
+        var initialCompilation = CSharpCompilation.Create(
+            "IncrementalTestAssembly",
+            [ initialSyntaxTree ],
+            [ MetadataReference
+                .CreateFromFile( typeof(object).Assembly.Location ) 
+            ]
+        );
+
+        // 2. Act: Ejecutar el generador
+        var generator = new RepositoryRegistrationGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver
+            .Create(
+                generators: [generator.AsSourceGenerator() ],
+                driverOptions: new GeneratorDriverOptions(
+                    IncrementalGeneratorOutputKind.None, 
+                    trackIncrementalGeneratorSteps: true
+                    )
+
+            )
+            .RunGenerators(initialCompilation);
+
+        
+        // 3. Arrange: Agregar una clase que no es registrable
+        const string modifiedSource = $$"""
+                                          using {{RepositoryMarker.MarkerNamespace}};
+                                          namespace MyApplication.Data
+                                          {
+                                              public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+                                              
+                                              // Este cambio no debería provocar la regeneración de la salida
+                                              // porque la clase no implementa la interfaz del marcador.
+                                              public class NotARelevantChange { }
+                                          }
+                                          """;
+        SyntaxTree modifiedSyntaxTree = CSharpSyntaxTree
+            .ParseText(modifiedSource, path: "TestFile.cs");
+        CSharpCompilation incrementalCompilation = initialCompilation
+            .ReplaceSyntaxTree(initialSyntaxTree, modifiedSyntaxTree);
+        
+        
+        // 4. Act: Ejecutar el generador
+        driver = driver.RunGenerators(incrementalCompilation);
+        GeneratorRunResult result = driver
+            .GetRunResult()
+            .Results
+            .Single();
+        
+        
+        // 5. Assert: El paso [CheckClassDeclarations]
+        
+        var allOutputs = result
+            .TrackedOutputSteps
+            .SelectMany(outputStep => outputStep.Value)
+            .SelectMany(output => output.Outputs);
+        
+        (object Value, IncrementalStepRunReason Reason) output = Assert.Single(allOutputs);
+        Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
+        
+        var assemblyNameOutputs = result
+            .TrackedSteps["CheckClassDeclarations"]
+            .SelectMany(it => it.Outputs);
+        
+        output = Assert.Single(assemblyNameOutputs);
+        Assert.Equal(IncrementalStepRunReason.Modified, output.Reason);
+        var syntaxOutputs = result
+            .TrackedSteps["CheckValidClasses"]
+            .Single()
+            .Outputs;
+        
+        output = Assert.Single(syntaxOutputs);
+        Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
+    }
+
+}
+```
+
+
+
