@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-23T23:25:57.875Z
+date: 2025-06-23T23:48:05.687Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -565,10 +565,45 @@ La siguiente tabla resume las reglas críticas de rendimiento, contrastando los 
 
 |Preocupación|Anti-Patrón (Rompe la Caché y Desperdicia Memoria)|Mejor Práctica (Habilita la Caché y Ahorra Memoria)|Justificación y Referencias|
 |-|-|-|
-|Transferencia de Datos|IncrementalValueProvider<ISymbol> o IncrementalValueProvider<ClassDeclarationSyntax>|IncrementalValueProvider<MyEquatableRecordStruct>|Los objetos ISymbol y SyntaxNode no son estables entre compilaciones y anclan grandes grafos de objetos. Los DTOs con igualdad por valor son pequeños y estables.|
-|Colecciones|`IncrementalValueProvider&lt;ImmutableArray&lt;T&gt;&gt;`|`IncrementalValueProvider&lt;EquatableArray&lt;T&gt;&gt;` o usar `.WithComparer()`|`ImmutableArray&lt;T&gt;` usa igualdad por referencia. `EquatableArray&lt;T&lt;` del **Community Toolkit** proporciona la igualdad estructural necesaria para la caché.|
+|Transferencia de Datos|**IncrementalValueProvider**&lt;**ISymbol**&gt; o **IncrementalValueProvider**&lt;**ClassDeclarationSyntax**&gt;|**IncrementalValueProvider**&lt;**MyEquatableRecordStruct**&gt;|Los objetos `ISymbol` y `SyntaxNode` no son estables entre compilaciones y anclan grandes grafos de objetos. Los DTOs con igualdad por valor son pequeños y estables.|
+|Colecciones|**IncrementalValueProvider**&lt;**ImmutableArray**&lt;**T**&gt;&gt;|**IncrementalValueProvider**&lt;**EquatableArray**&lt;**T**&gt;&gt; o usar `.WithComparer()`|**ImmutableArray**&lt;**T**&gt; usa igualdad por referencia. **EquatableArray**&lt;**T**&lt; del **Community Toolkit** proporciona la igualdad estructural necesaria para la caché.|
 |Datos de Compilación|`provider.Combine(context.CompilationProvider)`|`var asm = c.CompilationProvider.Select(...); provider.Combine(asm)`|El objeto Compilation completo cambia en casi cada pulsación de tecla. Seleccionar solo los datos necesarios (p. ej., el nombre del ensamblado) crea una entrada mucho más estable para el paso Combine.|
 |Tipo de Modelo de Datos|Usar una `class` estándar con igualdad por referencia por defecto para su DTO.|Usar un `record` o `record struct` para el DTO.|Los record proporcionan una igualdad basada en valores generada automáticamente por el compilador, que es exactamente lo que el mecanismo de caché requiere para funcionar correctamente.|
+
+## Conclusión y Recomendaciones Finales
+  
+El viaje a través de los generadores de código incrementales revela una tecnología que es a la vez poderosa y matizada. `IIncrementalGenerator` se ha consolidado como el pilar de la metaprogramación en tiempo de compilación en .NET, no solo como una optimización, sino como un habilitador fundamental para la dirección estratégica de la plataforma hacia el rendimiento, la eficiencia y la compatibilidad con AOT.
+
+Los principios clave para dominar esta tecnología son claros:
+
+- **Adopción Obligatoria:** `IIncrementalGenerator` no es una opción, sino un requisito para cualquier generador de código que se preocupe por el rendimiento y la experiencia del desarrollador.
+
+- **El Rendimiento es un Pipeline**: El rendimiento se dicta por la construcción de un pipeline de datos bien estructurado y consciente de la caché.
+
+- **La Caché Depende de la Igualdad**: La eficacia de la caché depende de transformar los símbolos semánticos, que son inherentemente inestables, en DTOs simples, inmutables y equatables lo antes posible.
+
+- **La Robustez Exige Pruebas**: La corrección y el rendimiento deben garantizarse a través de un conjunto de pruebas exhaustivo que incluya tanto pruebas de instantáneas para la salida como pruebas de incrementalidad para la eficiencia de la caché.
+
+A continuación, se presenta una lista de verificación de mejores prácticas para los autores de generadores de código incrementales, que resume las recomendaciones críticas discutidas a lo largo de este informe:
+
+Lista de Verificación para Autores de Generadores Incrementales
+☑️ **Usar** `IIncrementalGenerator`: Implementar siempre `IIncrementalGenerator` y evitar la interfaz heredada `ISourceGenerator`.
+
+☑️ **Apuntar a** _netstandard2.0_: Configurar el proyecto del generador para que apunte a _netstandard2.0_ para una máxima compatibilidad.
+
+☑️ **Usar el Patrón DTO Equatable**: Nunca pasar ISymbol, Compilation o SyntaxNode directamente a través del pipeline. Transformarlos en record struct DTOs que contengan solo los datos primitivos necesarios.
+
+☑️ **Utilizar ForAttributeWithMetadataName**: Para la detección basada en atributos, preferir siempre este método optimizado sobre un CreateSyntaxProvider manual.
+
+☑️ **Inyectar Atributos Marcadores**: Usar `RegisterPostInitializationOutput` para inyectar el código fuente de los atributos marcadores en la compilación del consumidor.
+
+☑️ **Ser Estratégico con Combine**: Evitar combinar con el `CompilationProvider` completo. En su lugar, usar `.Select()` para extraer solo la información necesaria (p. ej., `AssemblyName`) y combinar con ese proveedor más pequeño.
+
+☑️ **Usar Colecciones Equatables**: Al trabajar con colecciones, usar **EquatableArray**&lt;**T**&gt; o un **IEqualityComparer**&lt;**T**&gt; personalizado para garantizar que la caché funcione.
+
+☑️ **Implementar Pruebas de Snapshot Testing**: Usar una biblioteca como `Verify` para crear pruebas de instantáneas que validen la exactitud del código generado y los diagnósticos.
+
+☑️ **Implementar Pruebas de Incrementalidad**: Escribir pruebas específicas que verifiquen que los pasos del pipeline se obtienen de la caché (**Reason** == **Cached**/**Unchanged**) en cambios de código triviales.
 
 
 
