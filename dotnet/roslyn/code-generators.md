@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-23T22:58:55.977Z
+date: 2025-06-23T23:25:57.875Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -410,6 +410,9 @@ public class RepositoryRegistrationGeneratorTests
 
 La primera vez que se ejecute esta prueba, fallará y creará dos archivos: \*.received.cs (la salida real) y \*.verified.cs (el archivo de instantánea, inicialmente una copia del recibido). El desarrollador debe revisar el archivo _.verified._ para asegurarse de que es correcto y luego aceptarlo.
 
+`CSharpCompilation.Create` permitirá la cración de una compilación, similar a como funcionaría sobre cualquier código fuente.
+`CSharpGeneratorDriver` será el encargado de ejecutar el generador sobre la compilación y generar el nuevo código fuente del generador.
+
 2. **Probando la Incrementalidad con aserciones**
 
 > Si bien este código usa las típicas aserciones incluídas en el framework de testing, en el repositorio se agregó código de ejemplo para el uso de `Verify` como se hizo anteriormente.
@@ -517,6 +520,56 @@ public class RepositoryRegistrationGeneratorTests
 
 }
 ```
+
+
+### El rendimiento que ofrece la caché
+
+Entender cómo funciona la caché del generador podría ser la diferencia entre un generador ultrarápido y uno que bloquea el IDE.
+
+#### **El Motor de Caché: Memoización en el Pipeline**
+Como se mencionó anteriormente, el pipeline de un generador incremental es un grafo de flujo de datos. El motor de Roslyn memoiza (almacena en caché) la salida de cada nodo de este grafo. En ejecuciones posteriores, si las entradas de un nodo se consideran idénticas a las de la ejecución anterior (mediante una comprobación de igualdad), se utiliza instantáneamente la salida almacenada en caché, y los nodos descendentes no se vuelven a ejecutar a menos que otras de sus entradas hayan cambiado. La clave de todo el sistema reside en esa "comprobación de igualdad".   
+
+#### `ISymbol`**: Su efecto en el Rendimiento**
+Este es el error más común y devastador que se puede cometer al escribir un generador incremental.
+
+- **El Problema**: Los objetos `ISymbol` (que representan tipos, métodos, etc.) y los objetos `Compilation` no son estables entre compilaciones. Incluso para exactamente el mismo código fuente, una nueva pasada de compilación (desencadenada por una pulsación de tecla, por ejemplo) generará nuevas instancias de `ISymbol` que no son iguales por referencia a las antiguas.
+
+- **La Consecuencia**: Si un `ISymbol` o cualquier objeto que lo contenga (como un `ClassDeclarationSyntax` que se combina con el `CompilationProvider`) se utiliza como el dato dentro de un `IncrementalValueProvider`, la comprobación de igualdad de la caché siempre fallará. Esto obliga al pipeline a reejecutarse desde ese punto en adelante con cada cambio, anulando por completo el propósito de la generación incremental.   
+
+- **La Catástrofe de Memoria**: Un efecto secundario grave es que mantener referencias a objetos ISymbol en el pipeline puede "anclar" (root) `Compilation` enteras en memoria, impidiendo que el recolector de basura las libere. En soluciones grandes, esto conduce a un consumo de memoria catastrófico por parte del proceso del IDE (por ejemplo, `RoslynCodeAnalysisService`), con informes de uso de 6-10 GB de RAM o más. [Issue en GitHub](https://github.com/dotnet/roslyn/issues/62674)
+
+#### Mejor Práctica: El Patrón del DTO Equatable
+La solución definitiva y no negociable a este problema es transformar la información semántica en un Objeto de Transferencia de Datos (DTO) simple, inmutable y equatable lo antes posible en el pipeline.
+
+- Implementación: Utilizar un `record struct` para el DTO. Esto proporciona semántica de igualdad basada en valores de forma gratuita y, al ser un struct, evita asignaciones en el heap para objetos pequeños.   
+
+- Proceso: En la etapa de transformación (el segundo delegado de `CreateSyntaxProvider` o `ForAttributeWithMetadataName`), se debe:
+
+  1. **Inspeccionar el ISymbol.**
+  2. Extraer únicamente los datos primitivos necesarios para la generación (nombres como `string`, indicadores como `bool`, etc.).
+
+	3. Poblar una nueva instancia del DTO record struct.
+
+  4. **Devolver el DTO.**
+  El ISymbol se descarta inmediatamente y nunca entra en la caché del pipeline incremental.
+  
+#### Optimizar la Estructura del Pipeline
+Además del patrón DTO, hay otras optimizaciones estructurales posibles.
+
+- **Colecciones**: El tipo estándar ImmutableArray<T> no es equatable por valor; utiliza igualdad por referencia. Pasarlo a través del pipeline romperá la caché. La solución es utilizar EquatableArray<T> (del paquete NuGet CommunityToolkit.Mvvm) o envolver el proveedor con un IEqualityComparer<T> personalizado usando el método .WithComparer().   
+
+- **Combinación de Proveedores**: Al usar `.Combine()`, se debe evitar combinar con el `context.CompilationProvider` completo, ya que este objeto cambia frecuentemente. En su lugar, se debe usar `.Select()` para extraer solo los datos necesarios (por ejemplo, `context.CompilationProvider.Select((c,_) => c.AssemblyName)`) y combinar con ese proveedor más pequeño y estable. El orden de las combinaciones también puede afectar el tamaño de la caché.
+  
+#### Tabla: Mejores Prácticas de Caché para Generadores Incrementales
+La siguiente tabla resume las reglas críticas de rendimiento, contrastando los antipatrones comunes con las mejores prácticas recomendadas. Sirve como una lista de verificación para auditar y optimizar un generador incremental.
+
+|Preocupación|Anti-Patrón (Rompe la Caché y Desperdicia Memoria)|Mejor Práctica (Habilita la Caché y Ahorra Memoria)|Justificación y Referencias|
+|-|-|-|
+|Transferencia de Datos|IncrementalValueProvider<ISymbol> o IncrementalValueProvider<ClassDeclarationSyntax>|IncrementalValueProvider<MyEquatableRecordStruct>|Los objetos ISymbol y SyntaxNode no son estables entre compilaciones y anclan grandes grafos de objetos. Los DTOs con igualdad por valor son pequeños y estables.|
+|Colecciones|`IncrementalValueProvider&lt;ImmutableArray&lt;T&gt;&gt;`|`IncrementalValueProvider&lt;EquatableArray&lt;T&gt;&gt;` o usar `.WithComparer()`|`ImmutableArray&lt;T&gt;` usa igualdad por referencia. `EquatableArray&lt;T&lt;` del **Community Toolkit** proporciona la igualdad estructural necesaria para la caché.|
+|Datos de Compilación|`provider.Combine(context.CompilationProvider)`|`var asm = c.CompilationProvider.Select(...); provider.Combine(asm)`|El objeto Compilation completo cambia en casi cada pulsación de tecla. Seleccionar solo los datos necesarios (p. ej., el nombre del ensamblado) crea una entrada mucho más estable para el paso Combine.|
+|Tipo de Modelo de Datos|Usar una `class` estándar con igualdad por referencia por defecto para su DTO.|Usar un `record` o `record struct` para el DTO.|Los record proporcionan una igualdad basada en valores generada automáticamente por el compilador, que es exactamente lo que el mecanismo de caché requiere para funcionar correctamente.|
+
 
 
 
