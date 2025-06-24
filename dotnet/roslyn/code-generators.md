@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T19:38:23.664Z
+date: 2025-06-24T19:41:50.216Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -230,38 +230,38 @@ Si bien por simplicidad este ejemplo se realizó usando una cadena de texto inte
   - Paso 2: **Predicado para encontrar candidatos.**
     Usamos `CreateSyntaxProvider` para encontrar todas las declaraciones de clases que no sean abstractas y que tengan una lista de tipos base.
 
-    ```csharp
-    public void Initialize(IncrementalGeneratorInitializationContext context)
-    {
-        ...
+```csharp
+public void Initialize(IncrementalGeneratorInitializationContext context)
+{
+    ...
             
-        IncrementalValuesProvider<ClassDeclarationSyntax> classDeclarations = CollectClasses(context)
-                .WithTrackingName("CheckClassDeclarations");
+    IncrementalValuesProvider<ClassDeclarationSyntax> classDeclarations = CollectClasses(context)
+            .WithTrackingName("CheckClassDeclarations");
                 
-        ...
-    }
+    ...
+}
 
-    private static IncrementalValuesProvider<ClassDeclarationSyntax> CollectClasses (
-            IncrementalGeneratorInitializationContext context
+private static IncrementalValuesProvider<ClassDeclarationSyntax> CollectClasses (
+        IncrementalGeneratorInitializationContext context
+    )
+{
+    IncrementalValuesProvider<ClassDeclarationSyntax> classDeclarations = context
+        .SyntaxProvider
+        .CreateSyntaxProvider(
+            predicate: static (node, _) => 
+                node is ClassDeclarationSyntax { BaseList: not null } @class
+                && @class
+                    .Modifiers
+                    .All(m => !m.IsKind(SyntaxKind.AbstractKeyword)),
+            transform: static (ctx, _) => ctx.Node as ClassDeclarationSyntax
         )
-    {
-        IncrementalValuesProvider<ClassDeclarationSyntax> classDeclarations = context
-            .SyntaxProvider
-            .CreateSyntaxProvider(
-                predicate: static (node, _) => 
-                        node is ClassDeclarationSyntax { BaseList: not null } @class
-                        && @class
-                            .Modifiers
-                            .All(m => !m.IsKind(SyntaxKind.AbstractKeyword)),
-                    transform: static (ctx, _) => ctx.Node as ClassDeclarationSyntax
-            )
-            .Where(static @class => @class is not null)!;
-        return classDeclarations;
-    }
-    ```
+        .Where(static @class => @class is not null)!;
+    return classDeclarations;
+}
+```
 
   - Paso 3: **Transformación para identificar implementaciones de IRepository.**
-    Combinamos los candidatos con el CompilationProvider para poder realizar análisis semántico que se mencionó anteriormente. En la transformación, se verifica si la clase implementa la interfaz que creamos anteriormente `IRepository` y, si es así, se extrae la información necesaria a un DTO (Data Transfer Object) inmutable y equatable, como se discutirá más adelante.
+Combinamos los candidatos con el CompilationProvider para poder realizar análisis semántico que se mencionó anteriormente. En la transformación, se verifica si la clase implementa la interfaz que creamos anteriormente `IRepository` y, si es así, se extrae la información necesaria a un DTO (Data Transfer Object) inmutable y equatable, como se discutirá más adelante.
 Se filtran los resultados nulos y se recolectan en un ImmutableArray.
 
 ```csharp
@@ -320,7 +320,7 @@ private static IncrementalValueProvider<ImmutableArray<RepositoryToRegister?>> F
 ```
 
   - Paso 4: **Generación del Método de Extensión**
-    Finalmente, registramos una acción de salida que tomará la colección de repositorios y generará el archivo de código fuente.
+Finalmente, registramos una acción de salida que tomará la colección de repositorios y generará el archivo de código fuente.
 
 ```csharp
 public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -390,11 +390,10 @@ Un generador de código es una pieza de software que debe ser tan robusta y fiab
 A los efectos de esta documentación se usarán dos enfoques: **Snapshot Testing** y las típicas **Aserciones**.
 
 1.  **Snapshot Testing con** [`Verify`](https://github.com/VerifyTests/Verify\)
-    Las pruebas de tipo **Snapshot Testing** son una técnica ideal para los generadores de código. En lugar de escribir aserciones manuales sobre el texto generado, el `framework Verify` captura la salida completa del generador (tanto el código generado como los diagnósticos) y la guarda en un archivo `.verified.cs`. En ejecuciones posteriores, la nueva salida se compara con este archivo "aprobado". Si hay alguna diferencia, la prueba falla, lo que permite detectar regresiones de manera muy eficaz.
+Las pruebas de tipo **Snapshot Testing** son una técnica ideal para los generadores de código. En lugar de escribir aserciones manuales sobre el texto generado, el `framework Verify` captura la salida completa del generador (tanto el código generado como los diagnósticos) y la guarda en un archivo `.verified.cs`. En ejecuciones posteriores, la nueva salida se compara con este archivo "aprobado". Si hay alguna diferencia, la prueba falla, lo que permite detectar regresiones de manera muy eficaz.
 
   - **Ejemplo**:
-
-  Para inizializar el soporte de Verify se requiere un `ModuleInitializer`
+Para inizializar el soporte de Verify se requiere un `ModuleInitializer`
   
 
 ```csharp
@@ -408,7 +407,7 @@ public static class ModuleInitializer
 }
 ```
 
-  Una prueba típica se vería así *(Ejemplo con XUnit)*:
+Una prueba típica se vería así *(Ejemplo con XUnit)*:
   
 
 ```csharp
@@ -476,8 +475,8 @@ Los pasos para probar la incrementalidad son básicamente los siguientes:
   - **Configurar el GeneratorDriver**: En la prueba, se crea el `GeneratorDriver` con la opción `trackIncrementalGeneratorSteps: true`.
 
   - **Realizar Múltiples Ejecuciones**:
-      - **Ejecución 1**: Se ejecuta el generador sobre una compilación inicial.
-      - **Ejecución 2**: Se crea una nueva compilación añadiendo un cambio trivial a la primera (por ejemplo, un comentario) y se vuelve a ejecutar el generador.
+    - **Ejecución 1**: Se ejecuta el generador sobre una compilación inicial.
+    - **Ejecución 2**: Se crea una nueva compilación añadiendo un cambio trivial a la primera (por ejemplo, un comentario) y se vuelve a ejecutar el generador.
       
 
   - **Aserción sobre el Motivo de la Ejecución**: Se obtiene el resultado de la segunda ejecución y se comprueba el motivo (**Reason**) por el que se ejecutaron los pasos. Si la caché funcionó, el motivo debería ser `IncrementalStepRunReason.Cached` o `IncrementalStepRunReason.Unchanged`.
