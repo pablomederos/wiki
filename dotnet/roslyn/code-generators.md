@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T00:20:26.609Z
+date: 2025-06-24T00:22:54.028Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -33,14 +33,14 @@ Con la llegada de la plataforma de compilación llamada `Roslyn`, se pasó de un
 
 La idea central de este artículo, es entender qué es un generadore de código incremental, cómo este mejora el rendimiento de la aplicación y mejora la relación entre el desarrollador y el código, así como también, presentar al ahora estándar de metaprogramación en tiempo de compilación de C\#, para el desarrollo de bibliotecas modernas y de alto rendimiento.
 
-<div id="generacion-incremental-fundamento-y-aplicacion"\>
+<div id="generacion-incremental-fundamento-y-aplicacion">
 
 ## I. Generación incremental: Fundamento y aplicación
 
 
 <br>
 
-<div id="ventajas-fundamentales"\>
+<div id="ventajas-fundamentales">
 
 ### A. Ventajas fundamentales de la generación  de código en tiempo de compilación
 
@@ -58,7 +58,7 @@ La idea central de este artículo, es entender qué es un generadore de código 
       Quizá una de las ventajas más importantes (al menos para este servidor), es la compatibilidad con tecnologías de optimización modernas como pueden ser la compilación **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)), o el **Trimming** ([Recorte de ensamblados](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). Estas tecnologías son más compatibles con entornos en la nube, móviles, o casos de uso de alto rendimiento y bajo consumo de recursos. En estos casos donde la compatibilidad con reflexión es inexistente, o el rendimiento es primordial, la generación de código permite obtener todo el código necesario durante la compilación, pasando de una simple optimización a un pilar arquitectónico de la estrategia de **.NET** para el futuro.
       
 
-<div id="casos-de-uso"\>
+<div id="casos-de-uso">
 
 ### B. Casos de uso en el ecosistema .NET
 
@@ -71,7 +71,7 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
 **El generador utiliza dos modos de operación:**
   - **Modo basado en metadatos**: Recolecta de antemano los metadatos necesarios de los tipos, para acelerar la serialización y deserialización.
   - **Modo de optimización de serialización**: Genera el código utilizando `Utf8JsonWriter` directamente, ofreciendo el máximo rendimiento posible de serialización. Este modo es más restrictivo y no soporta todas las opciones de personalización.
-  \> Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
+> Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
   
 2. **ASP.NET Core y Native AOT**
   ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, de que se tratarán más adelante en este artículo. Pero básicamente, **intercepta** las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
@@ -80,7 +80,7 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
   Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
   
 
-<div id="consideraciones-de-portabilidad"\>
+<div id="consideraciones-de-portabilidad">
 
 ### C. Consideraciones de portabilidad
 
@@ -97,7 +97,7 @@ Al desarrollar un generador de código, se requiere tener en cuenta el entorno e
       El desarrollo en **Unity** u otras plataformas podría requerir configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual.
       
 
-<div id="evolucion-isourcegenerator"\>
+<div id="evolucion-isourcegenerator">
 
 ### D. Evolución de `ISourceGenerator` hacia `IIncrementalGenerator`
 
@@ -113,7 +113,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
       En pocas palabras, el método `Execute` de `ISourceGenerator` se activa con cada pulsación o cambio en el proyecto, obligando a la reevaluación de la lógica, lo que resulta en un rendimiento catastrófico del IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar una técnica de **Memoization** sobre los resultados de cada etapa, lo que aumenta la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos. Además, `IIncrementalGenerator` separa la etapa inicial de comprobación sintáctica, de la más costosa que es la transformación, siendo esta una etapa que implica análisis semántico. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
       
 
-<div id="elementos-generador"\>
+<div id="elementos-generador">
 
 ## II. Elementos de un Generador de Código
 
@@ -134,7 +134,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
       El mecanismo principal para la generación de código consiste en registrar una acción capaz de generar el código fuente basado en el filtrado que se realizó en el paso anterior. Para esto, `IncrementalGeneratorInitializationContext` posee un método llamado `RegisterSourceOutput(IncrementalValueProvider<TSource> source, Action<SourceProductionContext, TSource> action)` que ejecutará dicha acción y finalmente añadirá el código generado al compilador.
       
 
-<div id="estrategias-identificacion"\>
+<div id="estrategias-identificacion">
 
 ## III. Estrategias para Identificar los Objetivos de Generación
 
@@ -166,7 +166,7 @@ Para que el atributo marcador esté disponible en el proyecto consumidor sin nec
     El mismo patrón de predicado/transformación se puede adaptar para cualquier otro criterio, como encontrar clases que heredan de una clase base específica (inspeccionando `symbol.BaseType`), métodos con nombres particulares, propiedades de un tipo determinado, etc.
       
 
-<div id="implementacion-practica"\>
+<div id="implementacion-practica">
 
 ## IV. Implementación práctica
 
@@ -380,7 +380,7 @@ public class RepositoryRegistrationGenerator : IIncrementalGenerator
     }
     ```
 
-<div id="testeando-generador"\>
+<div id="testeando-generador">
 
 ## V. Testeando el generador de código
 
@@ -572,20 +572,20 @@ Los pasos para probar la incrementalidad son básicamente los siguientes:
     }
     ```
 
-<div id="rendimiento-cache"\>
+<div id="rendimiento-cache">
 
 ## VI. El rendimiento que ofrece la caché
 
 
 Entender cómo funciona la caché del generador podría ser la diferencia entre un generador ultrarápido y uno que bloquea el IDE.
 
-<div id="motor-cache"\>
+<div id="motor-cache">
 
 #### A. El Motor de Caché: Memoización en el Pipeline
 
 Como se mencionó anteriormente, el pipeline de un generador incremental es un grafo de flujo de datos. El motor de Roslyn memoiza (almacena en caché) la salida de cada nodo de este grafo. En ejecuciones posteriores, si las entradas de un nodo se consideran idénticas a las de la ejecución anterior (mediante una comprobación de igualdad), se utiliza instantáneamente la salida almacenada en caché, y los nodos descendentes no se vuelven a ejecutar a menos que otras de sus entradas hayan cambiado. La clave de todo el sistema reside en esa "comprobación de igualdad".   
 
-<div id="isymbol-rendimiento"\>
+<div id="isymbol-rendimiento">
 
 #### B. `ISymbol`: Su efecto en el Rendimiento
 
@@ -597,7 +597,7 @@ Este es el error más común y devastador que se puede cometer al escribir un ge
 
   - **La Catástrofe de Memoria**: Un efecto secundario grave es que mantener referencias a objetos ISymbol en el pipeline puede "anclar" (root) `Compilation` enteras en memoria, impidiendo que el recolector de basura las libere. En soluciones grandes, esto conduce a un consumo de memoria catastrófico por parte del proceso del IDE (por ejemplo, `RoslynCodeAnalysisService`), con informes de uso de 6-10 GB de RAM o más. [Issue en GitHub](https://github.com/dotnet/roslyn/issues/62674)
 
-<div id="patron-dto-equatable"\>
+<div id="patron-dto-equatable">
 
 #### C. Mejor Práctica: El Patrón del DTO Equatable
 
@@ -614,7 +614,7 @@ La solución definitiva y no negociable a este problema es transformar la inform
   El ISymbol se descarta inmediatamente y nunca entra en la caché del pipeline incremental.
   
 
-<div id="optimizar-pipeline"\>
+<div id="optimizar-pipeline">
 
 #### D. Optimizar la Estructura del Pipeline
 
@@ -625,7 +625,7 @@ Además del patrón DTO, hay otras optimizaciones estructurales posibles.
   - **Combinación de Proveedores**: Al usar `.Combine()`, se debe evitar combinar con el `context.CompilationProvider` completo, ya que este objeto cambia frecuentemente. En su lugar, se debe usar `.Select()` para extraer solo los datos necesarios (por ejemplo, `context.CompilationProvider.Select((c,_) => c.AssemblyName)`) y combinar con ese proveedor más pequeño y estable. El orden de las combinaciones también puede afectar el tamaño de la caché.
       
 
-<div id="tabla-mejores-practicas"\>
+<div id="tabla-mejores-practicas">
 
 #### E. Tabla: Mejores Prácticas de Caché para Generadores Incrementales
 
@@ -638,7 +638,7 @@ La siguiente tabla resume las reglas críticas de rendimiento, contrastando los 
 |Datos de Compilación|`provider.Combine(context.CompilationProvider)`|`var asm = c.CompilationProvider.Select(...); provider.Combine(asm)`|El objeto Compilation completo cambia en casi cada pulsación de tecla. Seleccionar solo los datos necesarios (p. ej., el nombre del ensamblado) crea una entrada mucho más estable para el paso Combine.|
 |Tipo de Modelo de Datos|Usar una `class` estándar con igualdad por referencia por defecto para su DTO.|Usar un `record` o `record struct` para el DTO.|Los record proporcionan una igualdad basada en valores generada automáticamente por el compilador, que es exactamente lo que el mecanismo de caché requiere para funcionar correctamente.|
 
-<div id="conclusion-recomendaciones"\>
+<div id="conclusion-recomendaciones">
 
 ## VII. Conclusión y Recomendaciones Finales
 
@@ -670,7 +670,7 @@ Lista de Verificación para Autores de Generadores Incrementales
 
 ☑️ **Ser Estratégico con Combine**: Evitar combinar con el `CompilationProvider` completo. En su lugar, usar `.Select()` para extraer solo la información necesaria (p. ej., `AssemblyName`) y combinar con ese proveedor más pequeño.
 
-☑️ **Usar Colecciones Equatables**: Al trabajar con colecciones, usar **EquatableArray**\<**T**\> o un **IEqualityComparer**\<**T**\> personalizado para garantizar que la caché funcione.
+☑️ **Usar Colecciones Equatables**: Al trabajar con colecciones, usar **EquatableArray**\<**T**> o un **IEqualityComparer**\<**T**> personalizado para garantizar que la caché funcione.
 
 ☑️ **Implementar Pruebas de Snapshot Testing**: Usar una biblioteca como `Verify` para crear pruebas de instantáneas que validen la exactitud del código generado y los diagnósticos.
 
