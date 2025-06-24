@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T15:21:44.508Z
+date: 2025-06-24T19:12:41.598Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -53,7 +53,7 @@ La idea central de este artículo, es entender qué es un generadore de código 
     Como se mencionó anteriormente, ahora en lugar de realizar un análisis durante el tiempo de ejecución, la carga se desplaza al tiempo de compilación, reduciendo así el arranque de las aplicaciones, y la respuesta general durante la ejecución normal de un proceso.
       Ejemplo de una implementación actual que ofrece los beneficios antes mencionados, es el atributo `GeneratedRegexAttribute`, introducido en **.NET 7**, evita la compilación de una expresión regular en tiempo de ejecución, generando código en tiempo de compilación, optimizado, que evalúa las coinidencias, resultando en una mejora drástica en el rendimiento. Otro ejemplo podría ser el atributo [`LibraryImport`](https://www.google.com/search?q=%5Bhttps://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation%5D\(https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation\)), que viene a ser un sustituto a `DllImport`, así como también, son ejemplo las técnicas avanzadas que utiliza actualmente Blazor para convertir los templates razor a clases generadas, especializadas en la generación de documentos HTML.
       
-2.  **Eliminación de código repetivo (Boilerplate)**
+2.  **Eliminación de código repetitivo (Boilerplate)**
       Otro de los beneficios es la automatización de la escritura de código repetitivo y propenso a errores, como podría ser la creación de DTOs, mapeadores de código, o incluso DAOs y funciones de acceso a bases de datos o recursos de red.
       
 3.  **Modelos de despliegue modernos**
@@ -76,7 +76,7 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
 > Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
   
 2. **ASP.NET Core y Native AOT**
-  ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, de que se tratarán más adelante en este artículo. Pero básicamente, **intercepta** las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
+  ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, que se tratarán a detalle en otro artículo. Pero básicamente, intercepta las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
   
 3. **Inyección de dependencias**
   Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
