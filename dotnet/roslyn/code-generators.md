@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T19:35:08.444Z
+date: 2025-06-24T19:38:23.664Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -50,14 +50,14 @@ La idea central de este artículo, es entender qué es un generadore de código 
 <br>
 
 1.  **Mejora del rendimiento**
-    Como se mencionó anteriormente, ahora en lugar de realizar un análisis durante el tiempo de ejecución, la carga se desplaza al tiempo de compilación, reduciendo así el arranque de las aplicaciones, y la respuesta general durante la ejecución normal de un proceso.
-      Ejemplo de una implementación actual que ofrece los beneficios antes mencionados, es el atributo `GeneratedRegexAttribute`, introducido en **.NET 7**, evita la compilación de una expresión regular en tiempo de ejecución, generando código en tiempo de compilación, optimizado, que evalúa las coinidencias, resultando en una mejora drástica en el rendimiento. Otro ejemplo podría ser el atributo [`LibraryImport`](https://www.google.com/search?q=%5Bhttps://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation%5D\(https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation\)), que viene a ser un sustituto a `DllImport`, así como también, son ejemplo las técnicas avanzadas que utiliza actualmente Blazor para convertir los templates razor a clases generadas, especializadas en la generación de documentos HTML.
+Como se mencionó anteriormente, ahora en lugar de realizar un análisis durante el tiempo de ejecución, la carga se desplaza al tiempo de compilación, reduciendo así el arranque de las aplicaciones, y la respuesta general durante la ejecución normal de un proceso.
+Ejemplo de una implementación actual que ofrece los beneficios antes mencionados, es el atributo `GeneratedRegexAttribute`, introducido en **.NET 7**, evita la compilación de una expresión regular en tiempo de ejecución, generando código en tiempo de compilación, optimizado, que evalúa las coinidencias, resultando en una mejora drástica en el rendimiento. Otro ejemplo podría ser el atributo [`LibraryImport`](https://www.google.com/search?q=%5Bhttps://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation%5D\(https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation\)), que viene a ser un sustituto a `DllImport`, así como también, son ejemplo las técnicas avanzadas que utiliza actualmente Blazor para convertir los templates razor a clases generadas, especializadas en la generación de documentos HTML.
       
 2.  **Eliminación de código repetitivo (Boilerplate)**
-      Otro de los beneficios es la automatización de la escritura de código repetitivo y propenso a errores, como podría ser la creación de DTOs, mapeadores de código, o incluso DAOs y funciones de acceso a bases de datos o recursos de red.
+Otro de los beneficios es la automatización de la escritura de código repetitivo y propenso a errores, como podría ser la creación de DTOs, mapeadores de código, o incluso DAOs y funciones de acceso a bases de datos o recursos de red.
       
 3.  **Modelos de despliegue modernos**
-      Quizá una de las ventajas más importantes (al menos para este servidor), es la compatibilidad con tecnologías de optimización modernas como pueden ser la compilación **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)), o el **Trimming** ([Recorte de ensamblados](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). Estas tecnologías son más compatibles con entornos en la nube, móviles, o casos de uso de alto rendimiento y bajo consumo de recursos. En estos casos donde la compatibilidad con reflexión es inexistente, o el rendimiento es primordial, la generación de código permite obtener todo el código necesario durante la compilación, pasando de una simple optimización a un pilar arquitectónico de la estrategia de **.NET** para el futuro.
+Quizá una de las ventajas más importantes (al menos para este servidor), es la compatibilidad con tecnologías de optimización modernas como pueden ser la compilación **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)), o el **Trimming** ([Recorte de ensamblados](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). Estas tecnologías son más compatibles con entornos en la nube, móviles, o casos de uso de alto rendimiento y bajo consumo de recursos. En estos casos donde la compatibilidad con reflexión es inexistente, o el rendimiento es primordial, la generación de código permite obtener todo el código necesario durante la compilación, pasando de una simple optimización a un pilar arquitectónico de la estrategia de **.NET** para el futuro.
       
 
 <div id="casos-de-uso">
@@ -68,7 +68,7 @@ La idea central de este artículo, es entender qué es un generadore de código 
 Los generadores de código no son un fenómeno aislado, de nicho, sin que actualmente están profundamente integrados en la plataforma **.NET**.
 
 1.  **Serializador `System.Text.Json`**
-      El serializador **JSON** integrado en .NET es un claro ejemplo de caso de uso. Mediante el uso del atributo `JsonSerializableAttribute` aplicado a una clase parcial que extienda de `JsonSerializerContext`, es posible activar un generador de código que analiza los tipos y produce lógica de serialización y deserialización muy optimizada en tiempo de compilación. Esto tiene como resultado una [mejora del rendimiento de hasta un 40%](https://okyrylchuk.dev/blog/intro-to-serialization-with-source-generation-in-system-text-json/) en el arranque gracias a evitar el uso de la reflexión.
+El serializador **JSON** integrado en .NET es un claro ejemplo de caso de uso. Mediante el uso del atributo `JsonSerializableAttribute` aplicado a una clase parcial que extienda de `JsonSerializerContext`, es posible activar un generador de código que analiza los tipos y produce lógica de serialización y deserialización muy optimizada en tiempo de compilación. Esto tiene como resultado una [mejora del rendimiento de hasta un 40%](https://okyrylchuk.dev/blog/intro-to-serialization-with-source-generation-in-system-text-json/) en el arranque gracias a evitar el uso de la reflexión.
 
 **El generador utiliza dos modos de operación:**
   - **Modo basado en metadatos**: Recolecta de antemano los metadatos necesarios de los tipos, para acelerar la serialización y deserialización.
@@ -76,10 +76,10 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
 > Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
   
 2. **ASP.NET Core y Native AOT**
-  ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, que se tratarán a detalle en otro artículo. Pero básicamente, intercepta las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
+ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, que se tratarán a detalle en otro artículo. Pero básicamente, intercepta las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
   
 3. **Inyección de dependencias**
-  Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
+Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
   
 
 <div id="consideraciones-de-portabilidad">
@@ -90,13 +90,13 @@ Los generadores de código no son un fenómeno aislado, de nicho, sin que actual
 Al desarrollar un generador de código, se requiere tener en cuenta el entorno en el que se ejecutará.
 
 1.  **Framework de destino (Target Framework)**
-      Es importante que el proyecto generador tenga como framework de destino `netstandard2.0` para maximizar la compatibilidad con diferentes versiones de **Visual Studio**, **MSBuild**, el **SDK de .NET** e incluso algunos otros IDEs.
+Es importante que el proyecto generador tenga como framework de destino `netstandard2.0` para maximizar la compatibilidad con diferentes versiones de **Visual Studio**, **MSBuild**, el **SDK de .NET** e incluso algunos otros IDEs.
       
 2.  **IDE vs. Compilación en Línea de Comandos**
-      El pipeline incremental, así como el sistema de caché (que se tratará más adelante en este artículo), están diseñados principalmente para maximizar la experiencia en un IDE (**Visual Studio**, **Rider**, etc.), ofreciendo una retroalimentación inmediata al desarrollador. En caso de usarse la línea de comandos, este proceso de compilación no será automático y probablemente requiera el desarrollo de un script que mejore esta experiencia. Editores como **Visual Studio Code** y derivados podrían ya contar con soporte integrado mediante las extensiones oficiales de **.NET** y **C\#** ([C\# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) u otras).
+El pipeline incremental, así como el sistema de caché (que se tratará más adelante en este artículo), están diseñados principalmente para maximizar la experiencia en un IDE (**Visual Studio**, **Rider**, etc.), ofreciendo una retroalimentación inmediata al desarrollador. En caso de usarse la línea de comandos, este proceso de compilación no será automático y probablemente requiera el desarrollo de un script que mejore esta experiencia. Editores como **Visual Studio Code** y derivados podrían ya contar con soporte integrado mediante las extensiones oficiales de **.NET** y **C\#** ([C\# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) u otras).
       
 3.  **Entornos multiplataforma**
-      El desarrollo en **Unity** u otras plataformas podría requerir configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual.
+El desarrollo en **Unity** u otras plataformas podría requerir configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual.
       
 
 <div id="evolucion-isourcegenerator">
@@ -107,12 +107,12 @@ Al desarrollar un generador de código, se requiere tener en cuenta el entorno e
 En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en absoluto. `IIncrementalGenerator` es la única opción, ya que la anterior se considera obsoleta.
 
 1.  **Comparación "arquitectónica": Imperativo vs Declarativo**
-      La diferencia entre ambas interfaces representa un cambio significativo en el modelo de programación:
+La diferencia entre ambas interfaces representa un cambio significativo en el modelo de programación:
   - `ISourceGenerator`: Expone dos métodos: `Initialize` y `Execute`, combinado con una implementación de `ISyntaxReceiver` o `ISyntaxContextReceiver`. El `ISyntaxReceiver` realiza un recorrido por todos los árboles de sintaxis de una compilación de forma imperativa, recopilando datos de los nodos, posteriormente invoca al método `Execute`, el cual recibe la compilación completa y el receptor poblado para realizar la generación. Como se mencionó, se trata de un modelo imperativo, y además basado en eventos.
   - `IIncrementalGenerator`: Solo contiene el método `Initialize`, dentro del cual el desarrollador escribe de forma declarativa el flujo de transformaciones de datos, en una sitaxis similar a LINQ. Este flujo describe como se trasladan los datos desde la entrada (código fuente u otros archivos adicionales) hasta el código generado.
       
 2.  **Rendimiento inferior de `ISourceGenerator`**
-      En pocas palabras, el método `Execute` de `ISourceGenerator` se activa con cada pulsación o cambio en el proyecto, obligando a la reevaluación de la lógica, lo que resulta en un rendimiento catastrófico del IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar una técnica de **Memoization** sobre los resultados de cada etapa, lo que aumenta la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos. Además, `IIncrementalGenerator` separa la etapa inicial de comprobación sintáctica, de la más costosa que es la transformación, siendo esta una etapa que implica análisis semántico. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
+En pocas palabras, el método `Execute` de `ISourceGenerator` se activa con cada pulsación o cambio en el proyecto, obligando a la reevaluación de la lógica, lo que resulta en un rendimiento catastrófico del IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar una técnica de **Memoization** sobre los resultados de cada etapa, lo que aumenta la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos. Además, `IIncrementalGenerator` separa la etapa inicial de comprobación sintáctica, de la más costosa que es la transformación, siendo esta una etapa que implica análisis semántico. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
       
 
 <div id="elementos-generador">
@@ -157,7 +157,7 @@ var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
 Para que el atributo marcador esté disponible en el proyecto consumidor sin necesidad de una referencia de ensamblado separada, su código fuente se puede inyectar directamente en la compilación utilizando `context.RegisterPostInitializationOutput` (se estará usando más adelante).
 
 2.  **Por Implementación de Interfaz**
-    Esta estrategia requiere análisis semántico, por lo que la comprobación debe realizarse en la etapa de transformación (segunda etapa mencionada anteriormente).
+Esta estrategia requiere análisis semántico, por lo que la comprobación debe realizarse en la etapa de transformación (segunda etapa mencionada anteriormente).
 
   - **Predicado**: Un predicado eficiente podría ser `(node, _) => node is ClassDeclarationSyntax c && c.BaseList is not null`. Esto filtra rápidamente las clases que declaran una lista de bases (clases base o interfaces), que es un requisito previo para implementar una interfaz.   
 
@@ -202,30 +202,30 @@ public class RepositoryRegistrationGenerator : IIncrementalGenerator
 
   - Paso 1: **Generar una interfaz marcadora**.
       Como se mencionó anteriormente, se puede utilizar una interfaz, un atributo u otras características semánticas o sintácticas del código fuente. En este caso, asumiendo que el código fuente no cuenta con un un elemento para marcar los desencadenantes de la generación, se generará una interfaz que se podrá implementar para "marcar" el código.
-    ```csharp
-    public const string MarkerNamespace = "SourceGeneratorExample";
-    public const string MarkerInterfaceName = "IRepository";
-    public const string MarkerFullyQualifiedName = $"{MarkerNamespace}.{MarkerInterfaceName}";
-    private const string Source = 
-          $$"""
-            // <auto-generated/>
-            namespace {{MarkerNamespace}} {
-                public interface {{MarkerInterfaceName}} { }
-            }
-            """;
+```csharp
+public const string MarkerNamespace = "SourceGeneratorExample";
+public const string MarkerInterfaceName = "IRepository";
+public const string MarkerFullyQualifiedName = $"{MarkerNamespace}.{MarkerInterfaceName}";
+private const string Source = 
+      $$"""
+        // <auto-generated/>
+        namespace {{MarkerNamespace}} {
+            public interface {{MarkerInterfaceName}} { }
+        }
+        """;
     
-    public void Initialize(IncrementalGeneratorInitializationContext context)
-    {
-        context.RegisterPostInitializationOutput(ctx => 
-            ctx.AddSource(
-                $"{MarkerFullyQualifiedName}.g.cs",
-                SourceText.From(Source, Encoding.UTF8))
-            );
-        ...
-    }
-    ```
+public void Initialize(IncrementalGeneratorInitializationContext context)
+{
+    context.RegisterPostInitializationOutput(ctx => 
+        ctx.AddSource(
+            $"{MarkerFullyQualifiedName}.g.cs",
+            SourceText.From(Source, Encoding.UTF8))
+        );
+    ...
+}
+```
 
-      Si bien por simplicidad este ejemplo se realizó usando una cadena de texto interpolada para crear la interfaz marcadora, el mismo resultado se podría obtener mediante el uso de **Árboles de Sintaxis**. El código en el repositorio mencionado anteriormente, usa esa estrategia para ilustrar lo dicho.
+Si bien por simplicidad este ejemplo se realizó usando una cadena de texto interpolada para crear la interfaz marcadora, el mismo resultado se podría obtener mediante el uso de **Árboles de Sintaxis**. El código en el repositorio mencionado anteriormente, usa esa estrategia para ilustrar lo dicho.
       
   - Paso 2: **Predicado para encontrar candidatos.**
     Usamos `CreateSyntaxProvider` para encontrar todas las declaraciones de clases que no sean abstractas y que tengan una lista de tipos base.
