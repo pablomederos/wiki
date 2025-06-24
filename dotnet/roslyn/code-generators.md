@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T00:22:54.028Z
+date: 2025-06-24T00:26:34.554Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -13,19 +13,19 @@ I. [Generación incremental: Fundamento y aplicación](#generacion-incremental-f
   - B. [Casos de uso en el ecosistema .NET](#casos-de-uso)
   - C. [Consideraciones de portabilidad](#consideraciones-de-portabilidad)
   - D. [Evolución de `ISourceGenerator` hacia `IIncrementalGenerator`](#evolucion-isourcegenerator)
+  - E. [Elementos de un Generador de Código](#elementos-generador)
+  - F. [Estrategias para Identificar los Objetivos de Generación](#estrategias-identificacion)
   
-II. [Elementos de un Generador de Código](#elementos-generador)
-III. [Estrategias para Identificar los Objetivos de Generación](#estrategias-identificacion)
-IV. [Implementación práctica](#implementacion-practica)
-V. [Testeando el generador de código](#testeando-generador)
-VI. [El rendimiento que ofrece la caché](#rendimiento-cache)
+II. [Implementación práctica](#implementacion-practica)
+III. [Testeando el generador de código](#testeando-generador)
+IV. [El rendimiento que ofrece la caché](#rendimiento-cache)
   - A. [El Motor de Caché: Memoización en el Pipeline](#motor-cache)
   - B. [`ISymbol`: Su efecto en el Rendimiento](#isymbol-rendimiento)
   - C. [Mejor Práctica: El Patrón del DTO Equatable](#patron-dto-equatable)
   - D. [Optimizar la Estructura del Pipeline](#optimizar-pipeline)
   - E. [Tabla: Mejores Prácticas de Caché para Generadores Incrementales](#tabla-mejores-practicas)
   
-VII. [Conclusión y Recomendaciones Finales](#conclusion-recomendaciones)
+V. [Conclusión y Recomendaciones Finales](#conclusion-recomendaciones)
 
 La metaprogramación es la capacidad de un programa de tratar a otros programas (o a sí mismo) como datos. Esto ha permitido la evolución de los frameworks a lo largo de los años. .NET provee múltiples técnicas con este propósito, como la reflexión (runtime reflection), y las plantillas de texto (T4 templates). Sin embargo, ambos enfoques presentan sus inconvenientes introduciendo una penalización en el rendimiento, durante el arranque en frío de la aplicación o durante su ejecución, ya que en el caso de la reflexión, el framework debe analizar el código durante el tiempo de ejecución, lo que conlleva un costo fijo extra de tiempo que no es posible optimizar.
 
@@ -115,7 +115,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
 
 <div id="elementos-generador">
 
-## II. Elementos de un Generador de Código
+## E. Elementos de un Generador de Código
 
 
 1.  **El Punto de Entrada**
@@ -136,7 +136,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
 
 <div id="estrategias-identificacion">
 
-## III. Estrategias para Identificar los Objetivos de Generación
+## F. Estrategias para Identificar los Objetivos de Generación
 
 Existen varias estrategias para identificar los elementos del código que deben desencadenar la generación de código.
 
@@ -168,7 +168,7 @@ Para que el atributo marcador esté disponible en el proyecto consumidor sin nec
 
 <div id="implementacion-practica">
 
-## IV. Implementación práctica
+## II. Implementación práctica
 
 
 En esta sección se demuestra la implementación de un generador de código enfocado en registrar repositorios en un contenedor de inyección de dependencias.
@@ -382,7 +382,7 @@ public class RepositoryRegistrationGenerator : IIncrementalGenerator
 
 <div id="testeando-generador">
 
-## V. Testeando el generador de código
+## III. Testeando el generador de código
 
 
 Un generador de código es una pieza de software que debe ser tan robusta y fiable como cualquier otra. Esta sección detalla cómo construir un conjunto de pruebas completo para el generador de registro de repositorios.
@@ -574,7 +574,7 @@ Los pasos para probar la incrementalidad son básicamente los siguientes:
 
 <div id="rendimiento-cache">
 
-## VI. El rendimiento que ofrece la caché
+## IV. El rendimiento que ofrece la caché
 
 
 Entender cómo funciona la caché del generador podría ser la diferencia entre un generador ultrarápido y uno que bloquea el IDE.
@@ -640,7 +640,7 @@ La siguiente tabla resume las reglas críticas de rendimiento, contrastando los 
 
 <div id="conclusion-recomendaciones">
 
-## VII. Conclusión y Recomendaciones Finales
+## V. Conclusión y Recomendaciones Finales
 
   
 El viaje a través de los generadores de código incrementales revela una tecnología que es a la vez poderosa y matizada. `IIncrementalGenerator` se ha consolidado como el pilar de la metaprogramación en tiempo de compilación en .NET, no solo como una optimización, sino como un habilitador fundamental para la dirección estratégica de la plataforma hacia el rendimiento, la eficiencia y la compatibilidad con AOT.
