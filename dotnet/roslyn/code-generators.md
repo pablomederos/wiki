@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T13:34:02.773Z
+date: 2025-06-24T15:21:44.508Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -50,7 +50,7 @@ La idea central de este artículo, es entender qué es un generadore de código 
 <br>
 
 1.  **Mejora del rendimiento**
-    Como se mencionó anteriormente, ahora en lugar de realizar un análisis durante el tiempo de ejecución, la carga se desplaza al tiempo de compilación, reduciendo así el arranque de las aplicación, y la respuesta general durante la ejecución normal de un proceso.
+    Como se mencionó anteriormente, ahora en lugar de realizar un análisis durante el tiempo de ejecución, la carga se desplaza al tiempo de compilación, reduciendo así el arranque de las aplicaciones, y la respuesta general durante la ejecución normal de un proceso.
       Ejemplo de una implementación actual que ofrece los beneficios antes mencionados, es el atributo `GeneratedRegexAttribute`, introducido en **.NET 7**, evita la compilación de una expresión regular en tiempo de ejecución, generando código en tiempo de compilación, optimizado, que evalúa las coinidencias, resultando en una mejora drástica en el rendimiento. Otro ejemplo podría ser el atributo [`LibraryImport`](https://www.google.com/search?q=%5Bhttps://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation%5D\(https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke-source-generation\)), que viene a ser un sustituto a `DllImport`, así como también, son ejemplo las técnicas avanzadas que utiliza actualmente Blazor para convertir los templates razor a clases generadas, especializadas en la generación de documentos HTML.
       
 2.  **Eliminación de código repetivo (Boilerplate)**
