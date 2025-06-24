@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T00:26:34.554Z
+date: 2025-06-24T00:27:51.063Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -115,7 +115,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
 
 <div id="elementos-generador">
 
-## E. Elementos de un Generador de Código
+### E. Elementos de un Generador de Código
 
 
 1.  **El Punto de Entrada**
@@ -136,7 +136,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
 
 <div id="estrategias-identificacion">
 
-## F. Estrategias para Identificar los Objetivos de Generación
+### F. Estrategias para Identificar los Objetivos de Generación
 
 Existen varias estrategias para identificar los elementos del código que deben desencadenar la generación de código.
 
