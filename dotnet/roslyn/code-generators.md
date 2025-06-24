@@ -2,13 +2,13 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T00:30:34.841Z
+date: 2025-06-24T00:30:48.794Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
 ---
 
-# Code Generators con Roslyn
+# Generadores de código con Roslyn
 
 I. [Generación incremental: Fundamento y aplicación](#generacion-incremental-fundamento-y-aplicacion)
   - A. [Ventajas fundamentales de la generación de código en tiempo de compilación](#ventajas-fundamentales)
