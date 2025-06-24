@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T19:29:36.911Z
+date: 2025-06-24T19:34:28.027Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -482,96 +482,95 @@ Los pasos para probar la incrementalidad son básicamente los siguientes:
 
   - **Aserción sobre el Motivo de la Ejecución**: Se obtiene el resultado de la segunda ejecución y se comprueba el motivo (**Reason**) por el que se ejecutaron los pasos. Si la caché funcionó, el motivo debería ser `IncrementalStepRunReason.Cached` o `IncrementalStepRunReason.Unchanged`.
 
-    ```csharp
-    public class RepositoryRegistrationGeneratorTests
-    {   
-        [Fact]
-        public void IncrementalGenerator_CachesOutputs()
-        {
-            // 1. Arrange: Definir el código fuente de entrada
-            const string initialSource = $$"""
-                                           using {{RepositoryMarker.MarkerNamespace}};
-                                           namespace MyApplication.Data
-                                           {
-                                               public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
-                                           }
-                                           """;
-            SyntaxTree initialSyntaxTree = CSharpSyntaxTree.ParseText(initialSource, path: "TestFile.cs");
-            var initialCompilation = CSharpCompilation.Create(
-                "IncrementalTestAssembly",
-                [ initialSyntaxTree ],
-                [ MetadataReference
-                    .CreateFromFile( typeof(object).Assembly.Location ) 
-                ]
-            );
+```csharp
+public class RepositoryRegistrationGeneratorTests
+{   
+    [Fact]
+    public void IncrementalGenerator_CachesOutputs()
+    {
+        // 1. Arrange: Definir el código fuente de entrada
+        const string initialSource = $$"""
+                                       using {{RepositoryMarker.MarkerNamespace}};
+                                       namespace MyApplication.Data
+                                       {
+                                           public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+                                       }
+                                       """;
+        SyntaxTree initialSyntaxTree = CSharpSyntaxTree.ParseText(initialSource, path: "TestFile.cs");
+        var initialCompilation = CSharpCompilation.Create(
+            "IncrementalTestAssembly",
+            [ initialSyntaxTree ],
+            [ MetadataReference
+                .CreateFromFile( typeof(object).Assembly.Location ) 
+            ]
+        );
 
-            // 2. Act: Ejecutar el generador
-            var generator = new RepositoryRegistrationGenerator();
-            GeneratorDriver driver = CSharpGeneratorDriver
-                .Create(
-                    generators: [generator.AsSourceGenerator() ],
-                    driverOptions: new GeneratorDriverOptions(
-                        IncrementalGeneratorOutputKind.None, 
-                        trackIncrementalGeneratorSteps: true
-                        )
+        // 2. Act: Ejecutar el generador
+        var generator = new RepositoryRegistrationGenerator();
+        GeneratorDriver driver = CSharpGeneratorDriver
+            .Create(
+                generators: [generator.AsSourceGenerator() ],
+                driverOptions: new GeneratorDriverOptions(
+                    IncrementalGeneratorOutputKind.None, 
+                    trackIncrementalGeneratorSteps: true
+                    )
 
-                )
-                .RunGenerators(initialCompilation);
+            )
+            .RunGenerators(initialCompilation);
 
             
-            // 3. Arrange: Agregar una clase que no es registrable
-            const string modifiedSource = $$"""
-                                              using {{RepositoryMarker.MarkerNamespace}};
-                                              namespace MyApplication.Data
-                                              {
-                                                  public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+        // 3. Arrange: Agregar una clase que no es registrable
+        const string modifiedSource = $$"""
+                                          using {{RepositoryMarker.MarkerNamespace}};
+                                          namespace MyApplication.Data
+                                          {
+                                              public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
                                                   
-                                                  // Este cambio no debería provocar la regeneración de la salida
-                                                  // porque la clase no implementa la interfaz del marcador.
-                                                  public class NotARelevantChange { }
-                                              }
-                                              """;
-            SyntaxTree modifiedSyntaxTree = CSharpSyntaxTree
-                .ParseText(modifiedSource, path: "TestFile.cs");
-            CSharpCompilation incrementalCompilation = initialCompilation
-                .ReplaceSyntaxTree(initialSyntaxTree, modifiedSyntaxTree);
+                                              // Este cambio no debería provocar la regeneración de la salida
+                                              // porque la clase no implementa la interfaz del marcador.
+                                              public class NotARelevantChange { }
+                                          }
+                                          """;
+        SyntaxTree modifiedSyntaxTree = CSharpSyntaxTree
+            .ParseText(modifiedSource, path: "TestFile.cs");
+        CSharpCompilation incrementalCompilation = initialCompilation
+            .ReplaceSyntaxTree(initialSyntaxTree, modifiedSyntaxTree);
             
             
-            // 4. Act: Ejecutar el generador
-            driver = driver.RunGenerators(incrementalCompilation);
-            GeneratorRunResult result = driver
-                .GetRunResult()
-                .Results
-                .Single();
+        // 4. Act: Ejecutar el generador
+        driver = driver.RunGenerators(incrementalCompilation);
+        GeneratorRunResult result = driver
+            .GetRunResult()
+            .Results
+            .Single();
             
+  
+        // 5. Assert: El paso [CheckClassDeclarations]
             
-            // 5. Assert: El paso [CheckClassDeclarations]
+        var allOutputs = result
+            .TrackedOutputSteps
+            .SelectMany(outputStep => outputStep.Value)
+            .SelectMany(output => output.Outputs);
             
-            var allOutputs = result
-                .TrackedOutputSteps
-                .SelectMany(outputStep => outputStep.Value)
-                .SelectMany(output => output.Outputs);
+        (object Value, IncrementalStepRunReason Reason) output = Assert.Single(allOutputs);
+        Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
             
-            (object Value, IncrementalStepRunReason Reason) output = Assert.Single(allOutputs);
-            Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
+        var assemblyNameOutputs = result
+            .TrackedSteps["CheckClassDeclarations"]
+            .SelectMany(it => it.Outputs);
             
-            var assemblyNameOutputs = result
-                .TrackedSteps["CheckClassDeclarations"]
-                .SelectMany(it => it.Outputs);
+        output = Assert.Single(assemblyNameOutputs);
+        Assert.Equal(IncrementalStepRunReason.Modified, output.Reason);
+        var syntaxOutputs = result
+            .TrackedSteps["CheckValidClasses"]
+            .Single()
+            .Outputs;
             
-            output = Assert.Single(assemblyNameOutputs);
-            Assert.Equal(IncrementalStepRunReason.Modified, output.Reason);
-            var syntaxOutputs = result
-                .TrackedSteps["CheckValidClasses"]
-                .Single()
-                .Outputs;
-            
-            output = Assert.Single(syntaxOutputs);
-            Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
-        }
-
+        output = Assert.Single(syntaxOutputs);
+        Assert.Equal(IncrementalStepRunReason.Cached, output.Reason);
     }
-    ```
+}
+```
 
 <div id="rendimiento-cache">
 
