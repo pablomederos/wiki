@@ -2,30 +2,30 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-06-24T00:18:57.474Z
+date: 2025-06-24T00:20:26.609Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
 ---
 
-# # Roslyn Source Generators
-
-I. [Generación incremental: Fundamento y aplicación](generacion-incremental-fundamento-y-aplicacion)
-  - A. [Ventajas fundamentales de la generación de código en tiempo de compilación](ventajas-fundamentales)
-  - B. [Casos de uso en el ecosistema .NET](casos-de-uso)
-  - C. [Consideraciones de portabilidad](consideraciones-de-portabilidad)
-  - D. [Evolución de `ISourceGenerator` hacia `IIncrementalGenerator`](evolucion-isourcegenerator)
-II. [Elementos de un Generador de Código](elementos-generador)
-III. [Estrategias para Identificar los Objetivos de Generación](estrategias-identificacion)
-IV. [Implementación práctica](implementacion-practica)
-V. [Testeando el generador de código](testeando-generador)
-VI. [El rendimiento que ofrece la caché](rendimiento-cache)
-  - A. [El Motor de Caché: Memoización en el Pipeline](motor-cache)
-  - B. [`ISymbol`: Su efecto en el Rendimiento](isymbol-rendimiento)
-  - C. [Mejor Práctica: El Patrón del DTO Equatable](patron-dto-equatable)
-  - D. [Optimizar la Estructura del Pipeline](optimizar-pipeline)
-  - E. [Tabla: Mejores Prácticas de Caché para Generadores Incrementales](tabla-mejores-practicas)
-VII. [Conclusión y Recomendaciones Finales](conclusion-recomendaciones)
+I. [Generación incremental: Fundamento y aplicación](#generacion-incremental-fundamento-y-aplicacion)
+  - A. [Ventajas fundamentales de la generación de código en tiempo de compilación](#ventajas-fundamentales)
+  - B. [Casos de uso en el ecosistema .NET](#casos-de-uso)
+  - C. [Consideraciones de portabilidad](#consideraciones-de-portabilidad)
+  - D. [Evolución de `ISourceGenerator` hacia `IIncrementalGenerator`](#evolucion-isourcegenerator)
+  
+II. [Elementos de un Generador de Código](#elementos-generador)
+III. [Estrategias para Identificar los Objetivos de Generación](#estrategias-identificacion)
+IV. [Implementación práctica](#implementacion-practica)
+V. [Testeando el generador de código](#testeando-generador)
+VI. [El rendimiento que ofrece la caché](#rendimiento-cache)
+  - A. [El Motor de Caché: Memoización en el Pipeline](#motor-cache)
+  - B. [`ISymbol`: Su efecto en el Rendimiento](#isymbol-rendimiento)
+  - C. [Mejor Práctica: El Patrón del DTO Equatable](#patron-dto-equatable)
+  - D. [Optimizar la Estructura del Pipeline](#optimizar-pipeline)
+  - E. [Tabla: Mejores Prácticas de Caché para Generadores Incrementales](#tabla-mejores-practicas)
+  
+VII. [Conclusión y Recomendaciones Finales](#conclusion-recomendaciones)
 
 La metaprogramación es la capacidad de un programa de tratar a otros programas (o a sí mismo) como datos. Esto ha permitido la evolución de los frameworks a lo largo de los años. .NET provee múltiples técnicas con este propósito, como la reflexión (runtime reflection), y las plantillas de texto (T4 templates). Sin embargo, ambos enfoques presentan sus inconvenientes introduciendo una penalización en el rendimiento, durante el arranque en frío de la aplicación o durante su ejecución, ya que en el caso de la reflexión, el framework debe analizar el código durante el tiempo de ejecución, lo que conlleva un costo fijo extra de tiempo que no es posible optimizar.
 
