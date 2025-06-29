@@ -1,0 +1,351 @@
+<!--
+title: Preguntar de entrenamiento para examen PSM I
+description: 
+published: false
+date: 2025-06-29T01:44:25.930Z
+tags: 
+editor: code
+dateCreated: 2025-06-29T01:44:25.930Z
+-->
+
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn, .category-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .option-btn.selected {
+            background-color: #3b82f6; /* bg-blue-500 */
+            color: white;
+            border-color: #2563eb; /* border-blue-700 */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .option-btn.correct {
+            background-color: #22c55e; /* bg-green-500 */
+            color: white;
+            border-color: #16a34a; /* border-green-700 */
+        }
+        .option-btn.incorrect {
+            background-color: #ef4444; /* bg-red-500 */
+            color: white;
+            border-color: #dc2626; /* border-red-700 */
+        }
+        .progress-bar-inner {
+            transition: width 0.4s ease-in-out;
+        }
+        .quiz-card-enter {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+<div class="bg-slate-100 text-slate-800 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6 md:p-8">
+
+        <!-- Pantalla de selección de categoría -->
+        <div id="category-selection-screen">
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-center">Bienvenido al Cuestionario PSM I</h1>
+            <p class="text-slate-600 mb-8 text-center">Selecciona una categoría para comenzar o practica con todas las preguntas.</p>
+            <div id="category-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <!-- Botones de categoría se insertarán aquí -->
+            </div>
+             <button id="all-questions-btn" class="category-btn w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700">
+                Practicar con Todas las Preguntas
+            </button>
+        </div>
+
+        <!-- Pantalla del Cuestionario -->
+        <div id="quiz-screen" class="hidden">
+            <div class="flex justify-between items-center mb-4">
+                <h1 id="quiz-title" class="text-xl md:text-2xl font-bold text-slate-900"></h1>
+                <button id="back-to-categories-btn" class="text-sm font-medium text-blue-600 hover:underline">Volver</button>
+            </div>
+            
+             <!-- Barra de Progreso -->
+            <div class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
+                <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+            </div>
+            
+            <div id="progress-container" class="flex justify-between items-center mb-6">
+                <p id="question-counter" class="text-sm font-medium text-slate-600"></p>
+                <div class="flex space-x-4">
+                    <span id="score-correct" class="text-sm font-semibold text-green-600">Correctas: 0</span>
+                    <span id="score-incorrect" class="text-sm font-semibold text-red-600">Incorrectas: 0</span>
+                </div>
+            </div>
+
+            <div id="question-area" class="quiz-card-enter">
+                <p id="question-type" class="text-sm font-semibold text-blue-600 mb-2"></p>
+                <h2 id="question-text" class="text-lg font-semibold text-slate-800 mb-6"></h2>
+                <div id="options-container" class="grid grid-cols-1 gap-4"></div>
+            </div>
+
+            <div id="result-area" class="mt-6 hidden">
+                <div id="result-feedback" class="p-4 rounded-lg">
+                    <h3 id="result-title" class="font-bold text-lg"></h3>
+                    <p id="result-explanation" class="mt-2 text-sm"></p>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button id="check-btn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:bg-slate-300 disabled:cursor-not-allowed">
+                    Comprobar
+                </button>
+                <button id="next-btn" class="w-full sm:w-auto bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition-colors duration-200 hidden">
+                    Siguiente Pregunta
+                </button>
+            </div>
+            
+            <div id="final-screen" class="text-center hidden mt-8">
+                <h2 class="text-2xl font-bold mb-4">¡Cuestionario Completado!</h2>
+                <p class="text-lg mb-2">Tu puntuación final es:</p>
+                <div class="flex justify-center space-x-6">
+                    <span id="final-score-correct" class="text-xl font-bold text-green-600"></span>
+                    <span id="final-score-incorrect" class="text-xl font-bold text-red-600"></span>
+                </div>
+                <button id="restart-btn" class="mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-200">
+                    Elegir otra Categoría
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            // Fundamentos de Scrum
+            { id: 1, category: "Fundamentos de Scrum", type: "Opción Múltiple", question: "¿Sobre qué teoría se fundamenta Scrum?", options: { A: "Gestión Científica", B: "Teoría del Proceso Definido", C: "Empirismo", D: "Lean Manufacturing" }, correct: ["C"], explanation: "La Guía Scrum establece explícitamente que \"Scrum se basa en la teoría de control de procesos empíricos, o empirismo\"." },
+            { id: 2, category: "Fundamentos de Scrum", type: "Selección Múltiple", question: "¿Cuáles son los tres pilares que sostienen toda implementación del control de procesos empíricos? (Elija tres)", options: { A: "Transparencia", B: "Inspección", C: "Colaboración", D: "Adaptación", E: "Planificación" }, correct: ["A", "B", "D"], explanation: "La Guía Scrum identifica la Transparencia, la Inspección y la Adaptación como los tres pilares del empirismo." },
+            { id: 14, category: "Fundamentos de Scrum", type: "Opción Múltiple", question: "Cuando los Developers se comprometen con un Sprint Goal, ¿a qué se están comprometiendo?", options: { "A": "A completar cada Product Backlog Item seleccionado.", "B": "A trabajar juntos para hacer el mejor progreso posible hacia el Sprint Goal.", "C": "A no cambiar nada en el Sprint Backlog.", "D": "A trabajar horas extras si es necesario." }, correct: ["B"], explanation: "El valor de Compromiso en Scrum se refiere a comprometerse con los objetivos del equipo y apoyarse mutuamente." },
+            
+            // El Scrum Team y sus Responsabilidades
+            { id: 26, category: "El Scrum Team", type: "Opción Múltiple", question: "¿Quién es el responsable final de la gestión del Product Backlog?", options: { A: "El Scrum Master", B: "Los Developers", C: "El Product Owner", D: "Los Stakeholders" }, correct: ["C"], explanation: "El Product Owner es el único responsable final de la gestión eficaz del Product Backlog, aunque puede delegar el trabajo." },
+            { id: 31, category: "El Scrum Team", type: "Opción Múltiple", question: "¿Cuál es el tamaño recomendado para un Scrum Team?", options: { "A": "De 3 a 9 miembros.", "B": "Típicamente 10 o menos personas.", "C": "Al menos 5 personas.", "D": "No hay recomendación." }, correct: ["B"], explanation: "La Guía Scrum 2020 establece: \"El Scrum Team es... típicamente de 10 o menos personas\". Los equipos más pequeños se comunican mejor." },
+
+            // Eventos de Scrum
+            { id: 51, category: "Eventos de Scrum", type: "Opción Múltiple", question: "¿Cuál es la duración máxima de un Sprint?", options: { A: "2 semanas", B: "1 mes", C: "6 semanas", D: "Depende del proyecto" }, correct: ["B"], explanation: "La Guía Scrum establece que los Sprints son eventos de duración fija de un mes o menos para crear consistencia." },
+            { id: 57, category: "Eventos de Scrum", type: "Opción Múltiple", question: "¿Cuál es el resultado principal de una Sprint Review?", options: { A: "Aceptación formal del Incremento.", B: "Un plan de mejora.", C: "Un Product Backlog revisado.", D: "Evaluación del rendimiento." }, correct: ["C"], explanation: "El resultado de la Sprint Review es un Product Backlog revisado que define los probables elementos para el próximo Sprint." },
+
+            // Artefactos y Compromisos
+            { id: 76, category: "Artefactos y Compromisos", type: "Opción Múltiple", question: "¿Cuál es el compromiso asociado con el Product Backlog?", options: { A: "El Sprint Goal", B: "La Definition of Done", C: "El Product Goal", D: "La Visión del Producto" }, correct: ["C"], explanation: "El Product Goal es el compromiso del Product Backlog. Describe un estado futuro del producto." },
+            { id: 79, category: "Artefactos y Compromisos", type: "Selección Múltiple", question: "¿Qué tres afirmaciones son ciertas sobre la Definition of Done (DoD)? (Elija tres)", options: { A: "Asegura que el Incremento sea de calidad utilizable.", B: "Es creada solo por el Scrum Master.", C: "Aumenta la transparencia.", D: "Si hay múltiples equipos, deben compartir la misma DoD.", E: "No se puede cambiar." }, correct: ["A", "C", "D"], explanation: "La DoD asegura calidad, aumenta la transparencia, y debe ser compartida por equipos en el mismo producto." },
+            
+            // Temas Avanzados
+            { id: 152, category: "Temas Avanzados", type: "Verdadero/Falso", question: "Un \"Sprint Cero\" es una práctica recomendada en Scrum para realizar toda la configuración inicial.", options: { A: "Verdadero", B: "Falso" }, correct: ["B"], explanation: "El concepto de \"Sprint Cero\" es un anti-patrón. El primer Sprint debe usarse para entregar un Incremento de producto utilizable." },
+        ];
+
+        const categories = [...new Set(quizData.map(q => q.category))];
+        
+        // Elementos del DOM
+        const categorySelectionScreen = document.getElementById('category-selection-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const categoryButtonsContainer = document.getElementById('category-buttons');
+        const allQuestionsBtn = document.getElementById('all-questions-btn');
+        const backToCategoriesBtn = document.getElementById('back-to-categories-btn');
+        
+        const quizTitleEl = document.getElementById('quiz-title');
+        const progressBarEl = document.getElementById('progress-bar');
+        const questionCounterEl = document.getElementById('question-counter');
+        const scoreCorrectEl = document.getElementById('score-correct');
+        const scoreIncorrectEl = document.getElementById('score-incorrect');
+        const questionAreaEl = document.getElementById('question-area');
+        const questionTypeEl = document.getElementById('question-type');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const resultAreaEl = document.getElementById('result-area');
+        const resultFeedbackEl = document.getElementById('result-feedback');
+        const resultTitleEl = document.getElementById('result-title');
+        const resultExplanationEl = document.getElementById('result-explanation');
+        const checkBtn = document.getElementById('check-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const finalScreenEl = document.getElementById('final-screen');
+        const finalScoreCorrectEl = document.getElementById('final-score-correct');
+        const finalScoreIncorrectEl = document.getElementById('final-score-incorrect');
+        const restartBtn = document.getElementById('restart-btn');
+
+        // Estado del cuestionario
+        let state = {};
+
+        function resetState() {
+             state = {
+                currentQuestionIndex: 0,
+                score: { correct: 0, incorrect: 0 },
+                selectedAnswers: [],
+                activeQuizData: [],
+                currentCategory: null,
+            };
+        }
+
+        function init() {
+            resetState();
+            localStorage.removeItem('psmQuizState');
+            categoryButtonsContainer.innerHTML = '';
+            categories.forEach(category => {
+                const btn = document.createElement('button');
+                btn.textContent = category;
+                btn.className = 'category-btn w-full bg-slate-200 text-slate-800 font-bold py-3 px-6 rounded-lg hover:bg-slate-300';
+                btn.addEventListener('click', () => startQuiz(category));
+                categoryButtonsContainer.appendChild(btn);
+            });
+            categorySelectionScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+        }
+
+        function startQuiz(category) {
+            state.currentCategory = category;
+            if (category === 'all') {
+                state.activeQuizData = quizData;
+                quizTitleEl.textContent = 'Todas las Preguntas';
+            } else {
+                state.activeQuizData = quizData.filter(q => q.category === category);
+                quizTitleEl.textContent = category;
+            }
+            categorySelectionScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            finalScreenEl.classList.add('hidden');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            if (state.currentQuestionIndex >= state.activeQuizData.length) {
+                showFinalScreen();
+                return;
+            }
+
+            questionAreaEl.classList.remove('quiz-card-enter');
+            void questionAreaEl.offsetWidth; // Trigger reflow
+            questionAreaEl.classList.add('quiz-card-enter');
+            
+            const question = state.activeQuizData[state.currentQuestionIndex];
+            
+            // Actualizar progreso
+            const progress = ((state.currentQuestionIndex) / state.activeQuizData.length) * 100;
+            progressBarEl.style.width = `${progress}%`;
+            
+            questionCounterEl.textContent = `Pregunta ${state.currentQuestionIndex + 1} de ${state.activeQuizData.length}`;
+            questionTypeEl.textContent = question.type;
+            questionTextEl.textContent = question.question;
+            
+            optionsContainerEl.innerHTML = '';
+            for (const key in question.options) {
+                const optionBtn = document.createElement('button');
+                optionBtn.dataset.key = key;
+                optionBtn.className = 'option-btn w-full text-left p-4 border-2 border-slate-300 rounded-lg hover:bg-slate-100 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-400';
+                optionBtn.innerHTML = `<span class="font-bold mr-2">${key}.</span> ${question.options[key]}`;
+                optionBtn.addEventListener('click', () => toggleOption(optionBtn, question.type));
+                optionsContainerEl.appendChild(optionBtn);
+            }
+            
+            updateScores();
+            resetButtons();
+            checkBtn.disabled = true;
+        }
+
+        function toggleOption(button, type) {
+            const key = button.dataset.key;
+            if (type === 'Opción Múltiple' || type === 'Verdadero/Falso') {
+                document.querySelectorAll('.option-btn.selected').forEach(btn => btn.classList.remove('selected'));
+                button.classList.add('selected');
+                state.selectedAnswers = [key];
+            } else { // Selección Múltiple
+                button.classList.toggle('selected');
+                state.selectedAnswers = [...document.querySelectorAll('.option-btn.selected')].map(btn => btn.dataset.key);
+            }
+            checkBtn.disabled = state.selectedAnswers.length === 0;
+        }
+        
+        function checkAnswer() {
+            const question = state.activeQuizData[state.currentQuestionIndex];
+            const correctAnswers = question.correct.sort();
+            const selectedAnswers = state.selectedAnswers.sort();
+
+            const isCorrect = JSON.stringify(correctAnswers) === JSON.stringify(selectedAnswers);
+            
+            if (isCorrect) {
+                state.score.correct++;
+                resultTitleEl.textContent = "¡Correcto!";
+                resultFeedbackEl.className = 'p-4 rounded-lg bg-green-100 text-green-800';
+                resultExplanationEl.textContent = question.explanation;
+            } else {
+                state.score.incorrect++;
+                resultTitleEl.textContent = "Incorrecto";
+                resultFeedbackEl.className = 'p-4 rounded-lg bg-red-100 text-red-800';
+                resultExplanationEl.textContent = `La(s) respuesta(s) correcta(s) era(n) ${question.correct.join(', ')}. ${question.explanation}`;
+            }
+
+            highlightAnswers(question);
+            updateScores();
+            showResult();
+        }
+
+        function highlightAnswers(question) {
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                const key = btn.dataset.key;
+                btn.disabled = true;
+                if (question.correct.includes(key)) {
+                    btn.classList.add('correct');
+                    btn.classList.remove('selected');
+                } else if (state.selectedAnswers.includes(key)) {
+                    btn.classList.add('incorrect');
+                }
+            });
+        }
+        
+        function updateScores() {
+            scoreCorrectEl.textContent = `Correctas: ${state.score.correct}`;
+            scoreIncorrectEl.textContent = `Incorrectas: ${state.score.incorrect}`;
+        }
+        
+        function showResult() {
+            resultAreaEl.classList.remove('hidden');
+            checkBtn.classList.add('hidden');
+            nextBtn.classList.remove('hidden');
+        }
+
+        function resetButtons() {
+            resultAreaEl.classList.add('hidden');
+            checkBtn.classList.remove('hidden');
+            nextBtn.classList.add('hidden');
+            checkBtn.disabled = true;
+            state.selectedAnswers = [];
+        }
+
+        function goToNextQuestion() {
+            state.currentQuestionIndex++;
+             const progress = ((state.currentQuestionIndex) / state.activeQuizData.length) * 100;
+            progressBarEl.style.width = `${progress}%`;
+            
+            if (state.currentQuestionIndex >= state.activeQuizData.length) {
+                showFinalScreen();
+            } else {
+                renderQuestion();
+            }
+        }
+        
+        function showFinalScreen() {
+            questionAreaEl.classList.add('hidden');
+            document.getElementById('progress-container').classList.add('hidden');
+            checkBtn.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            progressBarEl.parentElement.classList.add('hidden');
+
+            finalScoreCorrectEl.textContent = `Correctas: ${state.score.correct}`;
+            finalScoreIncorrectEl.textContent = `Incorrectas: ${state.score.incorrect}`;
+            finalScreenEl.classList.remove('hidden');
+        }
+
+        // Event Listeners
+        allQuestionsBtn.addEventListener('click', () => startQuiz('all'));
+        backToCategoriesBtn.addEventListener('click', init);
+        restartBtn.addEventListener('click', init);
+        checkBtn.addEventListener('click', checkAnswer);
+        nextBtn.addEventListener('click', goToNextQuestion);
+        
+        // Iniciar la aplicación
+        init();
+    </script>
+</div>
