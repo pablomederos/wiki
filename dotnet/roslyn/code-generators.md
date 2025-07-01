@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-01T22:54:58.611Z
+date: 2025-07-01T23:02:18.026Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -69,11 +69,11 @@ Posiblemente una de las ventajas más importantes (al menos para este servidor),
 Al tratar con generadores de código, no se trata de algo aislado o para algunos pocos, sino que actualmente están íntimamente integrados en la plataforma **.NET**.
 
 1.  **Serializador `System.Text.Json`**
-El serializador **JSON** integrado en .NET es un claro ejemplo de caso de uso. Mediante el uso del atributo `JsonSerializableAttribute` aplicado a una clase parcial que extienda de `JsonSerializerContext`, es posible activar un generador de código que analiza los tipos y produce lógica de serialización y deserialización muy optimizada en tiempo de compilación. Esto tiene como resultado una [mejora del rendimiento de hasta un 40%](https://okyrylchuk.dev/blog/intro-to-serialization-with-source-generation-in-system-text-json/) en el arranque gracias a evitar el uso de la reflexión.
+El serializador de **JSON** integrado en .NET es un ejemplo impecable de caso de uso. Usando el atributo [`JsonSerializableAttribute`](https://learn.microsoft.com/es-es/dotnet/api/system.text.json.serialization.jsonserializableattribute?view=net-8.0) en una clase parcial que extienda de `JsonSerializerContext`, es posible activar un generador de código que analiza nuestras clases y genera lógica de serialización y deserialización óptima durante la compilación. Esto tiene como resultado una mejora del rendimiento de hasta un 40% gracias a evitar el uso de la reflexión. [Me remito a estos tests](https://okyrylchuk.dev/blog/intro-to-serialization-with-source-generation-in-system-text-json/).
 
 **El generador utiliza dos modos de operación:**
-  - **Modo basado en metadatos**: Recolecta de antemano los metadatos necesarios de los tipos, para acelerar la serialización y deserialización.
-  - **Modo de optimización de serialización**: Genera el código utilizando `Utf8JsonWriter` directamente, ofreciendo el máximo rendimiento posible de serialización. Este modo es más restrictivo y no soporta todas las opciones de personalización.
+  - **Modo basado en metadatos**: Recolecta previamente los metadatos necesarios de los tipos para acelerar la serialización y deserialización.
+  - **Modo de optimización de serialización**: Genera el código utilizando `Utf8JsonWriter` directamente, el mayor rendimiento de serialización, pero es más restrictivo y no soporta todas las opciones de personalización.
 > Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
   
 2. **ASP.NET Core y Native AOT**
