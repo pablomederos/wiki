@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-01T23:15:36.339Z
+date: 2025-07-01T23:16:49.489Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -82,7 +82,7 @@ Otro caso interesante puede ser el de ASP.NET Core que utiliza el generador inco
 > Más detalles en: [Convierta los métodos de mapa en delegados de solicitudes con el generador de delegados de solicitudes de ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/core/fundamentals/aot/request-delegate-generator/rdg?view=aspnetcore-8.0)
   
 3. **Inyección de dependencias**
-Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
+Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) implemenan el uso de generadores de código, generando el grafo de dependencias durante la compilación, detectando en esta misma fase qué dependencias que aún no fueron implementadas o están incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
   
 
 <div id="consideraciones-de-portabilidad">
