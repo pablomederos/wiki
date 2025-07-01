@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-01T23:02:18.026Z
+date: 2025-07-01T23:15:36.339Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -77,8 +77,10 @@ El serializador de **JSON** integrado en .NET es un ejemplo impecable de caso de
 > Más detalles en [Microsoft Learn: serialization/system text json/source generation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/source-generation)
   
 2. **ASP.NET Core y Native AOT**
-ASP.NET Core utiliza el generador incorporado `RequestDelegateGenerator`, para hacer que las Minimal APIs sean compatibles con **Native AOT**. Esta característica hace uso de los `interceptors`, que se tratarán a detalle en otro artículo. Pero básicamente, intercepta las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. El producto de esto es un ejecutable nativo y altamente optimizado.
-  
+Otro caso interesante puede ser el de ASP.NET Core que utiliza el generador incorporado `RequestDelegateGenerator`. Esto hace que las Minimal APIs sean compatibles con **Native AOT**. Para esto se hace uso de los `interceptors`, que se tratarán a detalle en otro artículo (cuando reúna suficiente experiencia, ya que es aún preliminar y no he ahondado suficiente en el tema). Pero básicamente, intercepta las llamadas a `app.MapGet()` que normalmente dependerían de reflexión, reemplazándolas por lógica precompilada. Esto además de maximizar el rendimiento, aumenta también la portabilidad del código.
+  
+> Más detalles en: [Convierta los métodos de mapa en delegados de solicitudes con el generador de delegados de solicitudes de ASP.NET Core](https://learn.microsoft.com/es-es/aspnet/core/fundamentals/aot/request-delegate-generator/rdg?view=aspnetcore-8.0)
+  
 3. **Inyección de dependencias**
 Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI](https://github.com/DevTeam/Pure.DI), [Injectio](https://github.com/loresoft/Injectio), [Jab](https://github.com/pakrym/jab), [StrongInject](https://github.com/YairHalberstadt/stronginject) [*algunos más activos que otros*]) han adoptado el uso de generadores de código, permitiendo generar el grafo de dependencias durante la compilación además de detectar en esta misma fase, aquellas dependencias que aún no fueron implementadas o que se encuentran incompletas. Esto reduce la probabilidad de recibir excepciones en tiempo de ejecución, y sin mencionar la mejora en el rendimiento.
   
