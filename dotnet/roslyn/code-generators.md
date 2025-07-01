@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-01T22:09:32.069Z
+date: 2025-07-01T22:21:30.410Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -29,9 +29,9 @@ IV. [El rendimiento que ofrece la caché](#rendimiento-cache)
   
 V. [Conclusión y Recomendaciones Finales](#conclusion-recomendaciones)
 
-La metaprogramación es la capacidad de un programa de tratar a otros programas (o a sí mismo) como datos, como veremos en los siguientes párrafos. Esto ha permitido la evolución de los frameworks a lo largo de los años. .NET provee múltiples técnicas con este propósito, como la reflexión ([runtime reflection](https://learn.microsoft.com/es-es/dotnet/fundamentals/reflection/reflection)), y las plantillas de texto ([T4 templates](https://learn.microsoft.com/en-us/visualstudio/modeling/code-generation-and-t4-text-templates?view=vs-2022)). Sin embargo, ambos enfoques presentan sus inconvenientes introduciendo una penalización en el rendimiento, durante el arranque en frío de la aplicación o durante su ejecución, ya que en el caso de la reflexión, el framework debe analizar el código durante el tiempo de ejecución, resultando en un costo fijo extra de tiempo que no es posible optimizar.
+Metaprogramación es la forma en que un programa de tratar a otros programas (o a sí mismo) como datos, como veremos en los siguientes párrafos. Esto ha permitido el desarrollo de los frameworks a lo largo de los años. Para suerte de quienes nos dedicamos a esto .NET provee múltiples técnicas para este fin, como la reflexión ([runtime reflection](https://learn.microsoft.com/es-es/dotnet/fundamentals/reflection/reflection)), y las plantillas T4 ([T4 templates](https://learn.microsoft.com/en-us/visualstudio/modeling/code-generation-and-t4-text-templates?view=vs-2022)). Sin embargo, ambos enfoques presentan desventajas en cuanto al rendimiento, durante el arranque en frío de la aplicación o su ejecución, ya que en el caso de la reflexión, el framework debe analizar el código durante el tiempo de ejecución, resultando en un costo fijo extra de tiempo que no es posible optimizar (o al menos no al nivel del código compilado).
 
-Con la llegada de la plataforma de compilación llamada [`Roslyn`](https://github.com/dotnet/roslyn), se pasó de una "caja negra" a una plataforma abierta con apis para el análisis y la generación de código. Esto llevó, entre otras cosas, al surgimiento de los **Source Generators**. Se trata de un componente que analiza el código en tiempo de compilación y produce archivos fuente adicionales, que se compilan con el resto del código.
+Gracias a la llegada del compilador [`Roslyn`](https://github.com/dotnet/roslyn), se pasó de trabajar en "caja negra" a hacerlo sobre una plataforma abierta con apis para análisis y generación de código. Como resultado, al surgimiento de los **Source Generators**. Se trata de un componente que analiza el código en tiempo de compilación y produce archivos fuente adicionales, que se compilan con el resto del código.
 
 La idea central de este artículo, es entender qué es un generador de código incremental, cómo este mejora el rendimiento de la aplicación y mejora la relación entre el desarrollador y el código, así como también, presentar al ahora estándar de metaprogramación en tiempo de compilación de C#, para el desarrollo de bibliotecas modernas y de alto rendimiento.
 
