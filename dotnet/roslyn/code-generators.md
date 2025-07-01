@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-01T23:16:49.489Z
+date: 2025-07-01T23:22:52.876Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -90,16 +90,16 @@ Muchos contenedores de Inyección de Dependencias de alto rendimiento ([Pure.DI]
 ### C. Consideraciones de portabilidad
 
 
-Al desarrollar un generador de código, se requiere tener en cuenta el entorno en el que se ejecutará.
+En lo tocante a desarrollar un generador de código, hay que tener en cuenta el entorno en el que se va a ejecutar.
 
 1.  **Framework de destino (Target Framework)**
-Es importante que el proyecto generador tenga como framework de destino `netstandard2.0` para maximizar la compatibilidad con diferentes versiones de **Visual Studio**, **MSBuild**, el **SDK de .NET** e incluso algunos otros IDEs.
+Es importante que el proyecto del generador tenga como framework de destino `netstandard2.0` para maximizar la compatibilidad con diferentes versiones de **Visual Studio**, **MSBuild**, el **SDK de .NET** e incluso algunos otros IDEs.
       
 2.  **IDE vs. Compilación en Línea de Comandos**
-El pipeline incremental, así como el sistema de caché (que se tratará más adelante en este artículo), están diseñados principalmente para maximizar la experiencia en un IDE (**Visual Studio**, **Rider**, etc.), ofreciendo una retroalimentación inmediata al desarrollador. En caso de usarse la línea de comandos, este proceso de compilación no será automático y probablemente requiera el desarrollo de un script que mejore esta experiencia. Editores como **Visual Studio Code** y derivados podrían ya contar con soporte integrado mediante las extensiones oficiales de **.NET** y **C\#** ([C\# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) u otras).
+El pipeline incremental, así como el sistema de caché (que se tratará más adelante en este artículo), se benefician mucho del IDE (**Visual Studio**, **Rider**, etc.), ofreciendo una retroalimentación inmediata al desarrollador y mejorando la experiencia de desarrollo. En caso de usarse la línea de comandos, este proceso de compilación no será automático y probablemente requiera agregar algún script que mejore la experiencia (realemente hará falta). Editores como **Visual Studio Code** y derivados podrían contar con soporte integrado mediante las extensiones oficiales de **.NET** y **C\#** ([C\# Dev Kit](https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.csdevkit) u otras), pero sin estas extensiones, hay que tener en cuenta que el código no se irá generando frecuentemente, o al mínimo cambio, sino hasta que se produzca una compilación.
       
 3.  **Entornos multiplataforma**
-El desarrollo en **Unity** u otras plataformas podría requerir configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual.
+El desarrollo en **Unity** u otras plataformas seguramente puede requerir alguna configuración adicional para que se reconozcan los generadores como un componente de compilación. Cada cual lo tendrá seguramente documentado para cada caso puntual, así que no voy a ahondar en el tema, pero lo menciono para no dejarlo como algo arbitrario.
       
 
 <div id="evolucion-isourcegenerator">
