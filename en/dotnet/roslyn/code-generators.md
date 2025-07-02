@@ -1,8 +1,8 @@
 ---
-title: Metaprogramación con Generadores de código
+title: Metaprograming with Code Generators
 description: 
 published: false
-date: 2025-07-02T20:08:10.116Z
+date: 2025-07-02T20:08:30.791Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
