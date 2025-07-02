@@ -2,7 +2,7 @@
 title: Metaprograming with Code Generators
 description: A comprehensive guide to code generation using the Roslyn compiler APIs
 published: true
-date: 2025-07-02T20:12:29.738Z
+date: 2025-07-02T20:25:08.205Z
 tags: asp.net core, aot compilation, minimal apis, iincrementalgenerator, isourcegenerator, system.text.json, dependency injection, dto pattern, unit test, snapshot testing, caching, memoization
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
@@ -11,22 +11,23 @@ dateCreated: 2025-07-02T20:05:08.179Z
 # Code Generators with Roslyn
 
 I. [Incremental Generation: Foundation and Application](#incremental-generation-foundation-and-application)
-  - A. [Fundamental advantages of compile-time code generation](#fundamental-advantages)
-  - B. [Use cases in the .NET ecosystem](#use-cases)
-  - C. [Portability considerations](#portability-considerations)
-  - D. [Evolution from `ISourceGenerator` to `IIncrementalGenerator`](#isourcegenerator-evolution)
-  - E. [Elements of a Code Generator](#generator-elements)
-  - F. [Strategies for Identifying Generation Targets](#identification-strategies)
-  
+  - A. [Fundamental advantages of compile-time code generation](#fundamental-advantages)
+  - B. [Use cases in the .NET ecosystem](#use-cases)
+  - C. [Portability considerations](#portability-considerations)
+  - D. [Evolution from `ISourceGenerator` to `IIncrementalGenerator`](#isourcegenerator-evolution)
+  - E. [Elements of a Code Generator](#generator-elements)
+  - F. [Strategies for Identifying Generation Targets](#identification-strategies)
+
 II. [Practical Implementation](#practical-implementation)
 III. [Testing the code generator](#testing-generator)
 IV. [The performance offered by the cache](#cache-performance)
-  - A. [The Cache Engine: Memoization in the Pipeline](#cache-engine)
-  - B. [`ISymbol`: Its Effect on Performance](#isymbol-performance)
-  - C. [Best Practice: The Equatable DTO Pattern](#equatable-dto-pattern)
-  - D. [Optimizing the Pipeline Structure](#optimizing-pipeline)
-  - E. [Table: Cache Best Practices for Incremental Generators](#table-best-practices)
-  
+	
+  - A. [The Cache Engine: Memoization in the Pipeline](#cache-engine)
+  - B. [`ISymbol`: Its Effect on Performance](#isymbol-performance)
+  - C. [Best Practice: The Equatable DTO Pattern](#equatable-dto-pattern)
+  - D. [Optimizing the Pipeline Structure](#optimizing-pipeline)
+  - E. [Table: Cache Best Practices for Incremental Generators](#table-best-practices)
+
 V. [Conclusion and Final Recommendations](#conclusion-recommendations)
 
 Metaprogramming is the way a program treats other programs (or itself) as data, as we will see in the following paragraphs. This has opened the doors to the development of frameworks over the years and has given them flexibility and dynamism that would have otherwise been considerably difficult. Luckily, .NET provides us with several solutions to manipulate and extend our applications, such as reflection ([runtime reflection](https://learn.microsoft.com/es-es/dotnet/fundamentals/reflection/reflection)), and T4 templates ([T4 templates](https://learn.microsoft.com/en-us/visualstudio/modeling/code-generation-and-t4-text-templates?view=vs-2022)). But, both techniques (especially reflection) present performance problems during application startup and execution, since in the case of reflection, the framework must analyze the code during runtime, resulting in an extra fixed time cost that is not possible to optimize (or at least not at the level of compiled code). T4 templates are a bit more flexible in this regard, but everything will depend on the use case.
