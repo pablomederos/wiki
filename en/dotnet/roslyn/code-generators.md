@@ -1,9 +1,9 @@
 ---
 title: Metaprograming with Code Generators
 description: A comprehensive guide to code generation using the Roslyn compiler APIs
-published: false
-date: 2025-07-02T20:09:26.924Z
-tags: 
+published: true
+date: 2025-07-02T20:12:29.738Z
+tags: asp.net core, aot compilation, minimal apis, iincrementalgenerator, isourcegenerator, system.text.json, dependency injection, dto pattern, unit test, snapshot testing, caching, memoization
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
 ---
