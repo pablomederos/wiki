@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: 
 published: false
-date: 2025-07-02T20:06:20.128Z
+date: 2025-07-02T20:08:10.116Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
@@ -189,7 +189,7 @@ The generator will create an extension method for `IServiceCollection` to regist
 > The following code will use a few lines for exemplification only, but the full implementation can be found [in this repository](https://github.com/pablomederos/SourceGeneratorsExample).
 
 The process is divided into defining the generator class and building the processing pipeline.
-Both Visual Studio and other IDEs, as well as the Dotnet CLI, already have a template to create the project with a basic configuration. You can start from there, or delete the automatically generated objects and replace them with the code I show below.
+Visual Studio and other IDEs, as well as the Dotnet CLI, already have a template to create the project with a basic configuration. You can start from there, or delete the automatically generated objects and replace them with the code I show below.
   
 **Example in RIDER**:
   
