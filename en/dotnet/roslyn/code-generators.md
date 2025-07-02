@@ -2,7 +2,7 @@
 title: Metaprograming with Code Generators
 description: A comprehensive guide to code generation using the Roslyn compiler APIs
 published: true
-date: 2025-07-02T20:25:08.205Z
+date: 2025-07-02T20:31:09.120Z
 tags: asp.net core, aot compilation, minimal apis, iincrementalgenerator, isourcegenerator, system.text.json, dependency injection, dto pattern, unit test, snapshot testing, caching, memoization
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
@@ -523,7 +523,7 @@ public class RepositoryRegistrationGeneratorTests
                                        using {{RepositoryMarker.MarkerNamespace}};
                                        namespace MyApplication.Data
                                        {
-                      _is_active                  public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
+                                          public class UserRepository : {{RepositoryMarker.MarkerInterfaceName}} { }
                                        }
                                        """;
         SyntaxTree initialSyntaxTree = CSharpSyntaxTree.ParseText(initialSource, path: "TestFile.cs");
@@ -543,7 +543,7 @@ public class RepositoryRegistrationGeneratorTests
                 driverOptions: new GeneratorDriverOptions(
                     IncrementalGeneratorOutputKind.None, 
                     trackIncrementalGeneratorSteps: true
-                    )
+                )
 
             )
             .RunGenerators(initialCompilation);
@@ -559,7 +559,7 @@ public class RepositoryRegistrationGeneratorTests
                                               // This change should not cause the output to be regenerated
                                               // because the class does not implement the marker interface.
                                               public class NotARelevantChange { }
-      _is_active                           }
+                                   }
                                           """;
         SyntaxTree modifiedSyntaxTree = CSharpSyntaxTree
             .ParseText(modifiedSource, path: "TestFile.cs");
@@ -569,7 +569,7 @@ public class RepositoryRegistrationGeneratorTests
             
         // 4. Act: Run the generator
         driver = driver.RunGenerators(incrementalCompilation);
-      _is_active GeneratorRunResult result = driver
+         GeneratorRunResult result = driver
             .GetRunResult()
             .Results
             .Single();
