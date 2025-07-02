@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-02T17:55:50.654Z
+date: 2025-07-02T18:50:48.158Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -117,7 +117,7 @@ En pocas palabras, el uso de la interfaz `ISourceGenerator` no es una opción en
   - `IIncrementalGenerator`: Solo contiene el método `Initialize`, dentro del que el desarrollador escribe de forma declarativa un flujo de transformaciones, en una sitaxis similar a LINQ. Este flujo describe como se trasladan los datos desde las fuentes (código C Sharp u otros archivos) hasta el código generado.
       
 2.  **Rendimiento inferior de `ISourceGenerator`**
-El problema de rendimiento tiene que ver con que cada vez que se pulsa una tecla y se realiza un cambio en el código, se llama al método `Execute` de `ISourceGenerator`, lo que obliga a la reevaluación de la lógica completa, ralentizando en casi todos los casos al IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar una técnica de **Memoization** sobre los resultados de cada etapa, lo que aumenta la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos. Además, `IIncrementalGenerator` separa la etapa inicial de comprobación sintáctica, de la más costosa que es la transformación, siendo esta una etapa que implica análisis semántico. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
+El problema de rendimiento tiene que ver con que cada vez que se pulsa una tecla y se realiza un cambio en el código, se llama al método `Execute` de `ISourceGenerator`, lo que obliga a la reevaluación de la lógica completa, ralentizando en casi todos los casos al IDE. `IIncrementalGenerator` resuleve este problema, y permite a **Roslyn** usar **Memoization** de cada etapa, para aumentar la eficiencia y solo requiere ejecutarse para cambios en la entrada de datos que invaliden el caché realizado previamente. Además, `IIncrementalGenerator` separa la etapa inicial que realiza una comprobación sintáctica, de la más costosa que es la transformación. Esta última etapa implica análisis semántico, y ahí es donde reducir el foco del análisis al mímino ofrece mayores beneficios. Este punto hace posible que el compilador pueda ejecutar el generador en muchos nodos, pero solo invocar la transformación en aquellos que se filtraron en la primera etapa.
       
 
 <div id="elementos-generador">
