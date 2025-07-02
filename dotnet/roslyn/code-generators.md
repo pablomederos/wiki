@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-02T19:13:38.431Z
+date: 2025-07-02T19:49:40.807Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -190,7 +190,12 @@ El generador creará un método de extensión para `IServiceCollection` para reg
 
 > El siguiente código usará algunas pocas líneas para ejemplificar únicamente, pero la implementación completa se puede encontrar [en este repositorio](https://github.com/pablomederos/SourceGeneratorsExample).
 
-El proceso se divide en la definición de la clase del generador y la construcción de su pipeline de procesamiento.
+El proceso se divide en la definición de la clase del generador y la construcción del pipeline de procesamiento.
+Tanto Visual Studio y otros IDEs, así como Dotnet CLI ya cuentan con un template para crear el proyecto con una configuración básica. Se puede partir de ahí mismo, o eliminar los objetos generados automáticamente y sustituirlos por el código que muestro a continuación.
+  
+**Ejemplo en RIDER**:
+  
+![generator.png](/generator.png =800x)
 
 1.  **Clase Generadora**: Una clase generadora debe implementar la interfaz `IIncrementalGenerator`, y será decorada con el atributo `[Generator]`
 
@@ -208,7 +213,8 @@ public class RepositoryRegistrationGenerator : IIncrementalGenerator
 2.  **Definición del Pipeline**: Dentro del método Initialize, se construye el pipeline paso a paso.
 
   - Paso 1: **Generar una interfaz marcadora**.
-      Como se mencionó anteriormente, se puede utilizar una interfaz, un atributo u otras características semánticas o sintácticas del código fuente. En este caso, asumiendo que el código fuente no cuenta con un un elemento para marcar los desencadenantes de la generación, se generará una interfaz que se podrá implementar para "marcar" el código.
+      Como mencioné antes, se puede utilizar una interfaz, un atributo u otras características del código fuente. En este caso, asumiendo que el código fuente no cuenta con un un elemento para marcar los desencadenantes de la generación, se generará una interfaz que se podrá implementar para "marcar" el código.
+  
 ```csharp
 public const string MarkerNamespace = "SourceGeneratorExample";
 public const string MarkerInterfaceName = "IRepository";
@@ -232,10 +238,10 @@ public void Initialize(IncrementalGeneratorInitializationContext context)
 }
 ```
 
-Si bien por simplicidad este ejemplo se realizó usando una cadena de texto interpolada para crear la interfaz marcadora, el mismo resultado se podría obtener mediante el uso de **Árboles de Sintaxis**. El código en el repositorio mencionado anteriormente, usa esa estrategia para ilustrar lo dicho.
+Si bien por simplicidad este ejemplo se realizó usando una cadena de texto interpolada para crear la interfaz marcadora, el mismo resultado se podría obtener mediante el uso de **Árboles de Sintaxis**. El código en el repositorio mencionado anteriormente, usa esa estrategia para ilustrar lo dicho, pero valía la pena simplificar el ejemplo.
       
   - Paso 2: **Predicado para encontrar candidatos.**
-    Usamos `CreateSyntaxProvider` para encontrar todas las declaraciones de clases que no sean abstractas y que tengan una lista de tipos base.
+    Usamos `CreateSyntaxProvider` para encontrar todas las declaraciones de clases que no sean abstractas y que tengan una lista de tipos base. Es decir, queremos solo clases concretas.
 
 ```csharp
 public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -268,8 +274,9 @@ private static IncrementalValuesProvider<ClassDeclarationSyntax> CollectClasses 
 ```
 
   - Paso 3: **Transformación para identificar implementaciones de IRepository.**
-Combinamos los candidatos con el CompilationProvider para poder realizar análisis semántico que se mencionó anteriormente. En la transformación, se verifica si la clase implementa la interfaz que creamos anteriormente `IRepository` y, si es así, se extrae la información necesaria a un DTO (Data Transfer Object) inmutable y equatable, como se discutirá más adelante.
-Se filtran los resultados nulos y se recolectan en un ImmutableArray.
+  
+Combinamos los candidatos con el `CompilationProvider` para poder realizar el análisis semántico que se mencionó anteriormente. En la transformación, se verifica si la clase implementa la interfaz que creamos anteriormente `IRepository` y, si es así, se extrae la información necesaria a un DTO (Data Transfer Object) inmutable y equatable, como se discutirá más adelante.
+Se filtran los resultados nulos y se recolectan en un ImmutableArray. Esto tiene algunos matices importantes que voy a mencionar más adelante, pero por ahora simplifico el ejemplo.
 
 ```csharp
 public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -318,16 +325,31 @@ private static IncrementalValueProvider<ImmutableArray<RepositoryToRegister?>> F
         }
     );
             
-    IncrementalValueProvider<ImmutableArray<RepositoryToRegister?>> repositories = 
+IncrementalValueProvider<ImmutableArray<RepositoryToRegister?>> repositories = 
         repositoryClasses
             .Where(static data => data is not null)
             .Collect();
     return repositories;
 }
+
+internal readonly struct RepositoryToRegister
+{
+    public string Namespace { get; } 
+    public string ClassName { get; }
+    public string AssemblyName { get; }
+
+    public RepositoryToRegister(string @namespace, string className, string assemblyName)
+    {
+        Namespace = @namespace;
+        ClassName = className;
+        AssemblyName = assemblyName;
+    }
+
+}
 ```
 
   - Paso 4: **Generación del Método de Extensión**
-Finalmente, registramos una acción de salida que tomará la colección de repositorios y generará el archivo de código fuente.
+Finalmente, registramos un delegado que tomará la colección de repositorios y generará el archivo de código fuente.
 
 ```csharp
 public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -393,14 +415,15 @@ private static void GenerateServicesRegistration(
 ## III. Testeando el generador de código
 
 
-Un generador de código es una pieza de software que debe ser tan robusta y fiable como cualquier otra. Esta sección detalla cómo construir un conjunto de pruebas completo para el generador de registro de repositorios.
+Un generador de código es una pieza de software que debe ser tan robusta y fiable como cualquier otra. Pasaré a detallar cómo realizar algunas pruebas para el generador que acabamos de probar.
 A los efectos de esta documentación se usarán dos enfoques: **Snapshot Testing** y las típicas **Aserciones**.
 
 1.  **Snapshot Testing con** [`Verify`](https://github.com/VerifyTests/Verify\)
-Las pruebas de tipo **Snapshot Testing** son una técnica ideal para los generadores de código. En lugar de escribir aserciones manuales sobre el texto generado, el `framework Verify` captura la salida completa del generador (tanto el código generado como los diagnósticos) y la guarda en un archivo `.verified.cs`. En ejecuciones posteriores, la nueva salida se compara con este archivo "aprobado". Si hay alguna diferencia, la prueba falla, lo que permite detectar regresiones de manera muy eficaz.
+Las pruebas de tipo **Snapshot Testing** son una técnica ideal para los generadores de código. En lugar de escribir aserciones manuales sobre el texto generado, el **framework Verify** captura la salida completa del generador (tanto el código generado como los diagnósticos) y la guarda en un archivo `.verified.cs`. En posteriores ejecuciones de la prueba, la nueva salida se compara con este archivo "aprobado". Si hay alguna diferencia, la prueba falla, lo que permite detectar regresiones de manera eficaz.
+  
 
   - **Ejemplo**:
-Para inizializar el soporte de Verify se requiere un `ModuleInitializer`
+Para inicializar el soporte de Verify se requiere un `ModuleInitializer`
   
 
 ```csharp
@@ -465,7 +488,7 @@ public class RepositoryRegistrationGeneratorTests
 }
 ```
 
-La primera vez que se ejecute esta prueba, fallará y creará dos archivos: \*.received.cs (la salida real) y \*.verified.cs (el archivo de instantánea, inicialmente una copia del recibido). El desarrollador debe revisar el archivo *.verified.* para asegurarse de que es correcto y luego aceptarlo.
+La primera vez que se ejecute esta prueba, fallará y creará dos archivos: \*.received.cs (la salida real) y \*.verified.cs (el archivo de snapshot (como una captura del estado). El desarrollador debe revisar el archivo *.verified.* para asegurarse de que es correcto y luego aceptarlo.
 
 `CSharpCompilation.Create` permitirá la cración de una compilación, similar a como funcionaría sobre cualquier código fuente.
 `CSharpGeneratorDriver` será el encargado de ejecutar el generador sobre la compilación y generar el nuevo código fuente del generador.
@@ -474,7 +497,7 @@ La primera vez que se ejecute esta prueba, fallará y creará dos archivos: \*.r
 
 > Si bien este código usa las típicas aserciones incluídas en el framework de testing, en el repositorio se agregó código de ejemplo para el uso de `Verify` como se hizo anteriormente.
 
-Esta es la prueba más crítica para un generador incremental. Demuestra que la caché está funcionando correctamente y que el generador no está realizando trabajo innecesario.
+Esta es la prueba más crítica para un generador incremental. Demuestra que la caché está funcionando correctamente y que el generador no está haciendo trabajo innecesario. Aquí es donde el uso de `IIncrementalGenerator` ofrece el mayor beneficio de rendimiento.
 Los pasos para probar la incrementalidad son básicamente los siguientes:
 
   - **Marcar los Pasos del Pipeline**: En el código del generador, se añade `.WithTrackingName("StepName")` a las etapas clave del pipeline que se quieren monitorizar.
@@ -583,31 +606,31 @@ public class RepositoryRegistrationGeneratorTests
 ## IV. El rendimiento que ofrece la caché
 
 
-Entender cómo funciona la caché del generador podría ser la diferencia entre un generador ultrarápido y uno que bloquea el IDE.
+Entender cómo funciona la caché del generador podría ser la diferencia entre un generador ultrarápido y uno que bloquea el IDE. Por eso fue importante realizar la prueba de caché de la sección anterior.
 
 <div id="motor-cache">
 
 #### A. El Motor de Caché: Memoización en el Pipeline
 
-Como se mencionó anteriormente, el pipeline de un generador incremental es un grafo de flujo de datos. El motor de Roslyn memoiza (almacena en caché) la salida de cada nodo de este grafo. En ejecuciones posteriores, si las entradas de un nodo se consideran idénticas a las de la ejecución anterior (mediante una comprobación de igualdad), se utiliza instantáneamente la salida almacenada en caché, y los nodos descendentes no se vuelven a ejecutar a menos que otras de sus entradas hayan cambiado. La clave de todo el sistema reside en esa "comprobación de igualdad".   
+Como se mencionó anteriormente, el pipeline de un generador incremental es un grafo de flujo de datos. El motor de Roslyn memoiza (almacena en caché) la salida de cada nodo de este grafo. En las ejecuciones siguientes, si las entradas de un nodo se consideran idénticas a las de la ejecución anterior (mediante una comprobación de igualdad), se utiliza instantáneamente la salida almacenada en caché, y los nodos descendentes no se vuelven a ejecutar a menos que otras de sus entradas hayan cambiado. La clave de todo el sistema reside en esa "comprobación de igualdad".   
 
 <div id="isymbol-rendimiento">
 
 #### B. `ISymbol`: Su efecto en el Rendimiento
 
-Este es el error más común y devastador que se puede cometer al escribir un generador incremental.
+Este es el error más común que se puede cometer al escribir un generador incremental.
 
-  - **El Problema**: Los objetos `ISymbol` (que representan tipos, métodos, etc.) y los objetos `Compilation` no son estables entre compilaciones. Incluso para exactamente el mismo código fuente, una nueva pasada de compilación (desencadenada por una pulsación de tecla, por ejemplo) generará nuevas instancias de `ISymbol` que no son iguales por referencia a las antiguas.
+  - **El Problema**: Los objetos `ISymbol` (que representan tipos, métodos, etc.) y los objetos `Compilation` no son estables entre compilaciones ya que dependen del código fuente que representan. Incluso para exactamente el mismo código fuente, una nueva pasada de compilación (desencadenada por una pulsación de tecla, por ejemplo) generará nuevas instancias de `ISymbol` que no son iguales por referencia a las antiguas.
 
-  - **La Consecuencia**: Si un `ISymbol` o cualquier objeto que lo contenga (como un `ClassDeclarationSyntax` que se combina con el `CompilationProvider`) se utiliza como el dato dentro de un `IncrementalValueProvider`, la comprobación de igualdad de la caché siempre fallará. Esto obliga al pipeline a reejecutarse desde ese punto en adelante con cada cambio, anulando por completo el propósito de la generación incremental.   
+  - **La Consecuencia**: Si un `ISymbol` o cualquier objeto que lo contenga (como un `ClassDeclarationSyntax` que se combina con el `CompilationProvider`) se utiliza como dato dentro de un `IncrementalValueProvider`, la comprobación de igualdad de la caché siempre fallará. Esto obliga al pipeline a reejecutarse desde ese punto en adelante con cada cambio, anulando por completo el propósito de la generación incremental.   
 
-  - **La Catástrofe de Memoria**: Un efecto secundario grave es que mantener referencias a objetos ISymbol en el pipeline puede "anclar" (root) `Compilation` enteras en memoria, impidiendo que el recolector de basura las libere. En soluciones grandes, esto conduce a un consumo de memoria catastrófico por parte del proceso del IDE (por ejemplo, `RoslynCodeAnalysisService`), con informes de uso de 6-10 GB de RAM o más. [Issue en GitHub](https://github.com/dotnet/roslyn/issues/62674)
+  - **Desperdicio de Memoria**: Un efecto secundario grave es que mantener referencias a objetos ISymbol en el pipeline puede "anclar" compilaciones enteras en memoria, impidiendo que el recolector de basura las libere. En soluciones grandes, esto conduce a un consumo de memoria terrible por parte del proceso del IDE (por ejemplo, `RoslynCodeAnalysisService`), con informes de uso de 6-10 GB de RAM o más. [Issue en GitHub](https://github.com/dotnet/roslyn/issues/62674)
 
 <div id="patron-dto-equatable">
 
 #### C. Mejor Práctica: El Patrón del DTO Equatable
 
-La solución definitiva y no negociable a este problema es transformar la información semántica en un Objeto de Transferencia de Datos (DTO) simple, inmutable y equatable lo antes posible en el pipeline.
+La solución definitiva y no negociable a este problema es transformar la información semántica en un Objeto de Transferencia de Datos (DTO) simple, inmutable y equatable lo antes posible en el pipeline, que es lo que hice en el ejemplo de código con el tipo `RepositoryToRegister`.
 
   - Implementación: Utilizar un `record struct` para el DTO. Esto proporciona semántica de igualdad basada en valores de forma gratuita y, al ser un struct, evita asignaciones en el heap para objetos pequeños.   
 
@@ -628,14 +651,14 @@ Además del patrón DTO, hay otras optimizaciones estructurales posibles.
 
   - **Colecciones**: El tipo estándar `ImmutableArray<T>` no es equatable por valor; utiliza igualdad por referencia. Pasarlo a través del pipeline romperá la caché. La solución es utilizar `EquatableArray<T>` (del paquete NuGet CommunityToolkit.Mvvm) o envolver el proveedor con un `IEqualityComparer<T>` personalizado usando el método `.WithComparer()`.   
 
-  - **Combinación de Proveedores**: Al usar `.Combine()`, se debe evitar combinar con el `context.CompilationProvider` completo, ya que este objeto cambia frecuentemente. En su lugar, se debe usar `.Select()` para extraer solo los datos necesarios (por ejemplo, `context.CompilationProvider.Select((c,_) => c.AssemblyName)`) y combinar con ese proveedor más pequeño y estable. El orden de las combinaciones también puede afectar el tamaño de la caché.
-      
-
+  - **Combinación de Proveedores**: Al usar `.Combine()`, se debe evitar combinar con el `context.CompilationProvider` completo, ya que este objeto cambia frecuentemente. Lo mejor es usar `.Select()` para extraer solo los datos necesarios (por ejemplo, `context.CompilationProvider.Select((c,_) => c.AssemblyName)`) y combinar con ese proveedor más pequeño y estable. El orden de las combinaciones también puede afectar el tamaño de la caché. Me repito nuevamente en este sentido porque es muy común intentar pasar un `ISymbol` e icluso la compilación completa en lugar de únicamente los datos que se requieren para la generación.
+      
+      
 <div id="tabla-mejores-practicas">
 
 #### E. Tabla: Mejores Prácticas de Caché para Generadores Incrementales
 
-La siguiente tabla resume las reglas críticas de rendimiento, contrastando los antipatrones comunes con las mejores prácticas recomendadas. Sirve como una lista de verificación para auditar y optimizar un generador incremental.
+La siguiente tabla resume lo que considero como "reglas" de rendimiento, contrastando los antipatrones comunes con las mejores prácticas recomendadas. Sirve como una lista de verificación para auditar y optimizar un generador incremental aunque cada quien irá haciendo su propio camino a media que lo recorre.
 
 |Preocupación|Anti-Patrón (Rompe la Caché y Desperdicia Memoria)|Mejor Práctica (Habilita la Caché y Ahorra Memoria)|Justificación y Referencias|
 |-|-|-|-|
@@ -650,8 +673,9 @@ La siguiente tabla resume las reglas críticas de rendimiento, contrastando los 
 
   
 El viaje a través de los generadores de código incrementales revela una tecnología que es a la vez poderosa y matizada. `IIncrementalGenerator` se ha consolidado como el pilar de la metaprogramación en tiempo de compilación en .NET, no solo como una optimización, sino como un habilitador fundamental para la dirección estratégica de la plataforma hacia el rendimiento, la eficiencia y la compatibilidad con AOT.
+Este es el primer artículo que escribo sobre este tema, pero no será el único, ya que quisiera posteriormente abarcar otros temas como los interceptores, publicación de un paquete NuGet, y buenas prácticas y herramientas que agilizan el desarrollo así como la revisión de código, ya sea en un proyecto independiente como en el trabajo en equipo.
 
-Los principios clave para dominar esta tecnología son claros:
+Creo que los principios clave para dominar esta tecnología son claros:
 
   - **Adopción Obligatoria:** `IIncrementalGenerator` no es una opción, sino un requisito para cualquier generador de código que se preocupe por el rendimiento y la experiencia del desarrollador.
 
