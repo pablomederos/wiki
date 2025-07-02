@@ -1,8 +1,8 @@
 ---
 title: Metaprograming with Code Generators
-description: 
+description: A comprehensive guide to code generation using the Roslyn compiler APIs
 published: false
-date: 2025-07-02T20:08:30.791Z
+date: 2025-07-02T20:09:26.924Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
