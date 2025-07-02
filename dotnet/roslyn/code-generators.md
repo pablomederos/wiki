@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
 published: false
-date: 2025-07-02T18:50:48.158Z
+date: 2025-07-02T19:13:38.431Z
 tags: roslyn, roslyn api, análisis de código, source generators, análisis estático, syntax tree, code analysis, árbol de sintaxis, api de compilador roslyn, .net source generators, code generators, generadores de código
 editor: markdown
 dateCreated: 2025-06-17T12:46:28.466Z
@@ -126,63 +126,65 @@ El problema de rendimiento tiene que ver con que cada vez que se pulsa una tecla
 
 
 1.  **El Punto de Entrada**
-El único punto de entrada de un Generador de Codigo es el método `Initialize`. El parámtro `IncrementalGeneratorInitializationContext` ofrece acceso a los diferentes proveedores de datos que son la base de cualquier generador.
+El único punto de entrada de un Generador de Codigo es el método `Initialize`. El parámtro `IncrementalGeneratorInitializationContext` ofrece acceso a los diferentes proveedores de datos que son la base de todo generador de Roslyn.
 Los proveedores disponibles entre otros son:
   - `SyntaxProvider`: Permite la consulta de árboles de sintaxis
   - `CompilationProvider`: Permite acceder a la compilación completa, incluyendo información semántica.
-  - `AdditionalTextsProvider`: Para leer otros archivos en el proyecto que no son archivos fuente (json, txt, xml, etc.).
+  - `AdditionalTextsProvider`: Para leer otros archivos en el proyecto (json, txt, xml, etc.).
 
 2.  **Identificación de recursos**
-Al intentar identificar clases, métodos, u otros elementos en el código fuente que desencadenarán la generación de código. `SyntaxProvider` provee el método `CreateSyntaxProvider` que se compone de dos parámetros:
-  - **El Predicado** `(Func<SyntaxNode, CancellationToken, bool>)`: Consiste en un análisis meramente sintáctico que permite descartar de forma rápido aquellos nodos que no son de interés. Este paso no contiene información semántica.
-  - **La Transformación** `(Func<GeneratorSyntaxContext, CancellationToken, T>)`: Este delegado se ejecuta en un segundo paso, que sí tiene conocimiento semántico. Solo se invoca para los nodos que han pasado el filtro anterior. El argumento `GeneratorSyntaxContext` que recibe como parámetro proporciona acceso al Modelo Semántico, lo que permite un análisis profundo y preciso del código. Aquí es donde se realizarían comprobaciones como verificar qué interfaz implementa una clase o de qué tipo base hereda.
+Para desencadenar la generación de código, es necesario primeramente  identificar clases, métodos, u otros elementos en el código fuente. Para esto, `SyntaxProvider` provee el método `CreateSyntaxProvider` que se compone de dos parámetros:
+  - **El Predicado** `(Func<SyntaxNode, CancellationToken, bool>)`: Consiste en un análisis sintáctico para descartar rápidamente los nodos que no son de interés. Este paso no contiene información semántica.
+  - **La Transformación** `(Func<GeneratorSyntaxContext, CancellationToken, T>)`: Este delegado es el segundo paso, que sí tiene conocimiento semántico. Solo se invoca para los nodos que han pasado el filtro anterior (el análisis del **Predicado**). El argumento `GeneratorSyntaxContext` que recibe como parámetro proporciona acceso al Modelo Semántico, para ahora sí, un análisis profundo de nodos específicos. Aquí es donde se realizarían comprobaciones como verificar qué interfaz implementa una clase o de qué tipo base hereda, si existen argumentos a tener en cuenta, etc..
 
 3.  **Generación del código**. 
-El mecanismo principal para la generación de código consiste en registrar una acción capaz de generar el código fuente basado en el filtrado que se realizó en el paso anterior. Para esto, `IncrementalGeneratorInitializationContext` posee un método llamado `RegisterSourceOutput(IncrementalValueProvider<TSource> source, Action<SourceProductionContext, TSource> action)` que ejecutará dicha acción y finalmente añadirá el código generado al compilador.
+El mecanismo principal para la generación de código consiste en registrar un delegado encargado de generar el código en base al filtrado que realizado en el paso anterior. Para esto, `IncrementalGeneratorInitializationContext` cuena con el método `RegisterSourceOutput(IncrementalValueProvider<TSource> source, Action<SourceProductionContext, TSource> action)` que ejecutará el delegado y finalmente añadirá el código generado al compilador.
       
 
 <div id="estrategias-identificacion">
 
 ### F. Estrategias para Identificar los Objetivos de Generación
 
-Existen varias estrategias para identificar los elementos del código que deben desencadenar la generación de código.
+Existen varias estrategias para identificar los elementos del código que deben desencadenar la generación de código, y voy a detallar las principales:
 
 1.  **Por Atributo Marcador (Recomendado)**
-Este es el patrón más común, eficiente y recomendado. En lugar de usar `CreateSyntaxProvider` manualmente, se debe utilizar el método auxiliar optimizado `context.SyntaxProvider.ForAttributeWithMetadataName()`. Este método está diseñado específicamente para este escenario y ofrece un alto rendimiento.
+Este es el patrón más común, eficiente y recomendado, aunque no el que voy a ejemplificar en este artículo ya que hay documentación de sobra por todo internet. En lugar de usar `CreateSyntaxProvider` manualmente, se debe utilizar el método auxiliar optimizado `context.SyntaxProvider.ForAttributeWithMetadataName()`. Este método está diseñado específicamente para este caso de uso y ofrece un alto rendimiento.
 
 ```csharp
 
 // Ejemplo de uso de ForAttributeWithMetadataName
 var provider = context.SyntaxProvider.ForAttributeWithMetadataName(
     "My.Namespace.MyMarkerAttribute",
-    (node, _) => node is ClassDeclarationSyntax, // Predicado adicional opcional
-    (ctx, _) => (ClassDeclarationSyntax)ctx.TargetNode); // Transformación
+    (node, _) => node is ClassDeclarationSyntax, // El predicado que mencioné antes, que en este caso es opcional
+  	(ctx, _) => (ClassDeclarationSyntax)ctx.TargetNode); // La transformación, que se describirá a detalle más adelante.
 ```
 
-Para que el atributo marcador esté disponible en el proyecto consumidor sin necesidad de una referencia de ensamblado separada, su código fuente se puede inyectar directamente en la compilación utilizando `context.RegisterPostInitializationOutput` (se estará usando más adelante).
+Para que el atributo marcador esté disponible en el proyecto consumidor sin necesidad de una referencia de ensamblado separada, o pretender que el programador la escriba cada vez, su código fuente se puede inyectar directamente en la compilación utilizando `context.RegisterPostInitializationOutput` (se estará usando más adelante).
 
 2.  **Por Implementación de Interfaz**
-Esta estrategia requiere análisis semántico, por lo que la comprobación debe realizarse en la etapa de transformación (segunda etapa mencionada anteriormente).
+Esta estrategia requiere análisis semántico (y es la que usaré de ejemplo), por lo que la comprobación debe realizarse en la etapa de transformación.
 
-  - **Predicado**: Un predicado eficiente podría ser `(node, _) => node is ClassDeclarationSyntax c && c.BaseList is not null`. Esto filtra rápidamente las clases que declaran una lista de bases (clases base o interfaces), que es un requisito previo para implementar una interfaz.   
+  - **Predicado**: Un predicado eficiente podría ser `(node, _) => node is ClassDeclarationSyntax c && c.BaseList is not null`. Esto filtra rápidamente las clases que extienen de otro tipo (clases o interfaces).
 
-  - **Transformación**: En el delegado de transformación, se obtiene el `INamedTypeSymbol` de la clase a través de `context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)`. Luego, se inspecciona la colección `symbol.AllInterfaces`. Si esta colección contiene la interfaz de destino, el nodo es un candidato para la generación. La comparación debe hacerse utilizando el nombre de metadatos completo y cualificado de la interfaz para mayor robustez.
-Este método se analizará más a detalle más adelante, por ser el más complejo de implementar.
+  - **Transformación**: En el delegado de transformación, se obtiene el `INamedTypeSymbol` de la clase a través de `context.SemanticModel.GetDeclaredSymbol(classDeclarationSyntax)`. Luego, se inspecciona la colección `symbol.AllInterfaces`. Ahora sí, si esta colección contiene la interfaz que buscamos, entonces el nodo es candidato para la generación. La comparación debe hacerse utilizando el nombre de metadatos completo y cualificado de la interfaz para mayor robustez, ya que un proyecto mediano o incluso grande podría tener múltiples interfaces con el mismo nombre en distintos namespaces.
+Este método se analizará más a detalle más adelante, por ser el más 'complejo' de implementar.
 
 3.  **Por Otras Pistas Sintácticas o Semánticas**
-El mismo patrón de predicado/transformación se puede adaptar para cualquier otro criterio, como encontrar clases que heredan de una clase base específica (inspeccionando `symbol.BaseType`), métodos con nombres particulares, propiedades de un tipo determinado, etc.
-      
+Los delegados de predicado y transformación se pueden adaptar para cualquier otro criterio, como encontrar clases que heredan de una clase base específica (inspeccionando `symbol.BaseType`), métodos con nombres particulares, propiedades de un tipo determinado, etc. Si ya se cuena con experiencia en Reflexión, los criterios se pueden aplicar aquí también.
+  
 
 <div id="implementacion-practica">
 
 ## II. Implementación práctica
 
 
-En esta sección se demuestra la implementación de un generador de código enfocado en registrar repositorios en un contenedor de inyección de dependencias.
+Ahora sí, manos a la obra con la implementación de un generador de código que sintetice todo lo mencionado anteriormente.
 
+  
 1.  **Escenario y configuración**
-  - **Objetivo**: Crear un generador que encuentre todas las clases concretas en un ensamblado que implementen la interfaz marcadora `IRepository`. El generador creará un método de extensión para `IServiceCollection` que registrará cada una de estas clases en el contenedor de DI con un ciclo de vida **Scoped**.
-  - **Configuración**: En el proyecto que se consuma el generador, se definirá una interfaz marcadora `public interface IRepository()`. El generador buscará las clases que implementen esta interfaz.
+  - **Objetivo**: Crear un generador que encuentre todas las clases concretas en un ensamblado que implementen la interfaz marcadora `IRepository`. Esto arroja algo de luz sobre cómo sería posible simplificar muchos patrones típicos. 
+El generador creará un método de extensión para `IServiceCollection` para registrar cada una de las clases en el contenedor de DI con un ciclo de vida **Scoped**.
+  - **Configuración**: Este ejemplo además demostrará la adición de una interfaz marcadora `public interface IRepository()` para no tener que contar con que el desarrollador deba hacerlo por sí mismo. El generador buscará las clases que implementen esta interfaz.
 
 2.  **Construcción del Pipeline del Generador**
 
