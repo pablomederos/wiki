@@ -2,7 +2,7 @@
 title: Metaprogramación con Generadores de código
 description: 
 published: false
-date: 2025-07-02T20:05:08.179Z
+date: 2025-07-02T20:06:20.128Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-02T20:05:08.179Z
@@ -57,7 +57,7 @@ An example of an implementation that offers the benefits I mentioned is the [`Ge
 Another benefit is saving us from writing repetitive and error-prone code, such as creating DTOs, mappers, or even DAOs and functions for accessing databases or network resources.
       
 3.  **Modern deployment models**
-Possibly one of the most important advantages (at least for yours truly), is compatibility with modern optimization technologies such as **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)) compilation, and **Trimming** ([Assembly trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). These technologies are extremely positive in cloud environments, mobile, or use cases that require high efficiency. In these cases, compatibility with reflection is nonexistent or very poor, performance is possibly paramount, and right there code generation allows obtaining all the necessary code during compilation. This turns from a simple optimization into a pillar of architectural design in the **.NET** strategy for the future.
+Possibly one of the most important advantages (at least for me), is compatibility with modern optimization technologies such as **AOT** ([Ahead-of-Time](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/?tabs=windows%2Cnet8)) compilation, and **Trimming** ([Assembly trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained)). These technologies are extremely positive in cloud environments, mobile, or use cases that require high efficiency. In these cases, compatibility with reflection is nonexistent or very poor, performance is possibly paramount, and right there code generation allows obtaining all the necessary code during compilation. This turns from a simple optimization into a pillar of architectural design in the **.NET** strategy for the future.
       
 
 <div id="use-cases"\>
