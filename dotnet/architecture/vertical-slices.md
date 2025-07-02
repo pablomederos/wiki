@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-02T20:38:12.618Z
+date: 2025-07-02T20:39:26.184Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -51,7 +51,7 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJiYWNrZ3JvdW5kOiB0
 
 ### Principios Fundamentales de VSA: El Porqué y el Cómo
 
-La VSA se sustenta en varios principios clave que guían su implementación y buscan optimizar la estructura del código para la mantenibilidad y la evolución:
+La VSA se sustenta en algunos principios que guían su implementación y pretenden optimizar la estructura del código para la mantenibilidad y su escalabilidad:
 
   - **Orientado a Casos de Uso (Use-case Driven):**
 
