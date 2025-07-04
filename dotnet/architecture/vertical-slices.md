@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T15:47:46.937Z
+date: 2025-07-04T15:52:13.541Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -171,8 +171,8 @@ Cuando los slices están en proyectos separados, el proyecto API principal neces
 
 **Desventajas y Limitaciones:**
 
-  - **Acoplado a MVC Tradicional:** No aplica a Minimal APIs (Aunque podría no ser un requisito).
-  - **Overhead de MVC:** Implica el framework MVC completo. Es decir, cuando se elige usar un Controlador MVC para un endpoint, no solo se ejecuta el método de acción, sino que además se activa toda la maquinaria y el ciclo de vida que el framework de ASP.NET Core MVC utiliza para procesar una solicitud.
+  - **Acoplado a MVC Tradicional:** No es compatible con Minimal APIs (Aunque podría no ser un requisito).
+  - **Sobrecarga de MVC:** Implica el framework MVC completo. Cuando se elige usar un Controlador MVC para un endpoint, no solo se ejecuta el método de acción, sino toda la maquinaria y el ciclo de vida que el framework de ASP.NET Core MVC utiliza para procesar una solicitud.
 
 **Ejemplo de Código Minimalista (Ilustrativo):**
   
@@ -202,7 +202,7 @@ IServiceCollection services = builder.Services;
 services
     .AddControllers()
     .AddApplicationPart(
-        typeof(ContextA.Features.Controllers.FeatureAController).Assembly
+  		typeof(ContextA.Features.Controllers.FeatureAController).Assembly
     );
 
 WebApplication app = builder.Build();
@@ -213,7 +213,7 @@ app.Run();
 ```
 
 
-o más configurable:
+o más personalizable:
   
   
 ```csharp
