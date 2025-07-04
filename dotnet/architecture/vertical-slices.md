@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:31:32.782Z
+date: 2025-07-04T16:35:48.915Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -615,7 +615,7 @@ Existen variaciones en cómo se implementan los detalles dentro de VSA, utilizan
 ### Uso de Source Generators o métodos de extensión para Registro/Optimización
 
   - **Por qué:** Para reducir código repetitivo (boilerplate) en el registro de servicios o endpoints, y para mejorar el rendimiento en el arranque y la compatibilidad AOT al evitar la reflexión en tiempo de ejecución.
-  - **Cómo:** Los Source Generators de .NET analizan el código en tiempo de compilación y pueden generar automáticamente el código necesario para, por ejemplo, registrar todos los manejadores de características o los endpoints de Minimal APIs.
+  - **Cómo:** Los Source Generators de .NET analizan el código en tiempo de compilación y pueden generar automáticamente el código necesario para registrar todos los manejadores de características o los endpoints de Minimal APIs.
 
 Estas alternativas se centran en cómo estructurar el código o cómo realizar ciertas tareas (como el registro) utilizando funcionalidades intrínsecas de .NET, sin depender de bibliotecas externas. De hecho, usar generadores de código o reflexión podría ser mucho código extra si no se usará frecuentemente, y quizá, lol métodos de extensión que mencioné antes, sean una solución más polivalente.
 
@@ -636,7 +636,7 @@ La Arquitectura de Vertical Slice en .NET, implementada mediante proyectos separ
 
 **Recomendaciones Estratégicas (Decisiones Pragmáticas):**
 
-  - **Elección del Mecanismo de Exposición de Endpoints (El "Cómo" basado en el "Porqué"):**
+  - **Elección del Mecanismo de Exposición de Endpoints (El "Cómo" basado en el "Por qué"):**
       - Si sus slices usan Controladores MVC (legado, complejidad MVC necesaria), use `ApplicationParts` (configuración en `Program.cs`).
       - Si sus slices usan Minimal APIs (ligereza, nuevos desarrollos), implemente un descubrimiento personalizado con reflexión o Source Generators (definir convenciones y escanear/generar código de registro).
   - **Evaluar la Madurez y Disciplina del Equipo (El "Porqué" de la necesidad de habilidad):** VSA otorga flexibilidad; sin una base sólida en diseño y refactoring, puede llevar a inconsistencias. El cómo se gestiona esta libertad es crucial.
@@ -646,6 +646,6 @@ La Arquitectura de Vertical Slice en .NET, implementada mediante proyectos separ
       - Ofrece un buen equilibrio entre simplicidad de monolito y modularidad, sin la complejidad inicial de microservicios, estructurando la solución con proyectos de contexto independientes.
 
 **Consideraciones Finales:**
-La Arquitectura de Vertical Slice, cuando se aborda con un entendimiento claro de sus principios y se utilizan las capacidades del framework .NET de manera pragmática, permite construir sistemas robustos y evolutivos. La elección entre `ApplicationParts` para controladores MVC y un descubrimiento personalizado para Minimal APIs es una decisión técnica fundamental, guiada por el porqué de las necesidades de cada slice y el cómo se integran estos en la aplicación principal.
+La Arquitectura de Vertical Slice, cuando se aborda con un entendimiento claro de sus principios y se utilizan las capacidades del framework .NET de manera pragmática, permite construir sistemas robustos y evolutivos. La elección entre `ApplicationParts` para controladores MVC y un descubrimiento personalizado para Minimal APIs es una decisión técnica fundamental, guiada por el por qué de las necesidades de cada slice y el cómo se integran estos en la aplicación principal.
   
 Todo lo mencionado anteriormente se condensó (razonablemente) en Github [Vertical Slices en .NET - Github](https://github.com/pablomederos/vetical-slices-dotnet)
