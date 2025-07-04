@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:32:13.532Z
+date: 2025-07-04T14:36:41.694Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -79,12 +79,12 @@ Si bien la comunidad .NET no es exclusivamente la única que lo implementa actua
 
 ### VSA en el Ecosistema .NET: Mecanismos del Framework
 
-En el contexto de proyectos .NET, la Arquitectura de Vertical Slice se apoya en características y patrones del propio framework:
+En el contexto de .NET, la Arquitectura de Vertical Slice se beneficia mucho de características y patrones del propio framework **ASP.NET**:
 
   - **Minimal APIs y ASP.NET Core MVC:**
 
-      - **Por qué:** Se necesitan puntos de entrada HTTP para exponer las funcionalidades de los slices (si se trata de un API Rest por ejemplo).
-      - **Cómo:** VSA puede implementarse utilizando tanto Minimal APIs como los controladores tradicionales de ASP.NET Core MVC. Minimal APIs (.NET 6+) se alinean bien con la filosofía de VSA de reducir el código repetitivo y centrarse en el endpoint y su lógica. Permiten definir endpoints con menos ceremonia. Los controladores MVC siguen siendo una opción robusta, especialmente para escenarios con funcionalidades MVC más complejas.
+      - **Por qué:** Se endpoints HTTP para exponer las funcionalidades de los slices (si se trata de un API Rest por ejemplo, aunque no está atado a este).
+      - **Cómo:** VSA puede implementarse utilizando Minimal APIs y/o controladores tradicionales de ASP.NET Core MVC. Las Minimal APIs (.NET 6+) se alinean bastane bien con la filosofía de VSA de reducir el código repetitivo y centrarse en el endpoint y su lógica. Los controladores MVC aún son una opción robusta, sobre todo para escenarios con funcionalidades MVC más complejas.
 
   - **Inyección de Dependencias (DI):**
 
