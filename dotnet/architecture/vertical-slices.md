@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:26:01.644Z
+date: 2025-07-04T16:31:32.782Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -556,9 +556,9 @@ La decisión se basa en el porqué de las necesidades del proyecto (legacy, rend
   - **Mantenibilidad y Testeabilidad Mejoradas:**
       - **Por qué:** Código localizado es más fácil de entender y modificar.
       - **Cómo:** Pruebas enfocadas en el comportamiento del slice de forma aislada.
-  - **Escalabilidad del Desarrollo y Productividad del Equipo:**
-      - **Por qué:** Menos conflictos entre desarrolladores trabajando en features distintas.
-      - **Cómo:** Nuevos miembros pueden enfocarse en un slice sin entender todo el sistema.
+  - **Escalabilidad del Desarrollo y Proyecto, y más Productividad del Equipo:**
+      - **Por qué:** Menos conflictos entre desarrolladores trabajando en features distintas, y más facilidad al intentar mover una característica hacia un microservicio.
+      - **Cómo:** Nuevos miembros pueden enfocarse en un slice sin entender todo el sistema, y escalar una funcionalidad horizontalmente solo requerirá extraer un proyecto.
   - **Flexibilidad en la Implementación por Slice:**
       - **Por qué:** No todas las características tienen la misma complejidad o requisitos técnicos.
       - **Cómo:** Cada slice puede, teóricamente, usar las herramientas o patrones óptimos para su necesidad específica (ej. EF Core para un slice, Dapper para otro). Se debe balancear con la consistencia.
