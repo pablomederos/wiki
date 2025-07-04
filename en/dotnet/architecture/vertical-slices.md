@@ -2,7 +2,7 @@
 title: Vertical Slices in .NET
 description: Software Architecture in Dotnet: A pragmatic introduction to Vertical Slices
 published: true
-date: 2025-07-04T16:48:19.372Z
+date: 2025-07-04T17:58:57.832Z
 tags: .net, c#, asp.net core, software architecture, software design, vertical slice architecture, minimal apis, applicationparts, mvc controllers, modular monolith, .net architecture, project structure, endpoint discovery, low coupling high cohesion, code maintainability, .net 8
 editor: markdown
 dateCreated: 2025-06-11T17:56:17.634Z
@@ -322,7 +322,7 @@ Scalable systems using plugins will be covered in other articles, but understand
       - **How:** Instead of runtime reflection, a source generator can analyze the projects during compilation, identify the endpoints (containing attributes or conventions), and generate the registration code that the main project will use. For example, by creating custom extension methods.
       - **Why:** It improves performance by avoiding reflection and can be more compatible with AOT (Ahead-Of-Time) compilation scenarios.
 
-> More information about source generators at [this link](#/dotnet/roslyn/source-generators-overview).
+> More information about source generators at [this link](/dotnet/roslyn/source-generators-overview).
 
 **Advantages with Separate Projects (using Minimal APIs):**
 
