@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T15:58:00.102Z
+date: 2025-07-04T16:03:30.061Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -308,9 +308,9 @@ Los sistemas escalables mediante plugins se verá en otros artículos, pero ente
 
 ### Aprovechamiento de Minimal APIs (con Descubrimiento Personalizado)
 
-**Por qué Minimal APIs:** Ofrecen una sintaxis concisa para definir endpoints HTTP, y se alinean mejor con la idea de Vertical Slice Architecture, de reducir el boilerplate y mantener la lógica cohesiva. Aunque no estoy completamente de acuerdo con lo primero, sí creo que esto último es un beneficio indiscutible.
+**Por qué Minimal APIs:** Ofrecen una sintaxis concisa para definir endpoints HTTP, y se alinean mejor con la idea de Vertical Slice Architecture, de reducir el boilerplate y mantener la lógica cohesiva. Aunque no estoy completamente de acuerdo con que sea complemtanete una sintaxis concisa, ya que depende mucho de cada implementación, sí creo que los beneficio durante la implementación son indiscutible en la mayoría de los casos que se centran en reducir la base de código.
 
-**Por qué se necesita descubrimiento personalizado:** ASP.NET Core no tiene un mecanismo automático como `ApplicationParts` para descubrir Minimal APIs definidas en ensamblados externos. Aunque podemos valernos de métodos de extensión, u otros mecanismos antes mencionados. Qué tan elaborado, dependerá de las necesidades de cada proyecto.
+**Por qué se necesita descubrimiento personalizado:** ASP.NET Core no tiene un mecanismo automático como las `ApplicationParts` para descubrir Minimal APIs existentens en otros ensamblados. Aunque podemos usar para ellos métodos de extensión y otros mecanismos antes mencionados. Qué tan elaborado, dependerá de las necesidades de cada proyecto.
 
 **Cómo implementar el descubrimiento personalizado:**
 
