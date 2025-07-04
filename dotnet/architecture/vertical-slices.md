@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:26:23.168Z
+date: 2025-07-04T14:32:13.532Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -68,9 +68,11 @@ La VSA cuenta con algunas especificidades que guían su implementación y preten
       - **Por qué:** Un desafío importante durante el mantenimiento de software es que un cambio en una funcionalidad requiere modificar código en múltiples lugares no relacionados directamente, aumentando el riesgo de errores. Si bien esto puede variar según la calidad y claridad de cada implementación, es común que al transicionar desde una arquitectura monolítica a una distribuída, sea bastante difícil encontrar todas las dependencias dispersas de una funcinalidad en cada capa.
       - **Cómo:** Los componentes que tienden a cambiar juntos deben residir cerca unos de otros en el código. Cuando se implementa o modifica una funcionalidad,todos los cambios se localizan dentro de su slice correspondiente, salvo aquellos que por convención un equipo decida moverlos a un paquete NuGet o librería compartida. Los típicos "Cross-cutting concerns". Si las modificaciones a una funcionalidad suelen requerir tocar código en varias capas horizontales (UI, lógica de negocio, datos), agruparlas verticalmente reduce la dispersión del cambio. O, Si se requiere extraer una funcionalidad a un microservicio (aquí es donde veo uno de los mayores beneficios), se puede extraer un proyecto o directorio completo, sin tener que analizar cada línea de código de la solución.
 
-El objetivo primordial de VSA es maximizar la cohesión dentro de cada slice (todos los elementos del slice están fuertemente relacionados) y minimizar el acoplamiento entre slices diferentes (los slices son lo más independientes posible).
+La idea principal es maximizar la cohesión dentro de cada slice (todos los elementos están fuertemente relacionados) y minimizar el acoplamiento entre slices diferentes (hacerlos lo más independientes posible).
 
-La popularización de VSA en .NET podría atribuirse quizá, aunque no exclusivamente, a Jimmy Bogard (creador de AutoMapper, MediatR y Respawn). Su argumento es que las arquitecturas en capas tradicionales pueden ser demasiado genéricas y no óptimas para la mayoría de las solicitudes individuales de un sistema. Puedes leer más acerca de este tema en este enlace: [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/).
+Si bien la comunidad .NET no es exclusivamente la única que lo implementa actualmente, la popularización de VSA en .NET podría atribuirse quizá a **[Jimmy Bogard](https://www.jimmybogard.com/)** (creador de AutoMapper, MediatR y Respawn). Su argumento es que las arquitecturas en capas tradicionales pueden ser demasiado genéricas y no óptimas para la mayoría de las necesidades individuales cada sistema. 
+
+> Puedes leer más acerca de este tema en el enlace [Vertical Slice Architecture](https://www.jimmybogard.com/vertical-slice-architecture/) para ampliar la información de este artículo.
   
 
 <div id="vsa-en-el-ecosistema-net-mecanismos-del-framework"\>
