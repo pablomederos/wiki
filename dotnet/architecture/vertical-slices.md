@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T15:36:58.727Z
+date: 2025-07-04T15:45:31.329Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -157,9 +157,11 @@ Cuando los slices están en proyectos separados, el proyecto API principal neces
 
 ### Uso de ApplicationParts de ASP.NET Core (para Controladores MVC)
 
-**Por qué existe `ApplicationParts`:** ASP.NET Core MVC necesita una forma de encontrar componentes como Controladores, Vistas, View Components, etc., que pueden estar en el ensamblado principal o en ensamblados referenciados (como los proyectos de contexto). `ApplicationParts` es la abstracción que permite esto.
+**Por qué existe `ApplicationParts`:** ASP.NET Core MVC necesita una forma de encontrar Controladores, Vistas, View Components, etc., que pueden estar en el ensamblado principal u otros referenciados (como los proyectos de contexto), y para esto es posible usar las `ApplicationParts`.
 
 **Cómo funciona:** El `ApplicationPartManager` rastrea las `ApplicationParts` (una `AssemblyPart` encapsula un ensamblado) y los `IFeatureProvider` (como `ControllerFeatureProvider`) para descubrir estos componentes. Por defecto, MVC examina las dependencias del proyecto principal y descubre controladores en ensamblados referenciados.
+  
+> Una excelente lectura para entender más a detalle este punto es este artículo [When ASP.NET Core can't find your controller: debugging application parts](https://andrewlock.net/when-asp-net-core-cant-find-your-controller-debugging-application-parts/) de [**Andrew Lock**](https://andrewlock.net/).
 
 **Ventajas para VSA con Proyectos Separados (usando Controladores MVC):**
 
