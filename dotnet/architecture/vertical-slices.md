@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:39:11.174Z
+date: 2025-07-04T14:39:54.831Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -93,8 +93,8 @@ En el contexto de .NET, la Arquitectura de Vertical Slice se beneficia mucho de 
 
   - **Estructura de Proyectos:**
 
-      - **Por qué:** Para una mejor organización y aislamiento, especialmente en aplicaciones grandes.
-      - **Cómo:** Se pueden crear carpetas por característica dentro de un mismo proyecto, o, como se enfoca esta nota, separar los slices en proyectos de biblioteca de clases (.csproj) independientes, agrupados por contexto de negocio.
+      - **Por qué:** Para optimizar la organización y aislamiento, especialmente en aplicaciones grandes.
+      - **Cómo:** Se pueden crear carpetas por funcionalidad dentro de un mismo proyecto, o, como se enfoca esta nota, separar los slices en proyectos de biblioteca de clases (.csproj) independientes, agrupados por contexto de negocio.
 
 <div id="implementacion-de-vertical-slices-en-proyectos-separados"\>
 
