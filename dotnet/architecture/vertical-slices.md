@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:08:16.864Z
+date: 2025-07-04T16:09:21.663Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -323,6 +323,8 @@ Los sistemas escalables mediante plugins se verá en otros artículos, pero ente
 
       - **Cómo:** En lugar de reflexión en runtime, un generador de código fuente puede analizar los proyectos usando una compilación, identificar los endpoints (que contengan atributos o convenciones) y generar el código de registro que usará el proyecto principal. Por ejemplo, creando métodos de extensión a la medida.
       - **Por qué:** Mejora el rendimiento al evitar la reflexión y puede ser más compatible con escenarios de compilación AOT (Ahead-Of-Time).
+  
+> Más información acerca de los generadores de código en [este enlace](/es/dotnet/roslyn/code-generators).
 
 **Ventajas para VSA con Proyectos Separados (usando Minimal APIs):**
 
