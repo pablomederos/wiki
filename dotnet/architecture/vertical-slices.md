@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:03:30.061Z
+date: 2025-07-04T16:06:05.550Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -316,8 +316,8 @@ Los sistemas escalables mediante plugins se verá en otros artículos, pero ente
 
   - **Convención y Reflexión:**
 
-      - **Cómo:** Definir una interfaz marcadora (ej. `IEndpointDefinition`) en un proyecto compartido. En cada proyecto de contexto, las clases que definen Minimal APIs implementan esta interfaz. En el `Program.cs` del proyecto principal, usar reflexión para escanear los ensamblados de los contextos, encontrar tipos que implementen `IEndpointDefinition`, instanciarlos y llamar a un método convenido (ej. `MapEndpoints(IEndpointRouteBuilder app)`) para registrar las rutas.
-      - **Por qué:** Permite un descubrimiento dinámico sin acoplar el proyecto principal a cada endpoint individual. La reflexión es una capacidad nativa de .NET.
+      - **Cómo:** Definir una interfaz marcadora (ej. `IEndpointDefinition`) en un proyecto compartido como el ya mencionado `SharedKernel`. En cada proyecto de slice, las clases que definen Minimal APIs deberán implementar esta interfaz. En el `Program.cs` del proyecto principal, se puede entonces usar reflexión para escanear los ensamblados de de cada slice, encontrar tipos que implementen `IEndpointDefinition`, instanciarlos y llamar a un método convenido (ej. `MapEndpoints(IEndpointRouteBuilder app)`) para registrar las rutas. Aquí definir las abstracciones con antelación facilitará el proceso de implementación.
+      - **Por qué:** Asegura el descubrimiento dinámico previniendo el acoplamiento del el proyecto principal a cada endpoint individual. La reflexión es una capacidad nativa de .NET.
 
   - **Source Generators (Generadores de Código Fuente):**
 
