@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:12:36.574Z
+date: 2025-07-04T16:21:31.822Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -335,7 +335,7 @@ Los sistemas escalables mediante plugins se verá en otros artículos, pero ente
 **Desventajas y Limitaciones:**
 
   - **Esfuerzo de Implementación para Descubrimiento:** Requiere código adicional (reflexión, source generators, o al menos métodos de extensión considerando la mantenibilidad) para el descubrimiento.
-  - **Madurez para Características Avanzadas:** Algunas funcionalidades complejas de MVC pueden requerir más trabajo para replicar en Minimal APIs, aunque esto está mejorando continuamente.
+  - **Madurez para Características Avanzadas:** Algunas funcionalidades de MVC pueden requerir más trabajo para replicar en Minimal APIs, aunque esto está mejorando continuamente.
 
 **Ejemplo de Código Minimalista (Descubrimiento de Minimal APIs por Reflexión):**
 
@@ -365,14 +365,17 @@ public static class EndpointRegistrationExtensions
     public static WebApplication MapAllEndpoints(
         this WebApplication app, params Assembly[] assembliesToScan)
     {
+  
+  			Type endpointDefinitionType = typeof(IEndpointDefinition);
         
+  			// Estos objetos solo se usarán una vez al inicio de la aplicación
         var endpointDefinitions = new List<IEndpointDefinition>();
         foreach (Assembly assembly in assembliesToScan)
             endpointDefinitions
                 .AddRange(
                     assembly
                         .ExportedTypes
-                        .Where(t => typeof(IEndpointDefinition)
+                        .Where(t => endpointDefinitionType
                                         .IsAssignableFrom(t) 
                                     && t is { 
                                         IsInterface: false, 
@@ -399,6 +402,7 @@ En `ContextB.Features.csproj`:
   
 namespace ContextB.Features.Api;
 
+// Empieza a parecerse más a los controladores MVC
 public sealed class FeatureB : IEndpointDefinition
 {
     // Solo se requiere el constructor por defecto
@@ -503,7 +507,7 @@ app.MapFeatureCEndpoints();
 app.Run();
 ```
   
-Este enfoque es más directo y también más todoterreno, ya que no usa Reflexión y no depende de un proyecto externo para el descubrimiento de los endpoints. El rendimiento podría ser apenas ligeramente mayor durante arranque de la aplicación, pero no habría diferencias durante la ejecución regular del proceso. También se evita la sobreingeniería en la mayoría de los casos.
+Este enfoque es más directo y también más todoterreno, ya que no usa Reflexión y no depende de un proyecto externo para descubrir los endpoints. El rendimiento podría ser apenas superior durante arranque de la aplicación, pero no habría diferencias durante la ejecución regular del proceso. También se evita la sobreingeniería en la mayoría de los casos.
   
 
 <div id="analisis-comparativo"\>
