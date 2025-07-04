@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:10:34.987Z
+date: 2025-07-04T14:19:12.232Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -60,8 +60,8 @@ La VSA cuenta con algunas especificidades que guían su implementación y preten
 
   - **Disolución de Abstracciones (Melting Abstractions):**
 
-      - **Por qué:** Las arquitecturas en capas a menudo imponen abstracciones rígidas (ej. "Controlador -\> Servicio -\> Repositorio") que no siempre aportan valor y pueden generar código repetitivo o innecesariamente complejo para funcionalidades simples.
-      - **Cómo:** Se busca eliminar las barreras y abstracciones forzadas entre componentes técnicos dentro de un slice. Un slice contiene lo necesario para su funcionamiento, permitiendo un diseño más directo y adaptado a la necesidad específica de la característica. Esto no implica la ausencia total de abstracciones, sino una crítica a las "reglas rígidas sobre gestión de dependencias". Las abstracciones se utilizan donde aportan valor genuino, no como un dogma.
+      - **Por qué:** Las arquitecturas en capas a menudo imponen abstracciones rígidas (ej. "Controlador -\> Servicio -\> Repositorio") que no siempre aportan valor significativo y generan código repetitivo o innecesariamente complejo para funcionalidades simples, y más en proyectos que al inicio son simples, pero se prevé que escalen en cuanto a características a futuro. Este tipo de proyectos se vuelven innecesariamente complejos desde el inicio.
+      - **Cómo:** Se busca reducir al mínimo las barreras y abstracciones forzadas entre componentes técnicos dentro de un slice. No se prohiben, y por temas de coherencia entre slices se pueden mantener. Pero ya no se trata una necesidad. Un slice contiene lo necesario para su funcionamiento, permitiendo un diseño más directo y adaptado a los requisitos puntuales de la característica. Como mencioné antes, esto no implica la ausencia total de abstracciones, sino una crítica a las "reglas rígidas sobre gestión de dependencias". Las abstracciones se utilizan donde aportan valor genuino, no como un dogma.
 
   - **Eje de Cambio (Axis Of Change):**
 
