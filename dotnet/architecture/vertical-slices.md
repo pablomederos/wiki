@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:35:48.915Z
+date: 2025-07-04T16:36:06.449Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -648,4 +648,4 @@ La Arquitectura de Vertical Slice en .NET, implementada mediante proyectos separ
 **Consideraciones Finales:**
 La Arquitectura de Vertical Slice, cuando se aborda con un entendimiento claro de sus principios y se utilizan las capacidades del framework .NET de manera pragmática, permite construir sistemas robustos y evolutivos. La elección entre `ApplicationParts` para controladores MVC y un descubrimiento personalizado para Minimal APIs es una decisión técnica fundamental, guiada por el por qué de las necesidades de cada slice y el cómo se integran estos en la aplicación principal.
   
-Todo lo mencionado anteriormente se condensó (razonablemente) en Github [Vertical Slices en .NET - Github](https://github.com/pablomederos/vetical-slices-dotnet)
+Todo lo mencionado anteriormente se condensó (razonablemente) en el repositorio de Github [Vertical Slices en .NET - Github](https://github.com/pablomederos/vetical-slices-dotnet)
