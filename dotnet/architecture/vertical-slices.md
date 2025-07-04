@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:36:41.694Z
+date: 2025-07-04T14:39:11.174Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -88,8 +88,8 @@ En el contexto de .NET, la Arquitectura de Vertical Slice se beneficia mucho de 
 
   - **Inyección de Dependencias (DI):**
 
-      - **Por qué:** Para lograr el bajo acoplamiento y la testeabilidad, los componentes (como los endpoints y los manejadores de lógica de negocio) no deben crear sus dependencias directamente.
-      - **Cómo:** El contenedor de DI incorporado en ASP.NET Core se utiliza para registrar y resolver los servicios y manejadores que cada slice necesita. Los endpoints (controladores o Minimal APIs) reciben sus dependencias (manejadores de características, servicios de infraestructura específicos del slice) a través de la DI.
+      - **Por qué:** Para mantener un bajo acoplamiento y la testeabilidad, los componentes (como los endpoints y los manejadores de lógica de negocio) no deben crear sus dependencias directamente. Esto se mantiene igual que en otras arquitecturas en capas tradicionales.
+      - **Cómo:** El contenedor de DI de ASP.NET Core se utiliza para registrar y resolver los servicios y manejadores que cada slice necesita. Los endpoints reciben sus dependencias a través de la inyección de dependencias.
 
   - **Estructura de Proyectos:**
 
