@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T15:52:13.541Z
+date: 2025-07-04T15:58:00.102Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -301,13 +301,14 @@ app.Run();
 ```
   
 
-Este ejemplo se basa en los conceptos descritos anteriormente. El `ApplicationPartManager` permite añadir `AssemblyPart` para ensamblados que no son referencias directas, lo cual es clave para un sistema de plugins o para cargar módulos de características de forma más dinámica.
+Este ejemplo se basa en lo descrito anteriormente. El `ApplicationPartManager` permite agregar `AssemblyPart` para ensamblados que no son referencias directas, siendo esto clave para un sistema de plugins o para cargar módulos de características de forma más dinámica.
+Los sistemas escalables mediante plugins se verá en otros artículos, pero entender este concepto ayuda a facilitar la implementación de este y otros tipos de software ampliable y dinámico.
 
 <div id="aprovechamiento-de-minimal-apis"\>
 
 ### Aprovechamiento de Minimal APIs (con Descubrimiento Personalizado)
 
-**Por qué Minimal APIs:** Ofrecen una sintaxis concisa para definir endpoints HTTP, alineándose con la idea de VSA de reducir el boilerplate y mantener la lógica del endpoint cohesiva. Aunque no estoy completamente de acuerdo con lo primero, sí creo que esto último es un beneficio indiscutible.
+**Por qué Minimal APIs:** Ofrecen una sintaxis concisa para definir endpoints HTTP, y se alinean mejor con la idea de Vertical Slice Architecture, de reducir el boilerplate y mantener la lógica cohesiva. Aunque no estoy completamente de acuerdo con lo primero, sí creo que esto último es un beneficio indiscutible.
 
 **Por qué se necesita descubrimiento personalizado:** ASP.NET Core no tiene un mecanismo automático como `ApplicationParts` para descubrir Minimal APIs definidas en ensamblados externos. Aunque podemos valernos de métodos de extensión, u otros mecanismos antes mencionados. Qué tan elaborado, dependerá de las necesidades de cada proyecto.
 
