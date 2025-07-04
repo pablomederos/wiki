@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:00:40.823Z
+date: 2025-07-04T14:08:19.369Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -51,11 +51,11 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJiYWNrZ3JvdW5kOiB0
 
 ### Principios Fundamentales de VSA: El Porqué y el Cómo
 
-La VSA se sustenta en algunos principios que guían su implementación y pretenden optimizar la estructura del código para la mantenibilidad y su escalabilidad:
+La VSA cuenta con algunas especificidades que guían su implementación y pretenden optimizar la estructura del código para la mantenibilidad y su escalabilidad:
 
   - **Orientado a Casos de Uso (Use-case Driven):**
 
-      - **Por qué:** El desarrollo tradicional centrado en capas puede dispersar la lógica de una única funcionalidad a través de múltiples componentes técnicos. Esto dificulta la comprensión y modificación de una característica completa. VSA busca alinear la estructura del código con la forma en que el negocio concibe y solicita funcionalidades.
+      - **Por qué:** El desarrollo típico organizado únicamente en capas puede esparcir la lógica de una funcionalidad a través de múltiples componentes técnicos, lo que dificulta la comprensión y modificación de una característica completa. Especialmente en sistemas en los que desarrolladores menos experimentados acoplan muchas funcionalidades, llevando a que un cambio en una funcionalidad arriesgue el funcionamiento de otra. VSA apunta a alinear la estructura del código con la forma en que el negocio concibe y solicita funcionalidades.
       - **Cómo:** El sistema se organiza en torno a características o capacidades de negocio específicas. Cada "slice" representa un caso de uso. Esto facilita la adición, modificación o eliminación de funcionalidades de manera aislada, ya que el impacto se contiene principalmente dentro del slice.
 
   - **Disolución de Abstracciones (Melting Abstractions):**
