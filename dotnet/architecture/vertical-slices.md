@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T16:21:31.822Z
+date: 2025-07-04T16:26:01.644Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -532,15 +532,15 @@ Este enfoque es más directo y también más todoterreno, ya que no usa Reflexi�
 
   - **Minimal APIs con Descubrimiento Personalizado:**
 
-      - **Por qué:** Para nuevos proyectos buscando ligereza, rendimiento, y una alineación más pura con VSA.
-      - **Cómo:** Implementando un sistema de descubrimiento (reflexión o source generators) que se adapte a las convenciones del proyecto.
+      - **Por qué:** Para nuevos proyectos buscando ligereza, rendimiento, y una alineación más pura con esta arquitectura.
+      - **Cómo:** Implementando un sistema de descubrimiento (reflexión o mejor source generators) que se adapte a las convenciones del proyecto y del equipo.
 
   - **Coexistencia:**
 
-      - **Por qué:** Para permitir una evolución gradual o usar el mejor enfoque para diferentes módulos.
+      - **Por qué:** Para permitir una evolución gradual o usar el mejor enfoque para diferentes módulos. No estoy seguro de que realmente sea conveniente, pero sí provee flexibilidad si se requiere.
       - **Cómo:** ASP.NET Core permite mapear tanto controladores como Minimal APIs en la misma aplicación.
 
-La decisión se basa en el porqué de las necesidades del proyecto (legado, rendimiento, complejidad de características) y el cómo se desea gestionar la infraestructura de descubrimiento.
+La decisión se basa en el porqué de las necesidades del proyecto (legacy, rendimiento, complejidad de características) y en cómo se desea gestionar la infraestructura de descubrimiento.
 
 <div id="analisis-profundo"\>
 
