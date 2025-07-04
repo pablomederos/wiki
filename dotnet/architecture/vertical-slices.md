@@ -2,7 +2,7 @@
 title: Vertical Slices en .NET
 description: Arquitectura de Software in Dotnet: Una introducción pragmática a Vertical Slices
 published: true
-date: 2025-07-04T14:48:31.170Z
+date: 2025-07-04T15:36:58.727Z
 tags: .net, asp.net core, arquitectura de software, vertical slice architecture, arquitectura .net, monolito modular, cqrs, diseño de apis, minimal apis, .net minimal apis, asp.net core mvc, applicationparts, inyección de dependencias .net, .net source generators, bounded context, shared kernel, reflection en .net, endpoints en .net, cómo implementar vertical slice en .net, ventajas de la arquitectura vertical slice, minimal apis vs mvc controllers en .net, descubrimiento de endpoints en asp.net core, arquitectura vertical slice con proyectos separados, organizar proyectos .net por features, usar applicationparts para descubrir controladores, registro de servicios con reflexión en .net
 editor: markdown
 dateCreated: 2025-06-10T20:57:34.537Z
@@ -110,8 +110,8 @@ Vuelvo a mencionar para mayor claridad que esta arquitectura no se limita exclus
 **Por qué:**
 
   - **Aislamiento y Límites Claros:** Cada funcionalidad del negocio tendría su propio proyecto, estableciendo límites de compilación y reduciendo el riesgo de acoplamiento con otros contextos. Esto es similar a los "Bounded Contexts" de Domain-Driven Design, pero aplicado al código específico.
-  - **Organización para Equipos:** Facilita que diferentes equipos trabajen en contextos distintos con menor interferencia.
-  - **Potencial de Evolución:** Aunque se despliegue como un monolito, esta estructura modular puede facilitar la extracción de módulos a microservicios en el futuro si fuera necesario.
+  - **Organización para Equipos:** Facilita que diferentes equipos trabajen en contextos distintos sin "chocar" entre ellos.
+  - **Potencial de Evolución:** Esta estructura modular, aún dentro del un monolito, facilita la extracción de módulos a microservicios en el futuro si fuera necesario.
 
 **Cómo:**
 Una estructura típica:
@@ -121,7 +121,7 @@ Una estructura típica:
   - `ContextB.Features.csproj`: Biblioteca de clases con slices para el Contexto B.
   - `SharedKernel.csproj`: Código compartido (utilidades, interfaces transversales, DTOs comunes si son estrictamente necesarios y bien definidos).
 
-La comunicación inter-contexto, si es necesaria, debe ser explícita, usualmente a través de interfaces definidas en un proyecto compartido o expuestas por el API pública de cada módulo de contexto. El desafío principal es cómo el `MainApiProject` descubre y registra los endpoints definidos en los proyectos de contexto.
+La comunicación entre contextos o slices, si es necesaria, debe ser explícita, usualmente a través de interfaces definidas en un proyecto compartido o expuestas por la API pública de cada proyecto. No debe haber comunicación entre componentes internos de cada slice directamente. El desafío principal es cómo el `MainApiProject` descubre y registra los endpoints en los proyectos de contexto.
 Personalmente prefiero usar y abusar de métodos de extensión que luego pueda agregar casi de forma transparente a mi `MainApiProject`.
   
  
@@ -133,25 +133,25 @@ PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHN0eWxlPSJiYWNrZ3JvdW5kOiB0
 
 ### Consideraciones Clave para la Separación de Proyectos: El Cómo de la Integración
   
-  - **Gestión de Dependencias:** El proyecto API principal referencia los proyectos de contexto.
+  - **Gestión de Dependencias:** El proyecto API principal contiene las  referencias los proyectos de cada slice.
   - **Descubrimiento de Features/Endpoints:**
-      - **Por qué:** Los endpoints (Controladores MVC o Minimal APIs) definidos en los proyectos de contexto deben ser accesibles a través de HTTP. El proyecto principal necesita saber de ellos.
+      - **Por qué:** Los endpoints (Controladores MVC o Minimal APIs) definidos en los proyectos de cada slice deben ser accesibles a través de HTTP. El proyecto principal necesita saber de ellos.
       - **Cómo:** Se explorarán `ApplicationParts` para MVC y Minimal APIs quizá con técnicas de reflexión, generadores de código, o simples métodos de extensión.
   - **Compartición de Código:**
-      - **Por qué:** Evitar duplicación excesiva de código verdaderamente común.
-      - **Cómo:** Usar un `SharedKernel` con precaución para no crear un "god object". Compartir solo lo que es estable y genuinamente reutilizable.
+      - **Por qué:** Evitar duplicación excesiva de código común.
+      - **Cómo:** Usar un `SharedKernel` con precaución para no crear un "god object". Compartir solo lo que es estable y reutilizable.
   - **Intereses Transversales (Cross-Cutting Concerns):**
       - **Por qué:** Funcionalidades como logging, autorización, validación deben aplicarse consistentemente.
-      - **Cómo:** Utilizar middleware de ASP.NET Core, filtros de acción/endpoint, o decoradores implementados manualmente sobre los manejadores de características. Estos mecanismos son parte del marco .NET.
+      - **Cómo:** Utilizar los middleware, filtros de endpoint, o atributos implementados manualmente sobre las características. Estos mecanismos son parte de .NET.
   - **Configuración y Arranque:**
-      - **Por qué:** Los servicios y endpoints de cada contexto deben ser registrados en la aplicación principal.
-      - **Cómo:** En `Program.cs`, se configura el registro de servicios y el mapeo de endpoints provenientes de los proyectos de contexto, ya sea directamente (poco recomendable) o usando métodos de extensión.
+      - **Por qué:** Los servicios y endpoints de cada slice deben ser registrados en la aplicación principal.
+      - **Cómo:** En `Program.cs`, se configura el registro de servicios y el mapeo de endpoints provenientes de los proyectos de contexto, ya sea directamente (poco recomendable) o usando métodos de extensión (lo que se demuestra en el proyecto que agregué al pie de este artículo).
 
 <div id="estrategias-de-exposicion-de-endpoints"\>
 
-## III. Estrategias de Exposición de Endpoints para Slices Verticales en Proyectos Separados: Mecanismos de .NET
+## III. Exposición de Endpoints para Slices Verticales en Proyectos Separados: Mecanismos de .NET
 
-Cuando los slices residen en proyectos separados, el proyecto API principal necesita un mecanismo para descubrir y exponer sus endpoints HTTP.
+Cuando los slices están en proyectos separados, el proyecto API principal necesita un mecanismo para descubrir y exponer los endpoints HTTP.
 
 <div id="uso-de-applicationparts-de-aspnet-core"\>
 
