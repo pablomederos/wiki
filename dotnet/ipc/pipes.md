@@ -1,0 +1,418 @@
+---
+title: Pipes
+description: 
+published: false
+date: 2025-07-17T18:36:32.654Z
+tags: 
+editor: markdown
+dateCreated: 2025-07-17T18:36:32.654Z
+---
+
+
+## Pipes y su rol en el panorama IPC
+
+IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante endpoints HTTP, una solución que aunque polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local.
+
+Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que ofrece el ecosistema IPC debido a su rendimiento y facilidad de uso; sin mencionar el hecho de .NET cuenta con soporte para Pipes con un comportamiento muy similar a los ya ampliamente conocidos *Stream*s. Esta facilidad de uso hace que la comunicación mediante Pipes sea muy similar a escribir en un archivo o envar datos a través de la red con `StreamReader` y `StreamWriter`. 
+
+## Pipes en .NET
+
+En .NET, todas las clases necesarias para trabajar con Pipes se encuentran en el espacio de nombre `System.IO.Pipes` con una jerarquía de clases suficientemente intuitiva, como se demuestra a continuación:
+
+- `PipeStream`: Es la clase base abstracta que sirve como base para el resto de implementaciones subyacentes, siendo esta descendiente directa de `System.IO.Stream`. Además contiene todas las funcionalidades comúnes a todos los tipos de Pipes, manejo de búferes, etc..
+- `AnonymousPipeServerStream` y `AnonymousPipeClientStream`: Contiene las implementaciones necesarias para crear **Pipes Anónimos**. Estos no tienen una identidad persistente y solo permiten comunicación unidireccional entre procesos y subprocesos. Estos establecen un conducto de comunicación **Servidor-Cliente**/**Cliente-Servidor**.
+- `NamedPipeServerStream` y `NamedPipeClientStream`: Al igual que los anteriores permiten comunicación **Servidor-Cliente**/**Cliente-Servidor**, pero esta vez puede ser configurado para que sea bidireccional o unidireccional, en lugar de únicamente unidireccional como sucede con `AnonymousPipe(Server/Client)Stream`. Estas clases establecen las implementaciones necesarias para crear **Pipes Nombrados**, los cuales pueden ser utilizados para establecer comunicación entre diferentes procesos o subprocesos, incluso a través de una red local.
+
+Algo interesante de mencionar es que la implementación que ofrece .NET es básicamente una abstracción de la que ofrece el sistema operativo host, lo que permite además que estos Pipes puedan ser utilizados incluso entre aplicaciones desarrolladas en diferentes lenguajes de programación. En sistemas operativos tipo Unix como pueden ser Linux, Mac, etc., se utilizan los **Unix Domain Sockets** (UDS) como mecanismo de comunicación para ofrecer estas funcionalidad, y en Windows el soporte viene a través de los **Named Pipes File System** (NPFS), lo que aumenta la capacidad de las interoperabilidad de las aplicaciones a la vez que se obtiene un muy alto rendimiento.
+
+### Algunos conceptos
+
+Desarrollando algunos de los puntos mencionados anteriormente, se definen a continuación los conceptos necesarios para establecer cualquier comunicación y algunos fundamentos necesarios para entender la finalidad de cada tipo de Pipe.
+
+- **Servidor de Pipe**: Se refiere al proceso encargado de establecer el canal de comunicación mediante las clases con prefijo **ServerStream** (`NamedPipeServerStream` y `AnonymousPipeServerStream`). Una vez iniciado, se pone a la espera de nuevas conexiones.
+Cada instancia del servidor puede antender una única conexión, por lo que si se requiere atender a más de un cliente, se deberán crear tantas instancias como conexiones se requieran.
+- **Cliente de Pipe**: Este será el proceso que buscará conectarse a un Pipe (servidor), ahora utilizando las clases con prefijo **ClientStream** (`NamedPipeClientStream` y `AnonymousPipeClientStream`).
+
+La diferencia entre ambos tipos de pipes radica en el "cómo` el cliente encuentra al servidor.
+
+- **Pipes Nombrados**: Son los más versátiles, debido a que no requieren una relación entre el proceso cliente y el servidor. Este tipo de Pipes se identifica por un nombre que es único en todo el sistema operativo (o la red). Se deben iniciar tantas instancias como conexiones se requieran, todas ellas con el mismo nombre de pipe.
+- **Pipes Anónimos**: Mucho más restrictivos, debido a que el pipe no cuenta con un nombre que permita el acceso a otros procesos en todo el sistema operativo, sino que que el servidor proporcionará un manejador (**Handle**) al proceso hijo (cliente) como argumento o mediante otros mecanismos disponibles.
+
+Todo lo mencionado será ejemplificado mediante algunos snippets de código más adelante, pero ahondando más en tema, pasaré a detallar algunos pormenores de cada tipo de Pipe.
+
+## Pipes Anónimos
+
+Este tipo de pipes es el más ligero y con menor sobrecarga IPC disponible en .NET. Es muy útil para casos de uso muy específicos que tienen que ver con comunicacion entre procesos y sus subprocesos. Alguas de las características y limitaciones son:
+
+- **Unidireccionalidad**: Esta limitación es estricta y es la más definitiva de un Pipe Anónimo. En el momento de la creación, se especifica la dirección de la comunicación, siendo esta de entrada o salida (`PipeDirection.In` o `PipeDirection.Out`). Esto conlleva a que si se requiere comunicación bidireccional, se deberán crear dos Pipes Anónimos, uno para cada dirección de la comunicación, lo que añade complejidad a la implementación.
+Este tipo de pipes es especialmente útil cuando se desea enviar señales a un subproceso, sin exponer el canal de comunicación a otros procesos en el sitema operativo o red.
+
+- **Comunicación local**: Como se mencionó antes, la comunicación está limitada de procesos a subprocesos, lo que implica que el ámbito es estrictamente local.
+
+- **Identificación por Handle**: A diferencia de los **Named Pipes**, los **Anonymous Pipes** carecen de un nombre, por lo que deben generar un identificador único llamado **Handle** y pasarlo al cliente de forma segura, para que este último pueda saber a qué conectarse.
+
+- **Comunicación Padre-Hijo**: Todo lo mencionado anteriormente nos lleva a lo siguiente. Esta "herencia" del Handle es estrictamente asegurada por el Sistema Operativo, el cual a nivel de Kernel es capaz de identificar la jerarquía de procesos, y no permite el uso del handle en un proceso que no está relacionado. Una forma habitual de compartir el Handle, es como argumento al iniciar el proceso hijo, y ese es el enfoque que se demostrará más adelante.
+
+### Posibles casos de uso
+
+- **Servidor Proxy**: Un servicio con un diseño similar al de Nginx podría beneficiarse del uso de los pipes anónimos. Nginx utiliza otras formas muy eficientes para reducir al mínimo la comunicación IPC, pero su diseño podría ser un ejemplo de de caso de uso práctico.
+  
+  > Nginx utiliza `Signals` y `Shared Memory` para la comunicación IPC, lo que reduce la sobrecarga de comunicación al mínimo necesario.
+
+    Este diseño se basaría en un proceso maestro y varios subprocesos workers que reciben señales de cuando deben actualizar su configuración, detenerse o realizar una tarea. En muchos casos esto podría ser más sencillo con Threads y una implementación del patrón Observer, pero un fallo en el código de un hilo podría matar el proceso principal completo si no se maneja correctamente. En cambio, los pipes anónimos robustecen los sistemas gracias a su diseño y reducen el riesgo al mínimo.
+
+- **Redirección de flujos estándar (Standard I/O)**: Debido a la necesidad de una comunicación contínua en este caso particular, un proceso podría beneficiarse de leer directamente el **Standar Input/Output** (stdin/stdout) al, por ejemplo, solicitar la conversión de un video mediante `ffmpeg`, y capturar tanto el `stdin` como el `stdout` para leer el progreso de la tarea.
+
+- **Comunicación simple entre hilos**: Si bien lo mencioné antes como un posible punto débil de diseño, los Pipes Anónimos pueden facilitar la comunicación entre hilos dentro de un mismo proceso. Aquí vale destacar que en lugar de pasar la cadena del Handle, se puede pasar el objeto `SafePipeHandle` a un nuevo hilo, lo que resulta ser considerablemente más seguro y eficiente. 
+
+- **Tareas simples en segundo plano**: Similar al ejemplo de redirección de **StdIn/Out**, la naturaleza unidireccional de los Pipes Anónimos podría ser suficiente para un escenario **Fire n' Forget**, enviando al proceso hijo la información necesaria para realizar su tarea, y olvidarse. Es decir, dejar que este último haga su trabajo sin que se requiera un monitoreo activo del estado de la tarea.
+
+
+### Implementación práctica
+
+A continuación, se mostrará un ejemplo muy simplificado de implementación para que pueda ser analizado posteriormente en este artículo. Sin embargo, este código estará disponible en el repositorio que se adjuntará al final de este contenido.
+
+**Proceso Servidor (Padre)**: `Program.cs`
+
+```csharp
+
+using System.Diagnostics;
+using System.IO.Pipes;
+
+try
+{
+
+    await using var server = new AnonymousPipeServerStream(PipeDirection.Out, HandleInheritability.Inheritable);
+    string clientHandle = server.GetClientHandleAsString();
+    Console.WriteLine($"Servidor inicializado con Client Handle: {clientHandle}");
+
+    await using StreamWriter writer = new(server);
+    writer.AutoFlush = true;
+
+    // El cliente deberá estar compilado antes de iniciar la comunicación
+    using var clientProcess = new Process();
+    clientProcess.StartInfo.FileName = "../../../../Client/bin/Debug/net8.0/Client";
+    clientProcess.StartInfo.Arguments = clientHandle;
+    clientProcess.StartInfo.UseShellExecute = false;//
+    clientProcess.StartInfo.RedirectStandardOutput = true;
+    clientProcess.StartInfo.RedirectStandardError = true;
+    
+    // Agregar manejadores para capturar la salida del proceso hijo
+    clientProcess.OutputDataReceived += (_, e) => {
+        if (!string.IsNullOrEmpty(e.Data))
+            Console.WriteLine($"[CLIENT OUT]: {e.Data}");
+    };
+    
+    clientProcess.ErrorDataReceived += (_, e) => {
+        if (!string.IsNullOrEmpty(e.Data))
+            Console.WriteLine($"[CLIENT ERR]: {e.Data}");
+    };
+
+    bool started = clientProcess.Start();
+
+    if (!started)
+    {
+        Console.Error.WriteLine("Proceso cliente no iniciado");
+        return;
+    }
+
+    clientProcess.BeginOutputReadLine();
+    clientProcess.BeginErrorReadLine();
+
+    server.DisposeLocalCopyOfClientHandle();
+
+    while (true)
+    {
+        string? serverMessage = Console.ReadLine();
+        await writer.WriteLineAsync(serverMessage);
+
+        if (serverMessage == "exit")
+            break;
+    }
+
+    Console.WriteLine("Servidor finalizado");
+
+    if (!clientProcess.WaitForExit(TimeSpan.FromSeconds(3)))
+    {
+        Console.WriteLine("Forzando el cierre del cliente");
+        clientProcess.Kill();
+    }
+    
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine(ex);
+}
+
+
+```
+
+**Proceso Cliente (Hijo)** - `Program.cs`
+
+```csharp
+using System.IO.Pipes;
+
+try
+{
+    string clientHandle = args[0];
+    Console.WriteLine($"Client handle: {clientHandle}");
+
+    await using var client = new AnonymousPipeClientStream(PipeDirection.In, clientHandle);
+
+    if (!client.IsConnected) return;
+
+    Console.WriteLine("Cliente inicializado");
+
+    using StreamReader reader = new(client);
+
+    while (await reader.ReadLineAsync() is { } line)
+    {
+        if (line == "exit")
+        {
+            Console.WriteLine("Conexión cerrada");
+            break;
+        }
+
+        Console.WriteLine($"El servidor dice: {line}");
+    }
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine(ex);
+}
+```
+
+La línea `string? serverMessage = Console.ReadLine();` implica que el servidor esperará la entrada del usuario mediante teclado y enviará el mensaje al cliente usando el Pipe. Tanto en la salida de terminal del Servidor como la del Cliente, se mostrará el flujo de datos de un proceso al otro.
+
+
+### Ciclo de vida del Handle
+
+
+En cierto punto, en el servidor se llama a `server.DisposeLocalCopyOfClientHandle();`. Esto es fundamental en la lógica de sincronización del pipe, y es importante comprender su uso para evitar errores difíciles de depurar.
+
+El Handle es el medio que tiene el cliente  de identificar cuál es su extemo del pipe, ya sea para escritura o lectura (recordando que es una comunicación unidireccional). El sistema operativo tiene un conteo de referencias que utiliza para gestionar el ciclo de vida de los objetos del Kernel, como en este caso los Pipes.
+El flujo de eventos es el siguiente:
+
+1. El servidor crea la instancia de `AnonymousPipeServerStream`, resultando esto en un par de Handles en el kenel. Uno de escritura y otro de lectura.
+2. Al llamar a `server.GetClientHandleAsString()`, se obtiene una representación del Handle que utilizará el cliente. Como en el ejemplo de código se usó como argumento del servidor `PipeDirection.Out`, entonces `server.GetClientHandleAsString()` devolverá un Handle para lectura. En caso contrario para una configuración de entrada al servidor, `server.GetClientHandleAsString()` devolvería un Handle de escritura.
+3. El Handle del cliente se pasa al proceso hijo, quien lo usará para abrir su extremo del pipe. Usamos `HandleInheritability.Inheritable` como argumento del servidor para permitir que un proceso hijo pueda hacer uso del pipe.
+4. Si el servidor no llamase a `DisposeLocalCopyOfClientHandle()` el proceso padre mantendría una referencia al extremo del pipe. Esta llamada desvincula al proceso padre de ese Handle, y debe hacerse inmediatamente después de que el proceso hijo haya sido iniciado. Cuando el proceso hijo termina su trabajo libera el Handle de su extremo del pipe, pero desde la perspectiva del sistema operativo, si el servidor no hubiese liberado el Handle previamente, el pipe no podría ser liberado, y por lo tanto, el resultado sería un **deadlock**, con el servidor colgado esperando un evento de finalización del pipe que nunca ocurriría.
+
+Es bueno pensar en la llamada a `server.DisposeLocalCopyOfClientHandle();` como una forma de enviarle al sistema operativo un mensaje de: "Ya entregué el handle al cliente y no soy responsable de ese extremo del pipe".
+
+
+## Pipes Nombrados
+
+Si bien, como se mencionó antes, los pipes anónimos son especializados para una comunicación simple y local, los *Pipes Nombrados* son una solución que elimina las principales limitaciones de los pines anónimos, agregando flexibilidad y robustez, siendo más apropiados para una amplia variedad de arquitecturas de software.
+
+### Características
+
+- **Acceso por nombre**: La diferencia más significativa es que los pipes nombrados pueden ser descubiertos mediante una cadena de texto usada como nombre. Esto permite desacoplar los proceso, ya que no se requiere una relación padre a hijo ni compartición de Handles. Un pipe puede ser abierto por cualquier otro proceso que conozca el nombre de este.
+- **Bidireccionalidad**: Esta es otra diferencia destacable, ya que los pipes nombrados no solo soportan la comunicación unidireccional (`PipeDirection.In` o `PipeDirection.Out`), sino también la comunicación en ambos sentidos del canal mediante la configuración `PipeDirection.InOut`. Claramente, esto simplifica mucho la implementación.
+- **Soporte para múltiples clientes**: Un único proceso servidor puede atender a múltiples clientes. Esto es configurable mediante el parámetro `maxNumberOfServerInstances`, que le indica al sistema operativo cuándas conexione concurrentes pueden existir para un nombre de pipe dado. Si se desea utilizar el límite máximo que permita el sistema se puede optar por utilizar el valor `NamedPipeServerStream.MaxllowedServerInstances`.
+  
+  > Algo a tener en cuenta, es que cada nueva instancia de la clase `NamedPipeServerStream` es capaz de atender únicamente una conexión, por lo que por cada cliente que se desee atender, se deberá crear una nueva instancia de `NamedPipeServerStream`.
+
+- **Acceso limitado de Red**: La finalidad de los pipes es su uso en la máquina local, no obstante, también es posible utilizarlos a través de la red local agregando el nombre de la máquina remota al iniciar la conexión. Si bien los sockets TCP/IP podrían ser más recomendable en estos casos, también podría ser viable reutilizar la implementación de pipes para comunicar servicios en locales y en la red en simultáneo.
+- **Seguridad**: En Windows los pipes nombrados siguen las mismas reglas que otros servicios, ciñéndose a las reglas de seguridad del sistema. Es posible aplicar Listas de Control de Acceso (ACLs) a un pipe para limitar el acceso de usuarios y grupos a conectarse, leer o escribir.
+
+### Posibles casos de uso
+
+Al igual que con los pipes anónimos, paso a listar algunos posibles casos de uso para los pipes nombrados, pero solo pretendo echar algo de luz que pueda llevar al lector a encontrar sus propios casos de uso, quizá, más apropiados o variados.
+
+- **Servicios Locales**: Un uso posiblemente útil es enviar comandos a un servicio de larga duración y monitorear el estado. Dicho servicio podría exponer el servidor para que varios otros procesos puedan conectarse y encolar tareas, a la vez que puede enviar notificaciones del estado de las tareas en curso.
+- **Comunicación de Procesos no relacionados**: Casi lo mismo que en el punto anterior, pero ahora fomentando el desacoplamiento, desarrollo y despliegue independiente de aplicaciones.
+- **Transporte para RPC**: Lo anterior nos lleva a esto, el bajo overhead permite que los pipes nombrados sean un transporte ideal pra frameworks **RPC**.
+- **Comunicación entre diferentes Lenguajes**: Esto ya no está limitado a los pipes nombrados, pero al tratarse de una característica del sistema operativo y no exclusiva de .NET, ya sea uando pipes nombrados, o iniciando un proceso como hijo, los pipes son un canal eficaz para estableer comunicación entre aplicaciones desarrolladas en diferentes lenguajes de programación, como *C++*, *Python*, *Go*, etc., y evitar así la sobrecarga que podría suponer una conexión mediante Socket.
+  
+### Implementación práctica
+
+
+**Servidor** - `Program.cs`
+
+```csharp
+using System.IO.Pipes;
+
+try
+{
+    // Si hubiesen muchos clientes, lo ideal 
+    Console.WriteLine("Configurando el servidor");
+
+    await using NamedPipeServerStream server = new("NamedPipe", PipeDirection.InOut);
+
+    Console.WriteLine("Servidor iniciado");
+    await server.WaitForConnectionAsync();
+
+    Console.WriteLine("Conexión con el cliente establecida");
+
+    using StreamReader reader = new(server);
+    await using StreamWriter writer = new(server);
+    writer.AutoFlush = true;
+
+    // Sync protocol
+    // Waiting for the client to be ready 
+    if(await reader.ReadLineAsync() == "READY")
+        await writer.WriteLineAsync("Bienvenido");
+
+
+    while (true)
+    {
+        string? receivedMessage = await reader.ReadLineAsync();
+        if (receivedMessage != null)
+        {
+            if (receivedMessage == "exit")
+            {
+                await writer.WriteLineAsync("Gracias por la conexión. Bye!");
+                Console.WriteLine("Cerrando la conexión");
+                break;
+            }
+
+            Console.WriteLine(receivedMessage);
+            await writer.WriteLineAsync("Mensaje recibido");
+        }
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex);
+}
+
+```
+
+**Cliente** - `Program.cs`
+
+```csharp
+using System.IO.Pipes;
+
+try
+{
+    Console.WriteLine("Configurando el cliente");
+    await using NamedPipeClientStream client = new("NamedPipe");
+
+    await client.ConnectAsync();
+    Console.WriteLine("Cliente conectado al servidor");
+
+    using StreamReader reader = new(client);
+    await using StreamWriter writer = new(client);
+    writer.AutoFlush = true;
+    
+    // Sync protocol
+    // Ready for messaging notification 
+    await writer.WriteLineAsync("READY");
+
+
+    string? firstReceivedMessage = await reader.ReadLineAsync();
+    Console.WriteLine($"Conectado con el mensaje: {firstReceivedMessage}");
+
+    while (true)
+    {
+        string? message = Console.ReadLine();
+        await writer.WriteLineAsync(message);
+
+        string? receivedMessage = await reader.ReadLineAsync();
+        Console.WriteLine($"El servidor contesta: {receivedMessage}");
+
+        if (message == "exit")
+            break;
+    }
+}
+catch (Exception ex)
+{
+    Console.WriteLine(ex);
+}
+```
+
+A diferencia del código anterior, este no requiere liberar un Handle manualmente durante el proceso de conexión, y es un claro ejemplo de una comunicación bidireccional.
+Una posible sobrecarga para inicializar la instancia del cliente podría ser `NamedPipeClientStream(".", "NamedPipe", PipeDirection.InOut)`, donde `"."` es el nombre de la máquina remota. Un punto se refiere a `localhost`.
+En caso de requerir atender a más de un cliente de forma concurrente con el mismo pipe, la sobrecarga de `NamedPipeServerStream` deberá contener también el parámetro `maxNumberOfServerInstances` para cada nueva instancia creada, pero una instancia solo podrá manejar una única conexión, y será necesario crear tantas instancias como conexiones se requieran.
+
+Esto es debido a que un pipe es una conexión **punto a punto** entre el cliente y el servidor. Además, esto implica que una instancia no se puede reutilizar una vez que un cliente se desconecta, ya que resultaría en un `ObjectDisposedException`.
+
+
+
+El siguiente es un ejemplo sumamente simplificado de una implementación para múltiples, pero sirve como ilustración de lo que menciono anteriormente:
+
+```csharp
+using System;
+using System.IO;
+using System.IO.Pipes;
+using System.Threading;
+using System.Threading.Tasks;
+
+class ConcurrentNamedPipeServer
+{
+    private const int MaxInstances = 10;
+    private const string PipeName = "concurrent-pipe";
+
+    static async Task Main(string args)
+    {
+        int clientId = 0;
+
+        // Bucle infinito para aceptar clientes continuamente.
+        while (true)
+        {
+            try
+            {
+                var server = new NamedPipeServerStream(
+                    PipeName,
+                    PipeDirection.InOut,
+                    MaxInstances, // Número máximo de instancias permitidas.
+                    PipeTransmissionMode.Byte,
+                    PipeOptions.Asynchronous);
+
+                Console.WriteLine($"({Thread.CurrentThread.ManagedThreadId}) Esperando conexión de cliente...");
+                
+                await server.WaitForConnectionAsync();
+                
+                int currentId = Interlocked.Increment(ref clientId);
+                Console.WriteLine($"Cliente #{currentId} conectado.");
+
+                // Lanzar una nueva tarea para manejar la comunicación con este cliente,
+                // para no bloquear el bucle principal de aceptación.
+                _ = Task.Run(() => HandleClient(server, currentId));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error en el bucle del servidor: {ex.Message}");
+            }
+        }
+    }
+
+    static async Task HandleClient(NamedPipeServerStream stream, int clientId)
+    {
+        Console.WriteLine($"({Thread.CurrentThread.ManagedThreadId}) Manejando cliente #{clientId}.");
+        await using (stream)
+        await using (var writer = new StreamWriter(stream) { AutoFlush = true })
+        {
+            using var reader = new StreamReader(stream);
+
+            try
+            {
+                await writer.WriteLineAsync($"Bienvenido, cliente #{clientId}!");
+
+                string line;
+                while ((line = await reader.ReadLineAsync())!= null)
+                {
+                    Console.WriteLine($"Cliente #{clientId} dice: {line}");
+                    if (line.Equals("exit", StringComparison.OrdinalIgnoreCase))
+                    {
+                        break;
+                    }
+                    await writer.WriteLineAsync($"Eco: {line}");
+                }
+            }
+            catch (IOException)
+            {
+                Console.WriteLine($"Cliente #{clientId} se ha desconectado abruptamente.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error manejando cliente #{clientId}: {ex.Message}");
+            }
+
+            Console.WriteLine($"Comunicación con cliente #{clientId} finalizada.");
+        }
+    }
+}
+```
+
