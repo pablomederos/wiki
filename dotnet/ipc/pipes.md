@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-19T22:05:27.564Z
+date: 2025-07-19T22:05:40.548Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -892,4 +892,4 @@ Esta genialidad vuelve al punto en la introducción de este artículo, abriendo 
     }
     ```
 
-## Pipes frente a Otros Mecanismos de IPC en.NET
+## Pipes frente a otros mecanismos de IPC en .NET
