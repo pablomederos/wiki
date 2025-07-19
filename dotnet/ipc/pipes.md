@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-17T18:36:32.654Z
+date: 2025-07-19T22:01:01.586Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -330,7 +330,7 @@ Esto es debido a que un pipe es una conexión **punto a punto** entre el cliente
 
 
 
-El siguiente es un ejemplo sumamente simplificado de una implementación para múltiples, pero sirve como ilustración de lo que menciono anteriormente:
+El siguiente es un ejemplo sumamente simplificado de una implementación para múltiples clientes para un solo pipe nombrado (múltiples instancias del mismo), pero sirve como ilustración de lo que mencioné anteriormente:
 
 ```csharp
 using System;
@@ -416,3 +416,480 @@ class ConcurrentNamedPipeServer
 }
 ```
 
+### Algunos puntos importantes
+
+1. **Modo de transmisión**: Los pipes operan en modo Byte por defecto (`PipeTransmissionMode.Byte`), para maximizar la compatibilidad multiplataforma. Esto implica que los datos se tratan como un flujo contínuo de bytes entre los extremos del pipe. Esto implica que el programador deberá establecer un protocolo para indicar al otro extremo del pipe cuando termina un mensaje y cuando empieza otro. Usualmente esto se evita utilizando un StreamReader/StreamWriter encima del pipe que ya tiene un "protocolo" implícito basado en acumular el flujo de datos hasta encontrar un caracter de finalización de línea (`\n` o `\r\n`). No obstante, también se puede configurar el modo `PipeTransmissionMode.Message`, únicamente soportado por Windows, en el que cada operación de escritura será tratada como un mensaje atómico. Esto, como se mencionó antes, evita al desarrollador implementar una lógica de "framing" para que el otro extremo del pipe pueda determinar cuando termina un mensaje y cuando empieza el siguiente.
+
+**Modo Byte**:
+```csharp
+
+// Servidor
+class ServidorModoBytes
+{
+    public static void IniciarServidor()
+    {
+        using var server = new NamedPipeServerStream(
+            "TestBytes",
+            PipeDirection.InOut,
+            1,
+            PipeTransmissionMode.Byte);
+
+        server.WaitForConnection();
+        
+        // Necesitas implementar tu protocolo de mensajes
+        var reader = new BinaryReader(server);
+        var writer = new BinaryWriter(server);
+        
+        while (server.IsConnected)
+        {
+            try
+            {
+                // Leer longitud del mensaje primero
+                int longitud = reader.ReadInt32();
+                
+                // Leer el mensaje completo
+                byte[] mensaje = reader.ReadBytes(longitud);
+                
+                Console.WriteLine($"Mensaje recibido: {Encoding.UTF8.GetString(mensaje)}");
+                
+                // Responder
+                var respuesta = Encoding.UTF8.GetBytes("Mensaje procesado");
+                writer.Write(respuesta.Length);
+                writer.Write(respuesta);
+                writer.Flush();
+            }
+            catch (EndOfStreamException)
+            {
+                break;
+            }
+        }
+    }
+}
+
+// Cliente
+class ClienteModoBytes
+{
+    public static void ConectarCliente()
+    {
+        using var client = new NamedPipeClientStream(".", "TestBytes", PipeDirection.InOut);
+        client.Connect();
+        
+        var writer = new BinaryWriter(client);
+        var reader = new BinaryReader(client);
+        
+        // Enviar mensaje con protocolo de longitud
+        var mensaje = Encoding.UTF8.GetBytes("Hola servidor!");
+        writer.Write(mensaje.Length); // Enviar longitud primero
+        writer.Write(mensaje);        // Enviar datos
+        writer.Flush();
+        
+        // Leer respuesta
+        int longitudRespuesta = reader.ReadInt32();
+        byte[] respuesta = reader.ReadBytes(longitudRespuesta);
+        Console.WriteLine($"Respuesta: {Encoding.UTF8.GetString(respuesta)}");
+    }
+}
+```
+
+**Modo Message (Solo Windows)**:
+```csharp
+// Servidor - Modo Message
+class ServidorModoMensajes
+{
+    public static void IniciarServidor()
+    {
+        using var server = new NamedPipeServerStream(
+            "TestMessages",
+            PipeDirection.InOut,
+            1,
+            PipeTransmissionMode.Message); // Solo en Windows
+
+        server.WaitForConnection();
+        
+        byte[] buffer = new byte[1024];
+        
+        while (server.IsConnected)
+        {
+            try
+            {
+                // Cada Read() obtiene un mensaje completo
+                int bytesLeidos = server.Read(buffer, 0, buffer.Length);
+                
+                if (bytesLeidos > 0)
+                {
+                    string mensaje = Encoding.UTF8.GetString(buffer, 0, bytesLeidos);
+                    Console.WriteLine($"Mensaje recibido: {mensaje}");
+                    
+                    // Responder - cada Write es un mensaje completo
+                    byte[] respuesta = Encoding.UTF8.GetBytes("Mensaje procesado");
+                    server.Write(respuesta, 0, respuesta.Length);
+                }
+            }
+            catch (IOException)
+            {
+                break;
+            }
+        }
+    }
+}
+
+// Cliente
+class ClienteModoMensajes
+{
+    public static void ConectarCliente()
+    {
+        using var client = new NamedPipeClientStream(".", "TestMessages", PipeDirection.InOut);
+        client.Connect();
+        
+        // Cada Write es un mensaje completo
+        byte[] mensaje = Encoding.UTF8.GetBytes("Hola servidor!");
+        client.Write(mensaje, 0, mensaje.Length);
+        
+        // Cada Read obtiene un mensaje completo
+        byte[] buffer = new byte[1024];
+        int bytesLeidos = client.Read(buffer, 0, buffer.Length);
+        
+        string respuesta = Encoding.UTF8.GetString(buffer, 0, bytesLeidos);
+        Console.WriteLine($"Respuesta: {respuesta}");
+    }
+}
+```
+
+
+2. **Seguridad**: Como se mencionó antes en este artículo, los pipes soportan la aplicación de **Listas de Control de Acceso** (ACLs). Esto también es una característica dependente de la plataforma, y actualmente solo es soportada en Windows.
+   Esta característica permite proteger un servicio en un entorno multiusuario mediante la clase `PipeSecurity`, a través de regkas de acceso de forma programática. La idea es crear una instancia de `PipeSecurity` y agregar una o más `PipeAccessRule` que especifiquen un usuario o grupo, mediante una `IdentityReference`. 
+   `IdentityReference` permite contendrá los derechos que se le conceden (`PipeAccessRights`), y si se permite o deniega el acceso (`AccessControlType`).
+
+**Ejemplo**: 
+```csharp
+using System;
+using System.IO.Pipes;
+using System.Security.AccessControl;
+using System.Security.Principal;
+
+class Program
+{
+    static void Main()
+    {
+        var pipeSecurity = new PipeSecurity();
+        
+        // Administradores: Control total
+        pipeSecurity.AddAccessRule(new PipeAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinAdministratorsSid, null),
+            PipeAccessRights.FullControl,
+            AccessControlType.Allow));
+        
+        // Power Users: Lectura y escritura
+        pipeSecurity.AddAccessRule(new PipeAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinPowerUsersSid, null),
+            PipeAccessRights.ReadWrite,
+            AccessControlType.Allow));
+        
+        // Usuarios normales: Solo lectura
+        pipeSecurity.AddAccessRule(new PipeAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null),
+            PipeAccessRights.Read,
+            AccessControlType.Allow));
+        
+        // Grupo personalizado de la empresa
+        try
+        {
+            var grupoAplicacion = new NTAccount("EMPRESA\\GrupoAplicacion");
+            pipeSecurity.AddAccessRule(new PipeAccessRule(
+                grupoAplicacion,
+                PipeAccessRights.ReadWrite,
+                AccessControlType.Allow));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"No se pudo configurar grupo personalizado: {ex.Message}");
+        }
+        
+        // Denegar explícitamente a invitados
+        pipeSecurity.AddAccessRule(new PipeAccessRule(
+            new SecurityIdentifier(WellKnownSidType.BuiltinGuestsSid, null),
+            PipeAccessRights.FullControl,
+            AccessControlType.Deny));
+
+        using (var server = new NamedPipeServerStream(
+            "PipeConRoles",
+            PipeDirection.InOut,
+            1,
+            PipeTransmissionMode.Byte,
+            PipeOptions.None,
+            1024,
+            1024,
+            pipeSecurity))
+        {
+            Console.WriteLine("Servidor iniciado con control de acceso por roles...");
+            server.WaitForConnection();
+            Console.WriteLine("Cliente conectado con permisos adecuados.");
+        }
+    }
+}
+```
+
+## Integración con Frameworks Avanzados
+
+El uso directo de pipes mediante `System.IO.Pipes` es una herramienta excelentemente útil para transporte de bajo nivel, y esto es una gran ventaja para su uso como transporte subyacente de alto rendimiento para frameworks más abstractos.
+ASP.NET Core y gRPC se beneficiam considerablemente de los pipes nombrados para optimizar la comunicación IPC separando la capa de aplicación de la capa de transporte.
+
+### Pipes como transporte de Alto Rendimiento
+
+Una ventaja arquitectónica inmensa puede ser el poder intercambiar la capa de transporte sin alterar la lógica de la aplicación, y diseñar una aplicación para operar en diferentes topologías de despliegue.
+Un microservicio que se despliegue en contenedores podría aprovechar la comunicación TCP/IP, mientras que para pruebas de integración o escenarios de alto rendimiento/recursos limitados, los pipes podrían ser una mejor opción. Kestrel permite aprovechar esta flexibilidad optimizando el rendimiento sin rescribir la lógica de negocio.
+
+- ### ASP.NET Core con Pipes Nombrados
+  ASP.NET Core, a través del servidor web Kestrel, es capaz de escuchar peticions HTTP no solo en puertos TCP, sino también a través de pipes nombrados, exponiendo de este modo una API RESTful completa (controladores, middleware, inyección de dependencias, etc.), a través de un canal IPC local, seguro, de alto rendimiento y sin abrir puertos de red en la máquina.
+
+#### Ejemplo:
+
+- **Servidor**
+
+```csharp
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Configución de Kestrel
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenNamedPipe("mi-api-pipe", listenOptions =>
+    {
+        // HTTP/2 es requerido si se planea usar gRPC sobre este pipe.
+        // Para REST simple, HTTP/1.1 es suficiente.
+        listenOptions.Protocols = HttpProtocols.Http1AndHttp2;
+    });
+});
+
+builder.Services.AddControllers();
+var app = builder.Build();
+
+app.MapGet("/", () => "Servidor ASP.NET Core escuchando en un pipe nombrado!");
+app.MapControllers();
+
+app.Run();
+```
+
+- **Cliente**
+
+```csharp
+using System;
+using System.IO;
+using System.IO.Pipes;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
+
+public class NamedPipeHttpClient
+{
+    public static async Task RunClientAsync()
+    {
+        const string pipeName = "mi-api-pipe";
+
+        // Crear un SocketsHttpHandler personalizado.
+        var handler = new SocketsHttpHandler
+        {
+            // El ConnectCallback anula la lógica de conexión TCP estándar.
+            ConnectCallback = async (context, cancellationToken) =>
+            {
+                var pipeStream = new NamedPipeClientStream(
+                    serverName: ".",
+                    pipeName: pipeName,
+                    direction: PipeDirection.InOut,
+                    options: PipeOptions.Asynchronous);
+
+                try
+                {
+                    await pipeStream.ConnectAsync(cancellationToken);
+                    return pipeStream;
+                }
+                catch
+                {
+                    pipeStream.Dispose();
+                    throw;
+                }
+            }
+        };
+
+        var httpClient = new HttpClient(handler);
+
+        // El host en la URI es arbitrario, ya que la conexión se redirige al pipe.
+        var response = await httpClient.GetAsync("http://localhost/WeatherForecast");
+
+        if (response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Respuesta del servidor a través del pipe:");
+            Console.WriteLine(content);
+        }
+        else
+        {
+            Console.WriteLine($"Error: {response.StatusCode}");
+        }
+    }
+}
+```
+
+- ### RPC tipado con StreamJsonRpc
+
+Uno de mis usos favoritos es el que se le da en la herramienta **C# Dev Kit** para **Visual Studio Code** para la comunicación entre la extensión escrita en JavaScript/TypeScript y el servidor de lenguaje Roslyn escrito en C#.
+Muchos escenarios no requieren la pila completa de ASP.NET Core, por lo que el uso de la librería `StreamJsonRpc` ofrece una solución eficiente y ligera para realizar llamadas a procedimientos remotos (RPC) sobre cualquier `Stream` de datos. Esto resulta en un sistema de comunicación fuertemente tipado, de baja latencia y con un mínimo de configuración.
+Esta genialidad vuelve al punto en la introducción de este artículo, abriendo las puertas a otras formas más eficientes y apropiadas para resolver cuestiones relacionadas con la comunicación IPC local.
+
+  #### Ejemplo:
+
+  - **Shared Kernel**
+  ```csharp
+  public interface ICalculator
+  {
+      Task<int> Add(int a, int b);
+  }
+  ```
+
+  -  **Servidor**:
+
+  ```csharp
+  using System;
+  using System.IO.Pipes;
+  using System.Threading.Tasks;
+  using StreamJsonRpc;
+
+  public class RpcServer
+  {
+      public static async Task StartServerAsync()
+      {
+          await using var pipeServer = new NamedPipeServerStream("jsonrpc-pipe", PipeDirection.InOut);
+          await pipeServer.WaitForConnectionAsync();
+          using var jsonRpc = JsonRpc.Attach(pipeServer, new CalculatorService());
+          
+          Console.WriteLine("Servidor RPC conectado. Esperando llamadas...");
+          
+          // Esperar a que la conexión se cierre.
+          await jsonRpc.Completion;
+      }
+  }
+  public class CalculatorService : ICalculator
+  {
+      public Task<int> Add(int a, int b)
+      {
+          return Task.FromResult(a + b);
+      }
+  }
+  ```
+
+  - **Cliente**:
+  ```csharp
+  using System;
+  using System.IO.Pipes;
+  using System.Threading.Tasks;
+  using StreamJsonRpc;
+
+  public class RpcClient
+  {
+      public static async Task StartClientAsync()
+      {
+          await using var pipeClient = new NamedPipeClientStream(".", "jsonrpc-pipe", PipeDirection.InOut);
+          await pipeClient.ConnectAsync();
+
+          using var jsonRpc = JsonRpc.Attach(pipeClient);
+          var calculator = jsonRpc.Attach<ICalculator>();
+
+          int result = await calculator.Add(5, 3);
+          Console.WriteLine($"Resultado de la llamada RPC: 5 + 3 = {result}");
+      }
+  }
+  ```
+
+- ### gRPC con PipesNombrados
+  gRPC es el framework moderno de Google para RPC de alto rendmiento, y, el sucesor espiritual de WCF para ASP.NET Core. Por defecto, utiliza HTTP/2 sobre sokets TCP como transporte, lo que introduce una sobrecarga innecesaria, como vimos anteriormente, cuando el cliente y el servidor se ejecutan en la misma máquina.
+  La respuesta: gRPC en ASP.NET también puede configurarse para usar pipes nombrados como transporte. Claramente esto combina la facilidad de uso de y contratos tipados de gRPC, con el alto rendimiento de los pipes.
+
+  #### Ejemplo:
+  - **Servidor**
+
+    ```csharp
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        // Igual que antes con el API RESTful
+        options.ListenNamedPipe("grpc-pipe", listenOptions =>
+        {
+            listenOptions.Protocols = HttpProtocols.Http2;
+        });
+    });
+
+    builder.Services.AddGrpc();
+    var app = builder.Build();
+    app.MapGrpcService<GreeterService>();
+    app.Run();
+    ```
+
+  - **Cliente**
+
+    ```csharp
+    using System;
+    using System.IO.Pipes;
+    using System.Net.Sockets;
+    using System.Threading.Tasks;
+    using Grpc.Net.Client;
+
+    public class GrpcPipeClient
+    {
+        public static async Task RunClientAsync()
+        {
+            var connectionFactory = new NamedPipesConnectionFactory("grpc-pipe");
+            var socketsHttpHandler = new SocketsHttpHandler
+            {
+                ConnectCallback = connectionFactory.ConnectAsync
+            };
+
+            // Crear el canal gRPC apuntando a un host ficticio y usando el handler personalizado.
+            var channel = GrpcChannel.ForAddress("http://localhost", new GrpcChannelOptions
+            {
+                HttpHandler = socketsHttpHandler
+            });
+
+            var client = new Greeter.GreeterClient(channel);
+            var reply = await client.SayHelloAsync(new HelloRequest { Name = "Cliente gRPC sobre Pipe" });
+
+            Console.WriteLine("Respuesta de gRPC: " + reply.Message);
+        }
+    }
+
+    // Clase auxiliar para gestionar la conexión al pipe.
+    public class NamedPipesConnectionFactory
+    {
+        private readonly string _pipeName;
+
+        public NamedPipesConnectionFactory(string pipeName)
+        {
+            _pipeName = pipeName;
+        }
+
+        public async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext _, CancellationToken cancellationToken = default)
+        {
+            var clientStream = new NamedPipeClientStream(
+                serverName: ".",
+                pipeName: _pipeName,
+                direction: PipeDirection.InOut,
+                options: PipeOptions.Asynchronous);
+
+            try
+            {
+                await clientStream.ConnectAsync(cancellationToken);
+                return clientStream;
+            }
+            catch
+            {
+                clientStream.Dispose();
+                throw;
+            }
+        }
+    }
+    ```
+
+## Pipes frente a Otros Mecanismos de IPC en .NET
