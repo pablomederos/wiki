@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-19T22:01:01.586Z
+date: 2025-07-19T22:05:27.564Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -55,11 +55,11 @@ Este tipo de pipes es especialmente útil cuando se desea enviar señales a un s
 
 ### Posibles casos de uso
 
-- **Servidor Proxy**: Un servicio con un diseño similar al de Nginx podría beneficiarse del uso de los pipes anónimos. Nginx utiliza otras formas muy eficientes para reducir al mínimo la comunicación IPC, pero su diseño podría ser un ejemplo de de caso de uso práctico.
+- **Servidor Proxy**: Un servicio con un diseño similar al de Nginx podría beneficiarse del uso de los pipes anónimos. Nginx utiliza otras formas muy eficientes de comunicación IPC en lugar de pipes anónimos para reducir al mínimo la comunicación IPC, pero su diseño podría ser un ejemplo de caso de uso práctico.
   
   > Nginx utiliza `Signals` y `Shared Memory` para la comunicación IPC, lo que reduce la sobrecarga de comunicación al mínimo necesario.
 
-    Este diseño se basaría en un proceso maestro y varios subprocesos workers que reciben señales de cuando deben actualizar su configuración, detenerse o realizar una tarea. En muchos casos esto podría ser más sencillo con Threads y una implementación del patrón Observer, pero un fallo en el código de un hilo podría matar el proceso principal completo si no se maneja correctamente. En cambio, los pipes anónimos robustecen los sistemas gracias a su diseño y reducen el riesgo al mínimo.
+    Este diseño, ahora implementado sobre pipes, se basaría en un proceso maestro y varios subprocesos workers que reciben señales de cuando deben actualizar su configuración, detenerse o realizar una tarea. En muchos casos esto podría ser más sencillo con Threads y una implementación del patrón Observer, pero un fallo en el código de un hilo podría matar el proceso principal completo si no se maneja correctamente. En cambio, los pipes anónimos robustecen los sistemas gracias a su diseño desacoplado y reduciendo el riesgo al mínimo.
 
 - **Redirección de flujos estándar (Standard I/O)**: Debido a la necesidad de una comunicación contínua en este caso particular, un proceso podría beneficiarse de leer directamente el **Standar Input/Output** (stdin/stdout) al, por ejemplo, solicitar la conversión de un video mediante `ffmpeg`, y capturar tanto el `stdin` como el `stdout` para leer el progreso de la tarea.
 
@@ -892,4 +892,4 @@ Esta genialidad vuelve al punto en la introducción de este artículo, abriendo 
     }
     ```
 
-## Pipes frente a Otros Mecanismos de IPC en .NET
+## Pipes frente a Otros Mecanismos de IPC en.NET
