@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-20T17:40:27.080Z
+date: 2025-07-20T17:40:58.545Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
