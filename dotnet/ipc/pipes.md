@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-19T22:05:40.548Z
+date: 2025-07-20T17:40:27.080Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -11,9 +11,10 @@ dateCreated: 2025-07-17T18:36:32.654Z
 
 ## Pipes y su rol en el panorama IPC
 
-IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante endpoints HTTP, una solución que aunque polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local.
+IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante sockets TCP/IP, una solución que aunque polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local. Y la verdad, es que pocas veces me he sentado a pensar si en lugar de intentar maximizar el rendimiento de mis aplicaciones refinando el código que administra la lógica de negocio, también puedo hacerlo utilizando un entorno para ese código que sea más adecuado a la carga de trabajo que le será asignada.
 
-Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que ofrece el ecosistema IPC debido a su rendimiento y facilidad de uso; sin mencionar el hecho de .NET cuenta con soporte para Pipes con un comportamiento muy similar a los ya ampliamente conocidos *Stream*s. Esta facilidad de uso hace que la comunicación mediante Pipes sea muy similar a escribir en un archivo o envar datos a través de la red con `StreamReader` y `StreamWriter`. 
+
+Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que ofrece el ecosistema IPC debido a su rendimiento y facilidad de uso; sin mencionar el hecho de .NET cuenta con soporte para Pipes con un comportamiento muy similar a los ya ampliamente conocidos *Streams*. Esta facilidad de uso hace que la comunicación mediante pipes sea muy similar a escribir en un archivo o envar datos a través de la red con `StreamReader` y `StreamWriter`. 
 
 ## Pipes en .NET
 
@@ -892,4 +893,60 @@ Esta genialidad vuelve al punto en la introducción de este artículo, abriendo 
     }
     ```
 
-## Pipes frente a otros mecanismos de IPC en .NET
+## Pipes frente a Otros Mecanismos de IPC en.NET
+
+Elegir un mecanismo IPC es siempre una decisión arquitectónica importante que tiene que ver más con la funcionalidad, sino que implica un compromiso entre rendimiento y complejidad.
+Paso a comparar los Pipes con otras alternativas populares en el catálogo de .NET con otras alternativas que estrán disponibles en otros artículos de esta Wiki:
+
+### Pipes vs Sockets
+
+- **Rendimiento**: Cuando se trata de comunicación local o dentro de la misma máquina, los pipes (y su equivalente en Linux UDS) son significativamente más rápidos que los sockets TCP/IP. Esto se debe a que los pipes evitan buena parte de la pila de red del sistema operativo. Esto implica no construir cabeceras TCP, calcular checksums, handshake de 3 vías, etc., siendo esto reemplazado por una comunicación de datos más directa a través de los búferes del kernel.
+- **Flexibilidad y usos**: Indudablemente, los Sockets TCP/IP tienen la ventaja en este campo, ya que permiten la intercomunicación de procesos en diferentes máquinas a través de la red. Si bien los pipes nombrados también soportan comunicación en red LAN, no están diseñados para una comunicación robusta de red.
+- **Complejidad**: Ya vimos antes que los pipes son muy fáciles de configurar, siendo solo necesario conocer el nombre del pipe. Esto evita la gestión de direcciones IP y puertos u otro conflicto relacionado con la disponibilidad de estos.
+- **Conclusión**: Los pipes son siempre la mejor elección cuando de comunicación IPC local se trata. Si la comunicación irá más allá de los límites de la máquina, los Sockets TCP/IP son la opción más adecuada.
+
+### Pipes vs Memory Mapped Files
+
+Esta comparación parecerá quizá extraña, dado que se trata de dos paradigmas completamente diferentes, sin embargo, conociendo todas las posibilidades en la "navaja suiza" del programador, es posible tomar una mejor desición cuando de aprovechar mejor cada recurso se trata.
+
+- **Paradigma**: Los pipes utilizan un enfoque de **compartir mediante comunicación**. Los datos se copian desde la memoria de un proceso, hacia un búfer del kernel, y de ahí al especio de memoria del siguiente proceso. No obstante, los **Memory Mapped Files** utilizan un enfoque de **comunicacar mediante compartición**. Esto es, una región de la memoria se mapea en el espacio de memoria de direcciones virtuales de varios procesos, lo que evita la copia de datos, operando todos sobre la misma memoria.
+- **Rendimiento**: Por lo dicho en el punto anterior, los **Memory Mapped Files** ofrecen el mayor rendimiento cuando se trata de compartir grandes volúmenes de datos en la misma máquina, ya que evitan la cipia de datos entre espacios de memoria.
+- **Sincronización y complejidad**: Debido a que los **Memory Mapped Files** no cuentan con un mecanismo inherente para la sincronización, el desarrollador es el responsable de hacer este trabajo. Por el contrario, un pipe se bloqueará en una operación de lectura hasta que hayan datos disponibles. Esta cerencia en cuanto a los **Memory Mapped Files** aumenta la complejidad, y expone los datos condiciones de carrera, corrupción u otros errores difíciles de depurar.
+- **Conclusión**: Cuando el rendimiento sea una prioridad incuestionable, los **Memory Mapped Files** son la opción más adecuada, ya que permiten el acceso concurrente y de alta velocidad a grandes volúmenes de datos (por ejemplo, un frame de video, una matriz de datos, o cualquier otro volúmen importante de datos que no conviene duplicar en memoria o requiera acceso inmediato entre diferentes procesos). Sin embargo, los pipes aún ofrecen un rendimiento excelente y son una mejor opción cuando se requiere de flujo secuencial y sincronización implícita.
+
+### Pipes vs gRPC
+
+No parece justo hacer esta comparativa, ya que los pipes son un mecanismo de transporte de bajo nivel, y **gRPC** es un framework RPC de alto nivel. Pero como vimos antes, la posiblidad de usar o no pipes en el servidor puede ofrecer una ventaja importante en cuanto a seguridad y rendimiento, ya sea que se usen en conjunto con **gRPC** o separados.
+
+- **Facilidad de uso**: En cuanto a su uso por separado, **gRPC** es mucho más fácil de usar y mantener. Este cuenta con contratos `.proto`, y generación de código, lo que elimina un sin fin de errores manuales de serialización/deserialización. Por eso, **gRPC** es mucho menos propenso a errores que construir un protocolo personalizado sobre un pipe crudo.
+- **Rendimiento**: Se mencionó antes en este artículo, y la verdad es que **gRPC** sobre TCP/IP añade una sobrecarga de red innecesaria en procesos que se ejecutan en la misma máquina en comparación con el uso directo de pipes. La solución es sin dudas, la combinación de ambos, lo que ofrece el mayor rendimiento de los pipes y la facilidad de uso de **gRPC**.
+- **Conclusión**: Evitar construir protocolos complejos manualmente sobre pipes sería ideal, pero claramente para comunicación IPC local los pipes son la mejor para algunos casos menos complejos. **gRPC** es más adecuado para construir APIs IPC robustas, mantenibles y escalables, aunque aún mejor es configurar los pipes nombrados como transporte de este para maximizar el rendimiento.
+
+### Pipes vs Colas de Mensajes
+
+Si hice mención de **gRPC** antes, no puedo dejar atrás otras opciones de comunicación como **RabbitMQ**, **MSMQ**, etc.
+
+- **Acomplamiento**: Los pipes establecen un acoplamiento temporal y directo entre el cliente y el servidor, lo que implica que se requiere que ambos estén ejecutándose en simultáneo para que la comunicación se establezca. Las colas de mensajes desacoplan completamente al productor y consumidor, por lo que los mensajes se pueden enviar independientemente de si ambos procesos están activos o no. 
+- **Fiabilidad**: Las colas de mensajes ofrecen persistencia de los mensajes y garantías de entrega, lo las hace ideales para escenarios que en los que un sistema no se puede permitir la pérdida de mensajes. En su lugar, los pipes no lo hacen, y si el cliente no está a la escucha en ese momento, los mensajes se perderán.
+- **Escalabilidad**: Las colas de mensajes están pensadas para sistemas distribuidos y soportan patrones avanzados de comunicación, enrutamiento de mensajes y balanceo de carga entre múltiples consumidores que leen la misma cola. Los pipes en su lugar,son un mecanismo punto a punto.
+- **Conclusión**: Aquí el modelo de despliegue y arquitectura de la solución tendrán el papel central en la toma de desiciones. Los pipes siguen siendo la solución ideal para la comunicación directa, de baja latencia y en tiempo real entre procesos locales, pero maximizan el acoplamiento. Las colas de mensajes son ideales cuando se requiere comunicación asíncrona, desacoplada y fiable. Y seguro, son la elección indiscutibles en sistemas distribuidos, basados en eventos y que requieren resiliencia ante fallos.
+
+Soy fan del rendimiento, pero en cuanto a comunicación IPC, no es una cuestión de benchmarks y preferencias únicamente, sino también de requisitos de un sistema y el compromiso entre flexibilidad, fiablidad y escalabilidad.
+
+### Tabla comparativa
+
+Para sintetizar un poco lo anterior, dejo esta tabla comparativa como referencia, que pienso que podría ayudar a tomar mejores decisiones cuando se deba elejir la mejor herramienta para resolver un problema.
+
+
+|Criterio|Memory-Mapped Files|Pipes (Named/UDS)|Sockets (TCP/IP)|gRPC (sobre TCP)|Colas de Mensajes|
+|:---:|:---:|:---:|:---:|:---:|:---:|
+|**Rendimiento Local**|	★★★★★ (El más alto)| ★★★★☆ (Muy Alto)|★★★☆☆ (Overhead de red)|★★★☆☆ (Bueno)|★☆☆☆☆ (Más Lento)|
+|**Paradigma**|Memoria Compartida|Stream de Mensajes|Stream de Red|RPC Tipado|Mensajería Asíncrona|
+|**Complejidad**|★★★★★ (Muy Alta, sync manual)|★★☆☆☆ (Baja/Moderada)|★★★☆☆ (Moderada)|★☆☆☆☆ (La más baja)|★★★☆☆ (Config. de broker)|
+|**Acoplamiento**|Fuerte (Datos)|Fuerte (Temporal)|Fuerte (Temporal)|Fuerte (Contrato)|Débil (Total)|
+|**Uso en Red**|No|Limitado (LAN)|Sí (Nativo)|Sí (Nativo)|Sí (Nativo)|
+|**Ideal Para...**|Compartir grandes datasets, estado compartido.|	Servicios locales, API de IPC, transporte para RPC.|Comunicación cliente-servidor estándar en red.|APIs de microservicios, comunicación entre lenguajes.|Sistemas distribuidos, resiliencia, tareas en background.|
+
+## Conclusión final
+
+Aunque tradicionalmente vistos como anticuados, los pipes en C# y .NET son herramientas modernas y potentes para la comunicación local de alto rendimiento, esenciales para la Comunicación Entre Procesos (IPC). Su evolución en .NET, con implementación multiplataforma e integración en extensiones y con frameworks como ASP.NET Core y gRPC, subraya su relevancia. Para un arquitecto de software .NET, comprender a fondo los pipes y elegir el mecanismo IPC adecuado (anónimo, nombrado, MMF o gRPC) es crucial para diseñar sistemas eficientes, robustos y escalables.
