@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-20T17:40:58.545Z
+date: 2025-07-21T13:35:47.515Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -11,7 +11,7 @@ dateCreated: 2025-07-17T18:36:32.654Z
 
 ## Pipes y su rol en el panorama IPC
 
-IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante sockets TCP/IP, una solución que aunque polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local. Y la verdad, es que pocas veces me he sentado a pensar si en lugar de intentar maximizar el rendimiento de mis aplicaciones refinando el código que administra la lógica de negocio, también puedo hacerlo utilizando un entorno para ese código que sea más adecuado a la carga de trabajo que le será asignada.
+IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante sockets TCP/IP, una solución que aunque popular y polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local. Y la verdad, es que pocas veces me he sentado a pensar si en lugar de intentar maximizar el rendimiento de mis aplicaciones refinando el código que administra la lógica de negocio, también puedo hacerlo utilizando una capa de transporte más apropiado para ese caso puntual del entorno de ejecución.
 
 
 Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que ofrece el ecosistema IPC debido a su rendimiento y facilidad de uso; sin mencionar el hecho de .NET cuenta con soporte para Pipes con un comportamiento muy similar a los ya ampliamente conocidos *Streams*. Esta facilidad de uso hace que la comunicación mediante pipes sea muy similar a escribir en un archivo o envar datos a través de la red con `StreamReader` y `StreamWriter`. 
