@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-22T12:22:52.119Z
+date: 2025-07-22T12:34:21.392Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -24,9 +24,9 @@ En .NET, todas las clases necesarias para trabajar con Pipes se encuentran en el
 - `AnonymousPipeServerStream` y `AnonymousPipeClientStream`: Contienen las implementaciones necesarias para crear **Pipes Anónimos**. Este tipo de pipe no tiene una identidad persistente y solo permite comunicación unidireccional entre procesos y subprocesos. Con estas clases se establece un conducto directo de comunicación **Servidor-Cliente** o **Cliente-Servidor** dentro de una jerarquía de procesos.
 - `NamedPipeServerStream` y `NamedPipeClientStream`: Al igual que los anteriores permiten comunicación **Servidor-Cliente**/**Cliente-Servidor**, pero esta vez puede ser configurado para que sea bidireccional o unidireccional, en lugar de únicamente unidireccional como sucede con `AnonymousPipe(Server/Client)Stream`. Estas clases contienen las implementaciones necesarias para crear **Pipes Nombrados**, los cuales pueden ser utilizados para habilitar comunicación entre diferentes procesos o subprocesos no relacionados, e incluso a través de una red local.
 
-Algo interesante de mencionar es que la implementación que ofrece .NET es básicamente una abstracción sobre la que ofrece el sistema operativo host, y que permite además que estos Pipes puedan ser utilizados incluso entre aplicaciones desarrolladas en diferentes lenguajes de programación. En sistemas operativos de la familia Unix como pueden ser Linux, Mac, etc., se utilizan los **Unix Domain Sockets** (UDS) como mecanismo de comunicación para ofrecer estas funcionalidad, y en Windows el soporte viene a través de los **Named Pipes File System** (NPFS), lo que aumenta la capacidad de las interoperabilidad de las aplicaciones a la vez que se obtiene un muy alto rendimiento.
+Algo interesante de mencionar es que la implementación que ofrece .NET es básicamente una abstracción sobre la que ofrece el sistema operativo host, y que permite además que estos Pipes puedan ser utilizados incluso entre aplicaciones desarrolladas en diferentes lenguajes de programación. En sistemas operativos de la familia Unix como pueden ser Linux, Mac, etc., se utilizan los **Unix Domain Sockets** (UDS) como mecanismo de comunicación para ofrecer estas funcionalidad, y en Windows el soporte viene a través de los **Named Pipes File System** (NPFS), lo que aumenta la capacidad de interoperabilidad de las aplicaciones a la vez que se obtiene un muy alto rendimiento.
 
-### Algunos conceptos
+## Algunos conceptos
 
 Desarrollando algunos de los puntos mencionados anteriormente, se definen a continuación los conceptos necesarios para establecer cualquier comunicación y algunos fundamentos necesarios para entender la finalidad de cada tipo de Pipe.
 
@@ -36,10 +36,11 @@ Cada instancia del servidor puede antender una única conexión, por lo que si s
 
 La diferencia entre ambos tipos de pipes radica en el "cómo` el cliente encuentra al servidor.
 
-- **Pipes Nombrados**: Son los más versátiles, debido a que no requieren una relación entre el proceso cliente y el servidor. Este tipo de Pipes se identifica por un nombre que es único en todo el sistema operativo (o la red). Se deben iniciar tantas instancias como conexiones se requieran, todas ellas con el mismo nombre de pipe.
+- **Pipes Nombrados**: Son los más versátiles, debido a que no requieren una relación entre el proceso cliente y el servidor. Este tipo de Pipes se identifica por un nombre que es único en todo el sistema operativo (o la red). Se pueden iniciar tantas instancias como conexiones se requieran, todas ellas con el mismo nombre de pipe.
 - **Pipes Anónimos**: Mucho más restrictivos, debido a que el pipe no cuenta con un nombre que permita el acceso a otros procesos en todo el sistema operativo, sino que que el servidor proporcionará un manejador (**Handle**) al proceso hijo (cliente) como argumento o mediante otros mecanismos disponibles.
 
-Todo lo mencionado será ejemplificado mediante algunos snippets de código más adelante, pero ahondando más en tema, pasaré a detallar algunos pormenores de cada tipo de Pipe.
+Que los pipes nombrados permitan la conexión de varios clientes, no implica que un mensaje enviado a una instancia de `NamedPipeServerStream` sea difundido a todos ellos, sino que esta capacidad de aceptar múltiples conexiones está relacionada con la estrategia de descubrimiento entre procesos. Por eso, el programador deberá utilizar una estrategia apropiada si desea difundir el mensaje a todos los clientes conectados a un pipe.
+La implementación y su uso será ejemplificada mediante algunos snippets de código más adelante, pero ahondando más en tema, pasaré a detallar algunos pormenores de cada tipo de Pipe.
 
 ## Pipes Anónimos
 
