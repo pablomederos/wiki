@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-22T12:19:00.736Z
+date: 2025-07-22T12:22:52.119Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -21,10 +21,10 @@ Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que
 En .NET, todas las clases necesarias para trabajar con Pipes se encuentran en el espacio de nombres `System.IO.Pipes` con una jerarquía de clases suficientemente intuitiva, como se demuestra a continuación:
 
 - `PipeStream`: Es la clase base abstracta de la que parte el resto de implementaciones subyacentes, siendo esta descendiente directa de `System.IO.Stream`. Además contiene todas las funcionalidades comúnes a todos los tipos de Pipes, manejo de búferes, etc..
-- `AnonymousPipeServerStream` y `AnonymousPipeClientStream`: Contienen las implementaciones necesarias para crear **Pipes Anónimos**. Estos no tienen una identidad persistente y solo permiten comunicación unidireccional entre procesos y subprocesos. Estos establecen un conducto de comunicación **Servidor-Cliente**/**Cliente-Servidor**.
-- `NamedPipeServerStream` y `NamedPipeClientStream`: Al igual que los anteriores permiten comunicación **Servidor-Cliente**/**Cliente-Servidor**, pero esta vez puede ser configurado para que sea bidireccional o unidireccional, en lugar de únicamente unidireccional como sucede con `AnonymousPipe(Server/Client)Stream`. Estas clases establecen las implementaciones necesarias para crear **Pipes Nombrados**, los cuales pueden ser utilizados para establecer comunicación entre diferentes procesos o subprocesos, incluso a través de una red local.
+- `AnonymousPipeServerStream` y `AnonymousPipeClientStream`: Contienen las implementaciones necesarias para crear **Pipes Anónimos**. Este tipo de pipe no tiene una identidad persistente y solo permite comunicación unidireccional entre procesos y subprocesos. Con estas clases se establece un conducto directo de comunicación **Servidor-Cliente** o **Cliente-Servidor** dentro de una jerarquía de procesos.
+- `NamedPipeServerStream` y `NamedPipeClientStream`: Al igual que los anteriores permiten comunicación **Servidor-Cliente**/**Cliente-Servidor**, pero esta vez puede ser configurado para que sea bidireccional o unidireccional, en lugar de únicamente unidireccional como sucede con `AnonymousPipe(Server/Client)Stream`. Estas clases contienen las implementaciones necesarias para crear **Pipes Nombrados**, los cuales pueden ser utilizados para habilitar comunicación entre diferentes procesos o subprocesos no relacionados, e incluso a través de una red local.
 
-Algo interesante de mencionar es que la implementación que ofrece .NET es básicamente una abstracción de la que ofrece el sistema operativo host, lo que permite además que estos Pipes puedan ser utilizados incluso entre aplicaciones desarrolladas en diferentes lenguajes de programación. En sistemas operativos tipo Unix como pueden ser Linux, Mac, etc., se utilizan los **Unix Domain Sockets** (UDS) como mecanismo de comunicación para ofrecer estas funcionalidad, y en Windows el soporte viene a través de los **Named Pipes File System** (NPFS), lo que aumenta la capacidad de las interoperabilidad de las aplicaciones a la vez que se obtiene un muy alto rendimiento.
+Algo interesante de mencionar es que la implementación que ofrece .NET es básicamente una abstracción sobre la que ofrece el sistema operativo host, y que permite además que estos Pipes puedan ser utilizados incluso entre aplicaciones desarrolladas en diferentes lenguajes de programación. En sistemas operativos de la familia Unix como pueden ser Linux, Mac, etc., se utilizan los **Unix Domain Sockets** (UDS) como mecanismo de comunicación para ofrecer estas funcionalidad, y en Windows el soporte viene a través de los **Named Pipes File System** (NPFS), lo que aumenta la capacidad de las interoperabilidad de las aplicaciones a la vez que se obtiene un muy alto rendimiento.
 
 ### Algunos conceptos
 
