@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-21T13:35:47.515Z
+date: 2025-07-22T12:19:00.736Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -11,17 +11,17 @@ dateCreated: 2025-07-17T18:36:32.654Z
 
 ## Pipes y su rol en el panorama IPC
 
-IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante sockets TCP/IP, una solución que aunque popular y polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local. Y la verdad, es que pocas veces me he sentado a pensar si en lugar de intentar maximizar el rendimiento de mis aplicaciones refinando el código que administra la lógica de negocio, también puedo hacerlo utilizando una capa de transporte más apropiado para ese caso puntual del entorno de ejecución.
+IPC son las siglas en inglés para **Inter-Process Communication** o Comunicación entre procesos. Cuando se trata con sistemas, y estos requieren descomponerse en servicios más pequeños o microservicios, se suele optar principalmente por comunicación mediante sockets TCP/IP, una solución que aunque popular y polivalente, no siempre es la más efiente y apropiada para comunicar aplicaciones, especialemente cuando estas se ejecutan localmente o en una red de area local. Y la verdad, es que yo mismo pocas veces me he sentado a pensar si en lugar de intentar maximizar el rendimiento de mis aplicaciones refinando el código que administra la lógica de negocio, también puedo hacerlo utilizando una capa de transporte más apropiada para ese caso puntual del entorno de ejecución.
 
 
-Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que ofrece el ecosistema IPC debido a su rendimiento y facilidad de uso; sin mencionar el hecho de .NET cuenta con soporte para Pipes con un comportamiento muy similar a los ya ampliamente conocidos *Streams*. Esta facilidad de uso hace que la comunicación mediante pipes sea muy similar a escribir en un archivo o envar datos a través de la red con `StreamReader` y `StreamWriter`. 
+Los Pipes (tuberías) son una opción destacable dentro del amplio catálogo que ofrece el ecosistema IPC gracias a su rendimiento y facilidad de uso; sin mencionar el hecho de que el comportamiento en .NET es muy similar a los ya ampliamente conocidos *Streams*. Esta facilidad de uso hace que la comunicación mediante pipes sea muy similar a escribir en un archivo o envar datos a través de la red con `StreamReader` y `StreamWriter`. 
 
 ## Pipes en .NET
 
-En .NET, todas las clases necesarias para trabajar con Pipes se encuentran en el espacio de nombre `System.IO.Pipes` con una jerarquía de clases suficientemente intuitiva, como se demuestra a continuación:
+En .NET, todas las clases necesarias para trabajar con Pipes se encuentran en el espacio de nombres `System.IO.Pipes` con una jerarquía de clases suficientemente intuitiva, como se demuestra a continuación:
 
-- `PipeStream`: Es la clase base abstracta que sirve como base para el resto de implementaciones subyacentes, siendo esta descendiente directa de `System.IO.Stream`. Además contiene todas las funcionalidades comúnes a todos los tipos de Pipes, manejo de búferes, etc..
-- `AnonymousPipeServerStream` y `AnonymousPipeClientStream`: Contiene las implementaciones necesarias para crear **Pipes Anónimos**. Estos no tienen una identidad persistente y solo permiten comunicación unidireccional entre procesos y subprocesos. Estos establecen un conducto de comunicación **Servidor-Cliente**/**Cliente-Servidor**.
+- `PipeStream`: Es la clase base abstracta de la que parte el resto de implementaciones subyacentes, siendo esta descendiente directa de `System.IO.Stream`. Además contiene todas las funcionalidades comúnes a todos los tipos de Pipes, manejo de búferes, etc..
+- `AnonymousPipeServerStream` y `AnonymousPipeClientStream`: Contienen las implementaciones necesarias para crear **Pipes Anónimos**. Estos no tienen una identidad persistente y solo permiten comunicación unidireccional entre procesos y subprocesos. Estos establecen un conducto de comunicación **Servidor-Cliente**/**Cliente-Servidor**.
 - `NamedPipeServerStream` y `NamedPipeClientStream`: Al igual que los anteriores permiten comunicación **Servidor-Cliente**/**Cliente-Servidor**, pero esta vez puede ser configurado para que sea bidireccional o unidireccional, en lugar de únicamente unidireccional como sucede con `AnonymousPipe(Server/Client)Stream`. Estas clases establecen las implementaciones necesarias para crear **Pipes Nombrados**, los cuales pueden ser utilizados para establecer comunicación entre diferentes procesos o subprocesos, incluso a través de una red local.
 
 Algo interesante de mencionar es que la implementación que ofrece .NET es básicamente una abstracción de la que ofrece el sistema operativo host, lo que permite además que estos Pipes puedan ser utilizados incluso entre aplicaciones desarrolladas en diferentes lenguajes de programación. En sistemas operativos tipo Unix como pueden ser Linux, Mac, etc., se utilizan los **Unix Domain Sockets** (UDS) como mecanismo de comunicación para ofrecer estas funcionalidad, y en Windows el soporte viene a través de los **Named Pipes File System** (NPFS), lo que aumenta la capacidad de las interoperabilidad de las aplicaciones a la vez que se obtiene un muy alto rendimiento.
