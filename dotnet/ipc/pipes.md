@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-22T12:34:21.392Z
+date: 2025-07-22T13:11:33.934Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -44,14 +44,14 @@ La implementación y su uso será ejemplificada mediante algunos snippets de có
 
 ## Pipes Anónimos
 
-Este tipo de pipes es el más ligero y con menor sobrecarga IPC disponible en .NET. Es muy útil para casos de uso muy específicos que tienen que ver con comunicacion entre procesos y sus subprocesos. Alguas de las características y limitaciones son:
+Este tipo de pipes es el más ligero y con menor sobrecarga IPC disponible en .NET. Es muy útil para casos de uso muy específicos que tienen que ver con comunicacion entre procesos y **sus** subprocesos. Alguas de las características y limitaciones son:
 
 - **Unidireccionalidad**: Esta limitación es estricta y es la más definitiva de un Pipe Anónimo. En el momento de la creación, se especifica la dirección de la comunicación, siendo esta de entrada o salida (`PipeDirection.In` o `PipeDirection.Out`). Esto conlleva a que si se requiere comunicación bidireccional, se deberán crear dos Pipes Anónimos, uno para cada dirección de la comunicación, lo que añade complejidad a la implementación.
 Este tipo de pipes es especialmente útil cuando se desea enviar señales a un subproceso, sin exponer el canal de comunicación a otros procesos en el sitema operativo o red.
 
 - **Comunicación local**: Como se mencionó antes, la comunicación está limitada de procesos a subprocesos, lo que implica que el ámbito es estrictamente local.
 
-- **Identificación por Handle**: A diferencia de los **Named Pipes**, los **Anonymous Pipes** carecen de un nombre, por lo que deben generar un identificador único llamado **Handle** y pasarlo al cliente de forma segura, para que este último pueda saber a qué conectarse.
+- **Identificación por Handle**: A diferencia de los **Named Pipes**, los **Anonymous Pipes** carecen de un nombre, por lo que deben generar un identificador único llamado **Handle** y pasarlo al cliente de forma segura, para que este último pueda saber dónde se encuentra el punto de conexión.
 
 - **Comunicación Padre-Hijo**: Todo lo mencionado anteriormente nos lleva a lo siguiente. Esta "herencia" del Handle es estrictamente asegurada por el Sistema Operativo, el cual a nivel de Kernel es capaz de identificar la jerarquía de procesos, y no permite el uso del handle en un proceso que no está relacionado. Una forma habitual de compartir el Handle, es como argumento al iniciar el proceso hijo, y ese es el enfoque que se demostrará más adelante.
 
@@ -61,11 +61,11 @@ Este tipo de pipes es especialmente útil cuando se desea enviar señales a un s
   
   > Nginx utiliza `Signals` y `Shared Memory` para la comunicación IPC, lo que reduce la sobrecarga de comunicación al mínimo necesario.
 
-    Este diseño, ahora implementado sobre pipes, se basaría en un proceso maestro y varios subprocesos workers que reciben señales de cuando deben actualizar su configuración, detenerse o realizar una tarea. En muchos casos esto podría ser más sencillo con Threads y una implementación del patrón Observer, pero un fallo en el código de un hilo podría matar el proceso principal completo si no se maneja correctamente. En cambio, los pipes anónimos robustecen los sistemas gracias a su diseño desacoplado y reduciendo el riesgo al mínimo.
+    Este diseño, ahora implementado sobre pipes, se basaría en un proceso maestro y varios subprocesos workers que reciben señales de cuando deben actualizar su configuración, detenerse o realizar una tarea. En muchos casos esto podría ser más sencillo con Threads y una implementación del patrón Observer, pero un fallo en el código de un hilo podría matar el proceso principal completo si no se maneja correctamente, llevando a la caída de todas las conexiones en curso. En cambio, los pipes anónimos robustecen los sistemas gracias a su diseño desacoplado y reduciendo el riesgo al mínimo.
 
-- **Redirección de flujos estándar (Standard I/O)**: Debido a la necesidad de una comunicación contínua en este caso particular, un proceso podría beneficiarse de leer directamente el **Standar Input/Output** (stdin/stdout) al, por ejemplo, solicitar la conversión de un video mediante `ffmpeg`, y capturar tanto el `stdin` como el `stdout` para leer el progreso de la tarea.
+- **Redirección de flujos estándar (Standard I/O)**: Debido a la necesidad de una comunicación contínua en este caso particular, un proceso podría beneficiarse de leer directamente el **Standard Input/Output** (stdin/stdout) al, por ejemplo: solicitar la conversión de un video mediante `ffmpeg`, y capturar tanto el `stdin` como el `stdout` para leer el progreso de la tarea o capturar posibles fallos.
 
-- **Comunicación simple entre hilos**: Si bien lo mencioné antes como un posible punto débil de diseño, los Pipes Anónimos pueden facilitar la comunicación entre hilos dentro de un mismo proceso. Aquí vale destacar que en lugar de pasar la cadena del Handle, se puede pasar el objeto `SafePipeHandle` a un nuevo hilo, lo que resulta ser considerablemente más seguro y eficiente. 
+- **Comunicación simple entre hilos**: Si bien lo mencioné antes como un posible punto débil de diseño, los pipes anónimos pueden facilitar la comunicación entre hilos dentro de un mismo proceso. Aquí vale destacar que en lugar de pasar la cadena del Handle, se puede pasar el objeto `SafePipeHandle` a un nuevo hilo, lo que resulta ser considerablemente más seguro y eficiente. 
 
 - **Tareas simples en segundo plano**: Similar al ejemplo de redirección de **StdIn/Out**, la naturaleza unidireccional de los Pipes Anónimos podría ser suficiente para un escenario **Fire n' Forget**, enviando al proceso hijo la información necesaria para realizar su tarea, y olvidarse. Es decir, dejar que este último haga su trabajo sin que se requiera un monitoreo activo del estado de la tarea.
 
