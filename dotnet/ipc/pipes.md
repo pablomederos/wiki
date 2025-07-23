@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T01:10:20.877Z
+date: 2025-07-23T01:17:07.122Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -740,9 +740,11 @@ public class NamedPipeHttpClient
 
 - ### RPC tipado con StreamJsonRpc
 
-Uno de mis usos favoritos es el que se le da en la herramienta **C# Dev Kit** para **Visual Studio Code** para la comunicación entre la extensión escrita en JavaScript/TypeScript y el servidor de lenguaje Roslyn escrito en C#.
+Uno de mis usos favoritos es el que se le da en la herramienta **C# Dev Kit** para **Visual Studio Code**, para la comunicación entre la extensión escrita en TypeScript y el servidor de lenguaje en C#.
+
+
 Muchos escenarios no requieren la pila completa de ASP.NET Core, por lo que el uso de la librería `StreamJsonRpc` ofrece una solución eficiente y ligera para realizar llamadas a procedimientos remotos (RPC) sobre cualquier `Stream` de datos. Esto resulta en un sistema de comunicación fuertemente tipado, de baja latencia y con un mínimo de configuración.
-Esta genialidad vuelve al punto en la introducción de este artículo, abriendo las puertas a otras formas más eficientes y apropiadas para resolver cuestiones relacionadas con la comunicación IPC local.
+Esta genialidad vuelve al punto en la introducción de este artículo, abriendo las puertas a otras formas más eficientes y apropiadas para resolver cuestiones relacionadas a la comunicación IPC local.
 
   #### Ejemplo:
 
@@ -810,7 +812,7 @@ Esta genialidad vuelve al punto en la introducción de este artículo, abriendo 
 
 - ### gRPC con PipesNombrados
   gRPC es el framework moderno de Google para RPC de alto rendmiento, y, el sucesor espiritual de WCF para ASP.NET Core. Por defecto, utiliza HTTP/2 sobre sokets TCP como transporte, lo que introduce una sobrecarga innecesaria, como vimos anteriormente, cuando el cliente y el servidor se ejecutan en la misma máquina.
-  La respuesta: gRPC en ASP.NET también puede configurarse para usar pipes nombrados como transporte. Claramente esto combina la facilidad de uso de y contratos tipados de gRPC, con el alto rendimiento de los pipes.
+  **La respuesta**: gRPC en ASP.NET también puede configurarse para usar pipes nombrados como transporte. Claramente esto combina la facilidad de uso de y contratos tipados de gRPC, con el alto rendimiento de los pipes.
 
   #### Ejemplo:
   - **Servidor**
@@ -897,8 +899,8 @@ Esta genialidad vuelve al punto en la introducción de este artículo, abriendo 
 
 ## Pipes frente a Otros Mecanismos de IPC en.NET
 
-Elegir un mecanismo IPC es siempre una decisión arquitectónica importante que tiene que ver más con la funcionalidad, sino que implica un compromiso entre rendimiento y complejidad.
-Paso a comparar los Pipes con otras alternativas populares en el catálogo de .NET con otras alternativas que estrán disponibles en otros artículos de esta Wiki:
+Elegir un mecanismo IPC es siempre una decisión arquitectónica importante que tiene que ver más que con la funcionalidad, sino que implica un compromiso entre rendimiento y complejidad.
+Paso a comparar los Pipes con otras alternativas populares en el catálogo de .NET que estrán disponibles en otros artículos de esta Wiki:
 
 ### Pipes vs Sockets
 
