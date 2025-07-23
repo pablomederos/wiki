@@ -2,7 +2,7 @@
 title: Pipes
 description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T14:42:36.370Z
+date: 2025-07-23T14:43:28.821Z
 tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -851,26 +851,28 @@ public class CalculatorService : ICalculator
   ```
 
   - **Cliente**:
+  
   ```csharp
-  using System;
-  using System.IO.Pipes;
-  using System.Threading.Tasks;
-  using StreamJsonRpc;
+  
+using System;
+using System.IO.Pipes;
+using System.Threading.Tasks;
+using StreamJsonRpc;
 
-  public class RpcClient
-  {
-      public static async Task StartClientAsync()
-      {
-          await using var pipeClient = new NamedPipeClientStream(".", "jsonrpc-pipe", PipeDirection.InOut);
-          await pipeClient.ConnectAsync();
+public class RpcClient
+{
+    public static async Task StartClientAsync()
+    {
+        await using var pipeClient = new NamedPipeClientStream(".", "jsonrpc-pipe", PipeDirection.InOut);
+        await pipeClient.ConnectAsync();
 
-          using var jsonRpc = JsonRpc.Attach(pipeClient);
-          var calculator = jsonRpc.Attach<ICalculator>();
+        using var jsonRpc = JsonRpc.Attach(pipeClient);
+        var calculator = jsonRpc.Attach<ICalculator>();
 
-          int result = await calculator.Add(5, 3);
-          Console.WriteLine($"Resultado de la llamada RPC: 5 + 3 = {result}");
-      }
-  }
+        int result = await calculator.Add(5, 3);
+        Console.WriteLine($"Resultado de la llamada RPC: 5 + 3 = {result}");
+    }
+}
   ```
 
 <div id="texto-ancla17"/>
