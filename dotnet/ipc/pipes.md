@@ -2,7 +2,7 @@
 title: Pipes
 description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T14:37:32.429Z
+date: 2025-07-23T14:42:36.370Z
 tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -807,40 +807,47 @@ Uno de mis usos favoritos es el que se le da en la herramienta **C# Dev Kit** pa
 Muchos escenarios no requieren la pila completa de ASP.NET Core, por lo que el uso de la librería `StreamJsonRpc` ofrece una solución eficiente y ligera para realizar llamadas a procedimientos remotos (RPC) sobre cualquier `Stream` de datos. Esto resulta en un sistema de comunicación fuertemente tipado, de baja latencia y con un mínimo de configuración.
 Esta genialidad vuelve al punto en la introducción de este artículo, abriendo las puertas a otras formas más eficientes y apropiadas para resolver cuestiones relacionadas a la comunicación IPC local.
 
-  ##### Ejemplo:
+##### Ejemplo:
 
   - **Shared Kernel**
-  ` csharp   public interface ICalculator   {       Task<int> Add(int a, int b);   }    `
+  
+  ``` csharp   
+	  public interface ICalculator   {       
+  		Task<int> Add(int a, int b);   
+    }    
+  ```
 
   -  **Servidor**:
+  
+  ```csharp
+  
+using System;
+using System.IO.Pipes;
+using System.Threading.Tasks;
+using StreamJsonRpc;
 
-  ```csharp
-  using System;
-  using System.IO.Pipes;
-  using System.Threading.Tasks;
-  using StreamJsonRpc;
+public class RpcServer
+{
+    public static async Task StartServerAsync()
+    {
+        await using var pipeServer = new NamedPipeServerStream("jsonrpc-pipe", PipeDirection.InOut);
+        await pipeServer.WaitForConnectionAsync();
+        using var jsonRpc = JsonRpc.Attach(pipeServer, new CalculatorService());
 
-  public class RpcServer
-  {
-      public static async Task StartServerAsync()
-      {
-          await using var pipeServer = new NamedPipeServerStream("jsonrpc-pipe", PipeDirection.InOut);
-          await pipeServer.WaitForConnectionAsync();
-          using var jsonRpc = JsonRpc.Attach(pipeServer, new CalculatorService());
-          
-          Console.WriteLine("Servidor RPC conectado. Esperando llamadas...");
-          
-          // Esperar a que la conexión se cierre.
-          await jsonRpc.Completion;
-      }
-  }
-  public class CalculatorService : ICalculator
-  {
-      public Task<int> Add(int a, int b)
-      {
-          return Task.FromResult(a + b);
-      }
-  }
+        Console.WriteLine("Servidor RPC conectado. Esperando llamadas...");
+
+        // Esperar a que la conexión se cierre.
+        await jsonRpc.Completion;
+    }
+}
+
+public class CalculatorService : ICalculator
+{
+    public Task<int> Add(int a, int b)
+    {
+        return Task.FromResult(a + b);
+    }
+}
   ```
 
   - **Cliente**:
