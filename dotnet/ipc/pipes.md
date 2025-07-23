@@ -1,9 +1,9 @@
 ---
-title: Pipes Anónimos y Nombrados en .NET
-description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramieta del panorama IPC
+title: Pipes
+description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T14:30:24.090Z
-tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful
+date: 2025-07-23T14:37:02.353Z
+tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
 ---
@@ -20,18 +20,21 @@ IV. [Pipes Anónimos](#texto-ancla4)
   - A. [Características](#texto-ancla9)
   - B. [Posibles casos de uso](#texto-ancla10)
   - C. [Implementación práctica](#texto-ancla11)
+  
 V. [Algunos puntos importantes](#texto-ancla12)
 VI. [Integración con Frameworks Avanzados](#texto-ancla13)
   - A. [Pipes como transporte de Alto Rendimiento](#texto-ancla14)
       - 1.  [ASP.NET Core con Pipes Nombrados](#texto-ancla15)
       - 2.  [RPC tipado con StreamJsonRpc](#texto-ancla16)
       - 3.  [gRPC con PipesNombrados](#texto-ancla17)
+      
 VII. [Pipes frente a Otros Mecanismos de IPC en.NET](#texto-ancla18)
   - A. [Pipes vs Sockets](#texto-ancla19)
   - B. [Pipes vs Memory Mapped Files](#texto-ancla20)
   - C. [Pipes vs gRPC](#texto-ancla21)
   - D. [Pipes vs Colas de Mensajes](#texto-ancla22)
   - E. [Tabla comparativa](#texto-ancla23)
+  
 VIII. [Conclusión final](#texto-ancla24)
 
 <div id="texto-ancla1"/>
