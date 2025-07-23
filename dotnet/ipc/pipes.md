@@ -2,7 +2,7 @@
 title: Pipes
 description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T15:07:39.551Z
+date: 2025-07-23T15:10:18.430Z
 tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -258,7 +258,7 @@ Si bien, como se mencionó antes, los pipes anónimos son especializados para un
 
   - **Soporte para múltiples clientes**: Un único proceso servidor puede atender a múltiples clientes. Esto es configurable mediante el parámetro `maxNumberOfServerInstances`, que le indica al sistema operativo cuántas conexiones concurrentes pueden existir para un nombre de pipe dado. Si se desea utilizar el límite máximo que permita el sistema se puede optar por utilizar el valor `NamedPipeServerStream.MaxllowedServerInstances`.
       
-      > Algo a tener en cuenta, es que cada nueva instancia de la clase `NamedPipeServerStream` es capaz de atender únicamente una conexión, por lo que por cada cliente que se desee atender, se deberá crear una nueva instancia de `NamedPipeServerStream`.
+> Algo a tener en cuenta, es que cada nueva instancia de la clase `NamedPipeServerStream` es capaz de atender únicamente una conexión, por lo que por cada cliente que se desee atender, se deberá crear una nueva instancia de `NamedPipeServerStream`.
 
   - **Acceso limitado de Red**: La finalidad de los pipes es su uso en la máquina local, no obstante, también es posible utilizarlos a través de la red local agregando el nombre de la máquina remota al iniciar la conexión. Si bien un socket TCP/IP podría ser más recomendable en estos casos, también podría ser viable reutilizar la implementación de pipes para comunicar servicios en local y a través de la red en simultáneo.
 
@@ -280,7 +280,7 @@ Al igual que con los pipes anónimos, paso a listar algunos posibles casos de us
 
 ### C. Implementación práctica
 
-Código de ejemplo disponible en: https://github.com/pablomederos/dotnet-named-pipes
+Código de ejemplo disponible en https://github.com/pablomederos/dotnet-named-pipes
 
 **Servidor** - `Program.cs`
 
