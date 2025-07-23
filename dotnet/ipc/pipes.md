@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T01:01:30.963Z
+date: 2025-07-23T01:04:29.200Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -333,7 +333,7 @@ Esto es debido a que un pipe es una conexión **punto a punto** entre el cliente
 
 
 
-El siguiente es un ejemplo sumamente simplificado de una implementación para múltiples clientes para un solo pipe nombrado (múltiples instancias del mismo), pero sirve como ilustración de lo que mencioné anteriormente:
+El siguiente es un ejemplo sumamente simplificado de una implementación para múltiples clientes, usando un solo pipe nombrado (múltiples instancias del mismo), pero sirve como ilustración de lo que mencioné anteriormente:
 
 ```csharp
 using System;
@@ -421,7 +421,7 @@ class ConcurrentNamedPipeServer
 
 ### Algunos puntos importantes
 
-1. **Modo de transmisión**: Los pipes operan en modo Byte por defecto (`PipeTransmissionMode.Byte`), para maximizar la compatibilidad multiplataforma. Esto implica que los datos se tratan como un flujo contínuo de bytes entre los extremos del pipe. Esto implica que el programador deberá establecer un protocolo para indicar al otro extremo del pipe cuando termina un mensaje y cuando empieza otro. Usualmente esto se evita utilizando un StreamReader/StreamWriter encima del pipe que ya tiene un "protocolo" implícito basado en acumular el flujo de datos hasta encontrar un caracter de finalización de línea (`\n` o `\r\n`). No obstante, también se puede configurar el modo `PipeTransmissionMode.Message`, únicamente soportado por Windows, en el que cada operación de escritura será tratada como un mensaje atómico. Esto, como se mencionó antes, evita al desarrollador implementar una lógica de "framing" para que el otro extremo del pipe pueda determinar cuando termina un mensaje y cuando empieza el siguiente.
+1. **Modo de transmisión**: Los pipes operan en modo Byte por defecto (`PipeTransmissionMode.Byte`) para maximizar la compatibilidad multiplataforma. Esto implica que los datos se tratan como un flujo contínuo de bytes entre los extremos del pipe, por lo que el programador deberá establecer un protocolo para indicar al otro extremo del pipe cuando termina un mensaje y cuando empieza otro. Usualmente esto se evita utilizando un StreamReader/StreamWriter encima del pipe que ya tiene un "protocolo" implícito basado en acumular el flujo de datos hasta encontrar un caracter de finalización de línea (`\n` o `\r\n`). No obstante, también se puede configurar el modo `PipeTransmissionMode.Message`, únicamente soportado por Windows, en el que cada operación de escritura será tratada como un mensaje atómico. Esto, como se mencionó antes, evita al desarrollador implementar una lógica de "framing" para que el otro extremo del pipe pueda determinar cuando termina un mensaje y cuando empieza el siguiente.
 
 **Modo Byte**:
 ```csharp
