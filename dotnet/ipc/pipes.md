@@ -2,7 +2,7 @@
 title: Pipes
 description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T14:54:49.905Z
+date: 2025-07-23T15:04:49.453Z
 tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -277,6 +277,8 @@ Al igual que con los pipes anónimos, paso a listar algunos posibles casos de us
 <div id="texto-ancla11"/>
 
 ### C. Implementación práctica
+
+Código de ejemplo disponible en: https://github.com/pablomederos/dotnet-named-pipes
 
 **Servidor** - `Program.cs`
 
