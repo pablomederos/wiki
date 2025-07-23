@@ -2,37 +2,37 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T12:34:53.556Z
+date: 2025-07-23T14:26:59.844Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
 ---
 
-I. [Pipes y su rol en el panorama IPC](texto-ancla1)
-II. [Pipes en .NET](texto-ancla2)
-III. [Algunos conceptos](texto-ancla3)
-IV. [Pipes Anónimos](texto-ancla4)
+I. [Pipes y su rol en el panorama IPC](#texto-ancla1)
+II. [Pipes en .NET](#texto-ancla2)
+III. [Algunos conceptos](#texto-ancla3)
+IV. [Pipes Anónimos](#texto-ancla4)
 
-  - A. [Posibles casos de uso](texto-ancla5)
-  - B. [Implementación práctica](texto-ancla6)
-  - C. [Ciclo de vida del Handle](texto-ancla7)
-    V. [Pipes Nombrados](texto-ancla8)
-  - A. [Características](texto-ancla9)
-  - B. [Posibles casos de uso](texto-ancla10)
-  - C. [Implementación práctica](texto-ancla11)
-  - D. [Algunos puntos importantes](texto-ancla12)
-    VI. [Integración con Frameworks Avanzados](texto-ancla13)
-  - A. [Pipes como transporte de Alto Rendimiento](texto-ancla14)
-      - 1.  [ASP.NET Core con Pipes Nombrados](texto-ancla15)
-      - 2.  [RPC tipado con StreamJsonRpc](texto-ancla16)
-      - 3.  [gRPC con PipesNombrados](texto-ancla17)
-            VII. [Pipes frente a Otros Mecanismos de IPC en.NET](texto-ancla18)
-  - A. [Pipes vs Sockets](texto-ancla19)
-  - B. [Pipes vs Memory Mapped Files](texto-ancla20)
-  - C. [Pipes vs gRPC](texto-ancla21)
-  - D. [Pipes vs Colas de Mensajes](texto-ancla22)
-  - E. [Tabla comparativa](texto-ancla23)
-    VIII. [Conclusión final](texto-ancla24)
+  - A. [Posibles casos de uso](#texto-ancla5)
+  - B. [Implementación práctica](#texto-ancla6)
+  - C. [Ciclo de vida del Handle](#texto-ancla7)
+    V. [Pipes Nombrados](#texto-ancla8)
+  - A. [Características](#texto-ancla9)
+  - B. [Posibles casos de uso](#texto-ancla10)
+  - C. [Implementación práctica](#texto-ancla11)
+V. [Algunos puntos importantes](#texto-ancla12)
+VI. [Integración con Frameworks Avanzados](#texto-ancla13)
+  - A. [Pipes como transporte de Alto Rendimiento](#texto-ancla14)
+      - 1.  [ASP.NET Core con Pipes Nombrados](#texto-ancla15)
+      - 2.  [RPC tipado con StreamJsonRpc](#texto-ancla16)
+      - 3.  [gRPC con PipesNombrados](#texto-ancla17)
+VII. [Pipes frente a Otros Mecanismos de IPC en.NET](#texto-ancla18)
+  - A. [Pipes vs Sockets](#texto-ancla19)
+  - B. [Pipes vs Memory Mapped Files](#texto-ancla20)
+  - C. [Pipes vs gRPC](#texto-ancla21)
+  - D. [Pipes vs Colas de Mensajes](#texto-ancla22)
+  - E. [Tabla comparativa](#texto-ancla23)
+VIII. [Conclusión final](#texto-ancla24)
 
 <div id="texto-ancla1"/>
 
@@ -464,7 +464,7 @@ class ConcurrentNamedPipeServer
 
 <div id="texto-ancla12"/>
 
-### D. Algunos puntos importantes
+## D. Algunos puntos importantes
 
 1.  **Modo de transmisión**: Los pipes operan en modo Byte por defecto (`PipeTransmissionMode.Byte`) para maximizar la compatibilidad multiplataforma. Esto implica que los datos se tratan como un flujo contínuo de bytes entre los extremos del pipe, por lo que el programador deberá establecer un protocolo para indicar al otro extremo del pipe cuando termina un mensaje y cuando empieza otro. Usualmente esto se evita utilizando un *StreamReader/StreamWriter* encima del pipe que ya tiene un "protocolo" implícito basado en acumular el flujo de datos en un búfer hasta encontrar un caracter de finalización de línea (`\n` o `\r\n`). No obstante, también se puede configurar el modo `PipeTransmissionMode.Message`, únicamente soportado por Windows, en el que cada operación de escritura será tratada como un mensaje atómico. Esto, como se mencionó antes, evita al desarrollador implementar una lógica de "framing" para que el otro extremo del pipe pueda determinar cuando termina un mensaje y cuando empieza el siguiente.
 
