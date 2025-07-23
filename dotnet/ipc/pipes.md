@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T01:09:14.186Z
+date: 2025-07-23T01:10:20.877Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -643,7 +643,7 @@ Una ventaja arquitectónica inmensa puede ser el poder intercambiar la capa de t
 Un microservicio que se despliegue en contenedores podría aprovechar la comunicación TCP/IP, mientras que para pruebas de integración o escenarios de alto rendimiento/recursos limitados, los pipes podrían ser una mejor opción. Kestrel (Servidor web en ASP.NET Core) permite aprovechar esta flexibilidad optimizando el rendimiento sin rescribir la lógica de negocio.
 
 - ### ASP.NET Core con Pipes Nombrados
-  ASP.NET Core, a través del servidor web Kestrel, es capaz de escuchar peticions HTTP no solo en puertos TCP, sino también a través de pipes nombrados, exponiendo de este modo una API RESTful completa (controladores, middleware, inyección de dependencias, etc.), a través de un canal IPC local, seguro, de alto rendimiento y sin abrir puertos de red en la máquina.
+  ASP.NET Core, a través del servidor web Kestrel, es capaz de escuchar peticions no solo en puertos TCP, sino también a través de pipes nombrados, exponiendo de este modo una API RESTful completa (controladores, middleware, inyección de dependencias, etc.), a través de un canal IPC local, seguro, de alto rendimiento y sin abrir puertos de red en la máquina.
 
 #### Ejemplo:
 
