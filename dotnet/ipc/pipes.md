@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T12:20:15.586Z
+date: 2025-07-23T12:21:30.891Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -914,7 +914,7 @@ Paso a comparar los Pipes con otras alternativas populares en el catálogo de .N
 Esta comparación parecerá quizá extraña, dado que se trata de dos paradigmas completamente diferentes, sin embargo, conociendo todas las posibilidades en la "navaja suiza" del programador, es posible tomar una mejor desición cuando de aprovechar mejor cada recurso se trata.
 
 - **Paradigma**: Los pipes utilizan un enfoque de **compartir mediante comunicación**. Los datos se copian desde la memoria de un proceso, hacia un búfer del kernel, y de ahí al especio de memoria del siguiente proceso. No obstante, los **Memory Mapped Files** utilizan un enfoque de **comunicacar mediante compartición**. Esto es, una región de la memoria se mapea en el espacio de memoria de direcciones virtuales de varios procesos, lo que evita la copia de datos, operando todos sobre la misma memoria.
-- **Rendimiento**: Por lo dicho en el punto anterior, los **Memory Mapped Files** ofrecen el mayor rendimiento cuando se trata de compartir grandes volúmenes de datos en la misma máquina, ya que evitan la cipia de datos entre espacios de memoria.
+- **Rendimiento**: Por lo dicho en el punto anterior, los **Memory Mapped Files** ofrecen el mayor rendimiento cuando se trata de compartir grandes volúmenes de datos en la misma máquina, ya que evitan la copia de datos entre espacios de memoria.
 - **Sincronización y complejidad**: Debido a que los **Memory Mapped Files** no cuentan con un mecanismo inherente para la sincronización, el desarrollador es el responsable de hacer este trabajo. Por el contrario, un pipe se bloqueará en una operación de lectura hasta que hayan datos disponibles. Esta cerencia en cuanto a los **Memory Mapped Files** aumenta la complejidad, y expone los datos condiciones de carrera, corrupción u otros errores difíciles de depurar.
 - **Conclusión**: Cuando el rendimiento sea una prioridad incuestionable, los **Memory Mapped Files** son la opción más adecuada, ya que permiten el acceso concurrente y de alta velocidad a grandes volúmenes de datos (por ejemplo, un frame de video, una matriz de datos, o cualquier otro volúmen importante de datos que no conviene duplicar en memoria o requiera acceso inmediato entre diferentes procesos). Sin embargo, los pipes aún ofrecen un rendimiento excelente y son una mejor opción cuando se requiere de flujo secuencial y sincronización implícita.
 
