@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T01:05:03.392Z
+date: 2025-07-23T01:07:34.054Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -559,9 +559,9 @@ class ClienteModoMensajes
 ```
 
 
-2. **Seguridad**: Como se mencionó antes en este artículo, los pipes soportan la aplicación de **Listas de Control de Acceso** (ACLs). Esto también es una característica dependente de la plataforma, y actualmente solo es soportada en Windows.
-   Esta característica permite proteger un servicio en un entorno multiusuario mediante la clase `PipeSecurity`, a través de regkas de acceso de forma programática. La idea es crear una instancia de `PipeSecurity` y agregar una o más `PipeAccessRule` que especifiquen un usuario o grupo, mediante una `IdentityReference`. 
-   `IdentityReference` permite contendrá los derechos que se le conceden (`PipeAccessRights`), y si se permite o deniega el acceso (`AccessControlType`).
+2. **Seguridad**: Como se mencionó antes, los pipes soportan la aplicación de **Listas de Control de Acceso** (ACLs). Esto también es una característica dependente de la plataforma, y actualmente solo es soportada en Windows.
+   Esta característica permite proteger un servicio en un entorno multiusuario mediante la clase `PipeSecurity`, a través de reglas de acceso de forma programática. La idea es crear una instancia de `PipeSecurity` y agregar una o más `PipeAccessRule` que especifiquen un usuario o grupo, mediante una `IdentityReference`. 
+   `IdentityReference` contendrá los derechos que se le conceden (`PipeAccessRights`), y si se permite o deniega el acceso (`AccessControlType`).
 
 **Ejemplo**: 
 ```csharp
