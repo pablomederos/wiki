@@ -2,7 +2,7 @@
 title: Pipes
 description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T14:44:15.664Z
+date: 2025-07-23T14:48:17.465Z
 tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -881,89 +881,89 @@ public class RpcClient
 
   gRPC es el framework moderno de Google para RPC de alto rendmiento, y, el sucesor espiritual de WCF para ASP.NET Core. Por defecto, utiliza HTTP/2 sobre sokets TCP como transporte, lo que introduce una sobrecarga innecesaria, como vimos anteriormente, cuando el cliente y el servidor se ejecutan en la misma máquina.
   **La respuesta**: gRPC en ASP.NET también puede configurarse para usar pipes nombrados como transporte. Claramente esto combina la facilidad de uso de y contratos tipados de gRPC, con el alto rendimiento de los pipes.
-
-  ##### Ejemplo:
+  
+  ##### Ejemplo:
   - **Servidor**
-
-    ```csharp
-    builder.WebHost.ConfigureKestrel(options =>
+  
+  ```csharp
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Igual que antes con el API RESTful
+    options.ListenNamedPipe("grpc-pipe", listenOptions =>
     {
-        // Igual que antes con el API RESTful
-        options.ListenNamedPipe("grpc-pipe", listenOptions =>
-        {
-            listenOptions.Protocols = HttpProtocols.Http2;
-        });
+        listenOptions.Protocols = HttpProtocols.Http2;
     });
+});
 
-    builder.Services.AddGrpc();
-    var app = builder.Build();
-    app.MapGrpcService<GreeterService>();
-    app.Run();
-    ```
+builder.Services.AddGrpc();
+var app = builder.Build();
+app.MapGrpcService<GreeterService>();
+app.Run();
+```
 
   - **Cliente**
+  
+  ```csharp
+using System;
+using System.IO.Pipes;
+using System.Net.Sockets;
+using System.Threading.Tasks;
+using Grpc.Net.Client;
 
-    ```csharp
-    using System;
-    using System.IO.Pipes;
-    using System.Net.Sockets;
-    using System.Threading.Tasks;
-    using Grpc.Net.Client;
-
-    public class GrpcPipeClient
+public class GrpcPipeClient
+{
+    public static async Task RunClientAsync()
     {
-        public static async Task RunClientAsync()
+        var connectionFactory = new NamedPipesConnectionFactory("grpc-pipe");
+        var socketsHttpHandler = new SocketsHttpHandler
         {
-            var connectionFactory = new NamedPipesConnectionFactory("grpc-pipe");
-            var socketsHttpHandler = new SocketsHttpHandler
-            {
-                ConnectCallback = connectionFactory.ConnectAsync
-            };
+            ConnectCallback = connectionFactory.ConnectAsync
+        };
 
-            // Crear el canal gRPC apuntando a un host ficticio y usando el handler personalizado.
-            var channel = GrpcChannel.ForAddress("http://localhost", new GrpcChannelOptions
-            {
-                HttpHandler = socketsHttpHandler
-            });
+        // Crear el canal gRPC apuntando a un host ficticio y usando el handler personalizado.
+        var channel = GrpcChannel.ForAddress("http://localhost", new GrpcChannelOptions
+        {
+            HttpHandler = socketsHttpHandler
+        });
 
-            var client = new Greeter.GreeterClient(channel);
-            var reply = await client.SayHelloAsync(new HelloRequest { Name = "Cliente gRPC sobre Pipe" });
+        var client = new Greeter.GreeterClient(channel);
+        var reply = await client.SayHelloAsync(new HelloRequest { Name = "Cliente gRPC sobre Pipe" });
 
-            Console.WriteLine("Respuesta de gRPC: " + reply.Message);
-        }
+        Console.WriteLine("Respuesta de gRPC: " + reply.Message);
+    }
+}
+
+// Clase auxiliar para gestionar la conexión al pipe.
+public class NamedPipesConnectionFactory
+{
+    private readonly string _pipeName;
+
+    public NamedPipesConnectionFactory(string pipeName)
+    {
+        _pipeName = pipeName;
     }
 
-    // Clase auxiliar para gestionar la conexión al pipe.
-    public class NamedPipesConnectionFactory
+    public async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext _, CancellationToken cancellationToken = default)
     {
-        private readonly string \_pipeName;
+        var clientStream = new NamedPipeClientStream(
+            serverName: ".",
+            pipeName: _pipeName,
+            direction: PipeDirection.InOut,
+            options: PipeOptions.Asynchronous);
 
-        public NamedPipesConnectionFactory(string pipeName)
+        try
         {
-            \_pipeName = pipeName;
+            await clientStream.ConnectAsync(cancellationToken);
+            return clientStream;
         }
-
-        public async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext \_, CancellationToken cancellationToken = default)
+        catch
         {
-            var clientStream = new NamedPipeClientStream(
-                serverName: ".",
-                pipeName: \_pipeName,
-                direction: PipeDirection.InOut,
-                options: PipeOptions.Asynchronous);
-
-            try
-            {
-                await clientStream.ConnectAsync(cancellationToken);
-                return clientStream;
-            }
-            catch
-            {
-                clientStream.Dispose();
-                throw;
-            }
+            clientStream.Dispose();
+            throw;
         }
     }
-    ```
+}
+```
 
 <div id="texto-ancla18"/>
 
