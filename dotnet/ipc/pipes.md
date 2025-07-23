@@ -2,7 +2,7 @@
 title: Pipes
 description: Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC
 published: true
-date: 2025-07-23T14:51:09.495Z
+date: 2025-07-23T14:54:49.905Z
 tags: dotnet, alto rendimiento, ipc, pipes, pipes anónimos, pipes nombrados, grpc, grpc pipes, inter-process communication, transporte, modelo osi, api rest, restful, transporte ipc
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -95,7 +95,7 @@ Este tipo de pipes es el más ligero y con menor sobrecarga IPC disponible en .N
 
   - **Servidor Proxy**: Un servicio con un diseño similar al de Nginx podría beneficiarse del uso de los pipes anónimos. Nginx utiliza otras formas muy eficientes de comunicación IPC en lugar de pipes anónimos para reducir al mínimo la comunicación IPC, pero su diseño podría ser un ejemplo de caso de uso práctico.
       
-      > Nginx utiliza `Signals` y `Shared Memory` para la comunicación IPC, lo que reduce la sobrecarga de comunicación al mínimo necesario.
+> Nginx utiliza `Signals` y `Shared Memory` para la comunicación IPC, lo que reduce la sobrecarga de comunicación al mínimo necesario.
 
     Este diseño, ahora implementado sobre pipes, se basaría en un proceso maestro y varios subprocesos workers que reciben señales de cuando deben actualizar su configuración, detenerse o realizar una tarea. En muchos casos esto podría ser más sencillo con Threads y una implementación del patrón Observer, pero un fallo en el código de un hilo podría matar el proceso principal completo si no se maneja correctamente, llevando a la caída de todas las conexiones en curso. En cambio, los pipes anónimos robustecen los sistemas gracias a su diseño desacoplado y reduciendo el riesgo al mínimo.
 
