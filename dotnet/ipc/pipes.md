@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-22T13:11:33.934Z
+date: 2025-07-23T01:01:30.963Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -184,7 +184,7 @@ catch (Exception ex)
 }
 ```
 
-La línea `string? serverMessage = Console.ReadLine();` implica que el servidor esperará la entrada del usuario mediante teclado y enviará el mensaje al cliente usando el Pipe. Tanto en la salida de terminal del Servidor como la del Cliente, se mostrará el flujo de datos de un proceso al otro.
+La línea `string? serverMessage = Console.ReadLine();` implica que el servidor esperará la entrada del usuario mediante teclado y enviará el mensaje al cliente usando el Pipe. Tanto en la salida de terminal del Servidor como en la del Cliente, se mostrará el flujo de datos de un proceso al otro.
 
 
 ### Ciclo de vida del Handle
@@ -193,6 +193,7 @@ La línea `string? serverMessage = Console.ReadLine();` implica que el servidor 
 En cierto punto, en el servidor se llama a `server.DisposeLocalCopyOfClientHandle();`. Esto es fundamental en la lógica de sincronización del pipe, y es importante comprender su uso para evitar errores difíciles de depurar.
 
 El Handle es el medio que tiene el cliente  de identificar cuál es su extemo del pipe, ya sea para escritura o lectura (recordando que es una comunicación unidireccional). El sistema operativo tiene un conteo de referencias que utiliza para gestionar el ciclo de vida de los objetos del Kernel, como en este caso los Pipes.
+
 El flujo de eventos es el siguiente:
 
 1. El servidor crea la instancia de `AnonymousPipeServerStream`, resultando esto en un par de Handles en el kenel. Uno de escritura y otro de lectura.
@@ -211,11 +212,11 @@ Si bien, como se mencionó antes, los pipes anónimos son especializados para un
 
 - **Acceso por nombre**: La diferencia más significativa es que los pipes nombrados pueden ser descubiertos mediante una cadena de texto usada como nombre. Esto permite desacoplar los proceso, ya que no se requiere una relación padre a hijo ni compartición de Handles. Un pipe puede ser abierto por cualquier otro proceso que conozca el nombre de este.
 - **Bidireccionalidad**: Esta es otra diferencia destacable, ya que los pipes nombrados no solo soportan la comunicación unidireccional (`PipeDirection.In` o `PipeDirection.Out`), sino también la comunicación en ambos sentidos del canal mediante la configuración `PipeDirection.InOut`. Claramente, esto simplifica mucho la implementación.
-- **Soporte para múltiples clientes**: Un único proceso servidor puede atender a múltiples clientes. Esto es configurable mediante el parámetro `maxNumberOfServerInstances`, que le indica al sistema operativo cuándas conexione concurrentes pueden existir para un nombre de pipe dado. Si se desea utilizar el límite máximo que permita el sistema se puede optar por utilizar el valor `NamedPipeServerStream.MaxllowedServerInstances`.
+- **Soporte para múltiples clientes**: Un único proceso servidor puede atender a múltiples clientes. Esto es configurable mediante el parámetro `maxNumberOfServerInstances`, que le indica al sistema operativo cuántas conexiones concurrentes pueden existir para un nombre de pipe dado. Si se desea utilizar el límite máximo que permita el sistema se puede optar por utilizar el valor `NamedPipeServerStream.MaxllowedServerInstances`.
   
   > Algo a tener en cuenta, es que cada nueva instancia de la clase `NamedPipeServerStream` es capaz de atender únicamente una conexión, por lo que por cada cliente que se desee atender, se deberá crear una nueva instancia de `NamedPipeServerStream`.
 
-- **Acceso limitado de Red**: La finalidad de los pipes es su uso en la máquina local, no obstante, también es posible utilizarlos a través de la red local agregando el nombre de la máquina remota al iniciar la conexión. Si bien los sockets TCP/IP podrían ser más recomendable en estos casos, también podría ser viable reutilizar la implementación de pipes para comunicar servicios en locales y en la red en simultáneo.
+- **Acceso limitado de Red**: La finalidad de los pipes es su uso en la máquina local, no obstante, también es posible utilizarlos a través de la red local agregando el nombre de la máquina remota al iniciar la conexión. Si bien un socket TCP/IP podría ser más recomendable en estos casos, también podría ser viable reutilizar la implementación de pipes para comunicar servicios en local y a través de la red en simultáneo.
 - **Seguridad**: En Windows los pipes nombrados siguen las mismas reglas que otros servicios, ciñéndose a las reglas de seguridad del sistema. Es posible aplicar Listas de Control de Acceso (ACLs) a un pipe para limitar el acceso de usuarios y grupos a conectarse, leer o escribir.
 
 ### Posibles casos de uso
@@ -225,7 +226,7 @@ Al igual que con los pipes anónimos, paso a listar algunos posibles casos de us
 - **Servicios Locales**: Un uso posiblemente útil es enviar comandos a un servicio de larga duración y monitorear el estado. Dicho servicio podría exponer el servidor para que varios otros procesos puedan conectarse y encolar tareas, a la vez que puede enviar notificaciones del estado de las tareas en curso.
 - **Comunicación de Procesos no relacionados**: Casi lo mismo que en el punto anterior, pero ahora fomentando el desacoplamiento, desarrollo y despliegue independiente de aplicaciones.
 - **Transporte para RPC**: Lo anterior nos lleva a esto, el bajo overhead permite que los pipes nombrados sean un transporte ideal pra frameworks **RPC**.
-- **Comunicación entre diferentes Lenguajes**: Esto ya no está limitado a los pipes nombrados, pero al tratarse de una característica del sistema operativo y no exclusiva de .NET, ya sea uando pipes nombrados, o iniciando un proceso como hijo, los pipes son un canal eficaz para estableer comunicación entre aplicaciones desarrolladas en diferentes lenguajes de programación, como *C++*, *Python*, *Go*, etc., y evitar así la sobrecarga que podría suponer una conexión mediante Socket.
+- **Comunicación entre diferentes Lenguajes**: Esto ya no está limitado a los pipes nombrados, pero al tratarse de una característica del sistema operativo y no exclusiva de .NET, ya sea usando pipes nombrados, o iniciando un proceso como hijo, los pipes son un canal eficaz para estableer comunicación entre aplicaciones desarrolladas en diferentes lenguajes de programación, como *C++*, *Python*, *Go*, etc., y evitar así la sobrecarga que podría suponer una conexión mediante Socket.
   
 ### Implementación práctica
 
