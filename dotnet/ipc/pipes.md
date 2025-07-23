@@ -2,7 +2,7 @@
 title: Pipes
 description: 
 published: false
-date: 2025-07-23T12:21:30.891Z
+date: 2025-07-23T12:24:30.609Z
 tags: 
 editor: markdown
 dateCreated: 2025-07-17T18:36:32.654Z
@@ -924,7 +924,7 @@ No parece justo hacer esta comparativa, ya que los pipes son un mecanismo de tra
 
 - **Facilidad de uso**: En cuanto a su uso por separado, **gRPC** es mucho más fácil de usar y mantener. Este cuenta con contratos `.proto`, y generación de código, lo que elimina un sin fin de errores manuales de serialización/deserialización. Por eso, **gRPC** es mucho menos propenso a errores que construir un protocolo personalizado sobre un pipe crudo.
 - **Rendimiento**: Se mencionó antes en este artículo, y la verdad es que **gRPC** sobre TCP/IP añade una sobrecarga de red innecesaria en procesos que se ejecutan en la misma máquina en comparación con el uso directo de pipes. La solución es sin dudas, la combinación de ambos, lo que ofrece el mayor rendimiento de los pipes y la facilidad de uso de **gRPC**.
-- **Conclusión**: Evitar construir protocolos complejos manualmente sobre pipes sería ideal, pero claramente para comunicación IPC local los pipes son la mejor para algunos casos menos complejos. **gRPC** es más adecuado para construir APIs IPC robustas, mantenibles y escalables, aunque aún mejor es configurar los pipes nombrados como transporte de este para maximizar el rendimiento.
+- **Conclusión**: Evitar construir protocolos complejos manualmente sobre pipes sería ideal, pero claramente para comunicación IPC local los pipes son la mejor opción para algunos casos menos complejos. **gRPC** es más adecuado para construir APIs IPC robustas, mantenibles y escalables, aunque aún mejor es configurar los pipes nombrados como transporte de este para maximizar el rendimiento.
 
 ### Pipes vs Colas de Mensajes
 
