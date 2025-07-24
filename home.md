@@ -2,7 +2,7 @@
 title:  Bienvenid@s a La Cueva Dev wiki
 description: Un espacio que nace de la pasión por el desarrollo de software y de compartir lo aprendido
 published: true
-date: 2025-07-24T12:34:16.934Z
+date: 2025-07-24T13:28:08.916Z
 tags: 
 editor: markdown
 dateCreated: 2025-06-01T18:47:41.119Z
@@ -16,7 +16,7 @@ Mi enfoque está principalmente en el uso de los leguajes C#, C++, F# y C, explo
 
 **La Cueva Dev** es el espacio donde desarrollo cosas, es parte de mi proyecto personal "La Cueva del Insecto", y esta es una invitación a explorar los artículos que voy agregando y, si algo resuena o surgen preguntas, a sumarse a la conversación. Próximamente habilitaré los comentarios, pero ahora mismo me pueden contactar a través del [correo electrónico](mailto:contacto@lacuevadelinsecto.dev?subject=Art%C3%ADculos%20de%20La%20Cueva%20del%20Insecto). Este es un espacio para aprender y potenciar las habilidades en el desarrollo de software.
 
-## Artículos más recientes:
+## Artículos más recientes
 
 - [Pipes en .NET](/es/dotnet/ipc/pipes): Un recorrido por los beneficios y características que hacen a los Pipes en .NET una excelente herramienta del panorama IPC.
 - [Generadores de código con Roslyn](/es/dotnet/roslyn/code-generators): Guia exaustiva sobre la generación de código usando las apis del compilador Roslyn
