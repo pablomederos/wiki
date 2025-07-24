@@ -1,8 +1,8 @@
 ---
-title: Vertical Slices in .NET
-description: Software Architecture in Dotnet: A pragmatic introduction to Vertical Slices
+title: Vertical Slices in .NET with C#
+description: Software Architecture in .NET, a pragmatic introduction to Vertical Slices
 published: true
-date: 2025-07-04T18:00:07.732Z
+date: 2025-07-24T12:27:39.045Z
 tags: .net, c#, asp.net core, software architecture, software design, vertical slice architecture, minimal apis, applicationparts, mvc controllers, modular monolith, .net architecture, project structure, endpoint discovery, low coupling high cohesion, code maintainability, .net 8
 editor: markdown
 dateCreated: 2025-06-11T17:56:17.634Z
