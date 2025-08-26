@@ -2,87 +2,87 @@
 title: Cuestionario de Práctica PSM I
 description: Simulador de exámen para p'ractica de Professional Scrum Master
 published: true
-date: 2025-08-26T19:12:04.587Z
+date: 2025-08-26T19:19:20.623Z
 tags: metodologías ágiles, psm i, scrum master, professional scrum master, certificación scrum  guía scrum 2020, simulador de examen, cuestionario scrum, preguntas de examen, framework scrum, empirismo, valores de scrum, roles de scrum, eventos de scrum, artefactos de scrum, product owner, scrum team, anti-patrones scrum
 editor: code
 dateCreated: 2025-06-29T01:44:25.930Z
 -->
 
 <div class="overlay">
-  <span class="material-icons refresh">
-	  refresh
-  </span>
+    <span class="material-icons refresh">
+        refresh
+    </span>
 </div>
-
-<div id="app-container" class="bg-white w-full rounded-2xl shadow-lg p-6 md:p-8">
-
-  <!-- Pantalla de selección de categoría -->
-  <div id="category-selection-screen">
-    <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-center">Bienvenido al Cuestionario PSM I</h1>
-    <p class="text-slate-600 mb-8 text-center">Selecciona una categoría para comenzar o practica con todas las preguntas.</p>
-    <div id="category-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-      <!-- Botones de categoría se insertarán aquí -->
+  
+  <div id="app-container" class="bg-white w-full rounded-2xl shadow-lg p-6 md:p-8">
+  
+    <!-- Pantalla de selección de categoría -->
+    <div id="category-selection-screen">
+      <h1 class="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-center">Bienvenido al Cuestionario PSM I</h1>
+      <p class="text-slate-600 mb-8 text-center">Selecciona una categoría para comenzar o practica con todas las preguntas.</p>
+      <div id="category-buttons" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <!-- Botones de categoría se insertarán aquí -->
+      </div>
+      <div class="flex justify-center">
+        <b class="text-slate-600 mb-8 text-center">Al elegir 'Todas las preguntas' verás solo 80 de ellas. Intenta de nuevo para intercambiar algunas por otras nuevas..</b>
+      </div>
+      <button id="all-questions-btn" class="category-btn w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700">
+        Practicar con Todas las Preguntas
+      </button>
     </div>
-    <div class="flex justify-center">
-      <b class="text-slate-600 mb-8 text-center">Al elegir 'Todas las preguntas' verás solo 80 de ellas. Intenta de nuevo para intercambiar algunas por otras nuevas..</b>
+  
+    <!-- Pantalla del Cuestionario -->
+    <div id="quiz-screen" class="hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h1 id="quiz-title" class="text-xl md:text-2xl font-bold text-slate-900"></h1>
+        <button id="back-to-categories-btn" class="text-sm font-medium text-blue-600 hover:underline">Volver</button>
+      </div>
+  
+      <!-- Barra de Progreso -->
+      <div class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
+ <div id="progress-bar" class="bg-blue-500 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
+      </div>
+  
+      <div id="progress-container" class="flex justify-between items-center mb-6">
+        <p id="question-counter" class="text-sm font-medium text-slate-600"></p>
+        <div class="flex space-x-4">
+          <span id="score-correct" class="text-sm font-semibold text-green-600">Correctas: 0</span>
+          <span id="score-incorrect" class="text-sm font-semibold text-red-600">Incorrectas: 0</span>
+        </div>
+      </div>
+  
+      <div id="question-area" class="quiz-card-enter">
+        <p id="question-type" class="text-sm font-semibold text-blue-600 mb-2 hidden"></p>
+        <h2 id="question-text" class="text-lg font-semibold text-slate-800 mb-6"></h2>
+        <div id="options-container" class="grid grid-cols-1 gap-4"></div>
+      </div>
+  
+      <div id="result-area" class="mt-6 hidden">
+        <div id="result-feedback" class="p-4 rounded-lg">
+          <h3 id="result-title" class="font-bold text-lg"></h3>
+ <p id="result-explanation" class="mt-2 text-base"></p>
+        </div>
+      </div>
+  
+      <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+ <button id="check-btn" class="w-full sm:w-auto bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors duration-200 disabled:bg-slate-300 disabled:cursor-not-allowed">
+          Comprobar:
+        </button>
+        <button id="next-btn" class="w-full sm:w-auto bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition-colors duration-200 hidden">
+          Siguiente Pregunta
+        </button>
+      </div>
+  
+      <div id="final-screen" class="text-center hidden mt-8">
+        <h2 class="text-2xl font-bold mb-4">¡Cuestionario Completado!</h2>
+        <p class="text-lg mb-2">Tu puntuación final es:</p>
+        <div class="flex justify-center space-x-6">
+          <span id="final-score-correct" class="text-xl font-bold text-green-600"></span>
+          <span id="final-score-incorrect" class="text-xl font-bold text-red-600"></span>
+        </div>
+ <button id="restart-btn" class="mt-8 bg-indigo-500 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-600 transition-colors duration-200">
+          Elegir otra Categoría
+        </button>
+      </div>
     </div>
-    <button id="all-questions-btn" class="category-btn w-full bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-indigo-700">
-      Practicar con Todas las Preguntas
-    </button>
   </div>
-
-  <!-- Pantalla del Cuestionario -->
-  <div id="quiz-screen" class="hidden">
-    <div class="flex justify-between items-center mb-4">
-      <h1 id="quiz-title" class="text-xl md:text-2xl font-bold text-slate-900"></h1>
-      <button id="back-to-categories-btn" class="text-sm font-medium text-blue-600 hover:underline">Volver</button>
-    </div>
-
-    <!-- Barra de Progreso -->
-    <div class="w-full bg-slate-200 rounded-full h-2.5 mb-4">
-      <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full progress-bar-inner" style="width: 0%"></div>
-    </div>
-
-    <div id="progress-container" class="flex justify-between items-center mb-6">
-      <p id="question-counter" class="text-sm font-medium text-slate-600"></p>
-      <div class="flex space-x-4">
-        <span id="score-correct" class="text-sm font-semibold text-green-600">Correctas: 0</span>
-        <span id="score-incorrect" class="text-sm font-semibold text-red-600">Incorrectas: 0</span>
-      </div>
-    </div>
-
-    <div id="question-area" class="quiz-card-enter">
-      <p id="question-type" class="text-sm font-semibold text-blue-600 mb-2 hidden"></p>
-      <h2 id="question-text" class="text-lg font-semibold text-slate-800 mb-6"></h2>
-      <div id="options-container" class="grid grid-cols-1 gap-4"></div>
-    </div>
-
-    <div id="result-area" class="mt-6 hidden">
-      <div id="result-feedback" class="p-4 rounded-lg">
-        <h3 id="result-title" class="font-bold text-lg"></h3>
-        <p id="result-explanation" class="mt-2 text-sm"></p>
-      </div>
-    </div>
-
-    <div class="mt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <button id="check-btn" class="w-full sm:w-auto bg-blue-600 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:bg-slate-300 disabled:cursor-not-allowed">
-        Comprobar:
-      </button>
-      <button id="next-btn" class="w-full sm:w-auto bg-slate-700 text-white font-bold py-3 px-6 rounded-lg hover:bg-slate-800 transition-colors duration-200 hidden">
-        Siguiente Pregunta
-      </button>
-    </div>
-
-    <div id="final-screen" class="text-center hidden mt-8">
-      <h2 class="text-2xl font-bold mb-4">¡Cuestionario Completado!</h2>
-      <p class="text-lg mb-2">Tu puntuación final es:</p>
-      <div class="flex justify-center space-x-6">
-        <span id="final-score-correct" class="text-xl font-bold text-green-600"></span>
-        <span id="final-score-incorrect" class="text-xl font-bold text-red-600"></span>
-      </div>
-      <button id="restart-btn" class="mt-8 bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-colors duration-200">
-        Elegir otra Categoría
-      </button>
-    </div>
-  </div>
-</div>
